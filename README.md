@@ -18,27 +18,64 @@
 
 ## 📦 Installation
 
-### Install from Git Repository
+> **Note:** This is a private repository. You need authentication to install.
+
+### Prerequisites: Create GitLab Personal Access Token
+
+1. Go to GitLab: **Settings → Access Tokens** → [Create new token](https://gitlab.com/-/profile/personal_access_tokens)
+2. Set token name: `raiki-sdk-access`
+3. Select scopes: `read_repository`
+4. Click **Create personal access token**
+5. **Copy the token** (shown only once!)
+
+### Install from Private Repository
+
+#### Using Personal Access Token
 
 ```bash
+# Replace YOUR_TOKEN with your actual token
 # Latest version from main branch
-pip install git+https://gitlab.com/dat.tram/raiki-sdk.git
+pip install git+https://oauth2:YOUR_TOKEN@gitlab.com/dat.tram/raiki-sdk.git
 
-# Or with uv
-uv pip install git+https://gitlab.com/dat.tram/raiki-sdk.git
+# Or with uv (recommended)
+uv pip install git+https://oauth2:YOUR_TOKEN@gitlab.com/dat.tram/raiki-sdk.git
 ```
 
-### Install Specific Version
+#### Install Specific Version
 
 ```bash
-# Install version 0.1.0
-pip install git+https://gitlab.com/dat.tram/raiki-sdk.git@v0.1.0
+# Install version 0.1.0 with token
+pip install git+https://oauth2:YOUR_TOKEN@gitlab.com/dat.tram/raiki-sdk.git@v0.1.0
+
+# Or with uv
+uv pip install git+https://oauth2:YOUR_TOKEN@gitlab.com/dat.tram/raiki-sdk.git@v0.1.0
+```
+
+#### Using SSH (if you have SSH key configured)
+
+```bash
+# Latest version
+pip install git+ssh://git@gitlab.com/dat.tram/raiki-sdk.git
+
+# Specific version
+pip install git+ssh://git@gitlab.com/dat.tram/raiki-sdk.git@v0.1.0
 ```
 
 ### Add to requirements.txt
 
 ```txt
-raiki-sdk @ git+https://gitlab.com/dat.tram/raiki-sdk.git@v0.1.0
+# Replace YOUR_TOKEN with your actual token
+raiki-sdk @ git+https://oauth2:YOUR_TOKEN@gitlab.com/dat.tram/raiki-sdk.git@v0.1.0
+```
+
+⚠️ **Security Warning:** Do NOT commit your token to git! Use environment variables instead:
+
+```bash
+# Set environment variable
+export GITLAB_TOKEN=your_token_here
+
+# Use in requirements.txt or scripts
+raiki-sdk @ git+https://oauth2:${GITLAB_TOKEN}@gitlab.com/dat.tram/raiki-sdk.git@v0.1.0
 ```
 
 ### Add to pyproject.toml
@@ -46,9 +83,25 @@ raiki-sdk @ git+https://gitlab.com/dat.tram/raiki-sdk.git@v0.1.0
 ```toml
 [project]
 dependencies = [
-    "raiki-sdk @ git+https://gitlab.com/dat.tram/raiki-sdk.git@v0.1.0",
+    # Option 1: With token (not recommended for public repos)
+    "raiki-sdk @ git+https://oauth2:YOUR_TOKEN@gitlab.com/dat.tram/raiki-sdk.git@v0.1.0",
+    
+    # Option 2: With SSH (recommended)
+    # "raiki-sdk @ git+ssh://git@gitlab.com/dat.tram/raiki-sdk.git@v0.1.0",
 ]
 ```
+
+### Using Environment Variables (Recommended for CI/CD)
+
+```bash
+# .env file (add to .gitignore!)
+GITLAB_TOKEN=your_token_here
+
+# Install using environment variable
+pip install git+https://oauth2:${GITLAB_TOKEN}@gitlab.com/dat.tram/raiki-sdk.git@v0.1.0
+```
+
+In CI/CD pipelines (GitLab CI, GitHub Actions, etc.), add the token as a secret environment variable.
 
 ## 🎯 Quick Start
 
@@ -160,6 +213,22 @@ Abstract base class for YOLO-based detection systems.
 
 ### Setup Development Environment
 
+#### Option 1: Using uv (Recommended)
+
+```bash
+# Clone the repository
+git clone https://gitlab.com/dat.tram/raiki-sdk.git
+cd raiki-sdk
+
+# Sync dependencies (creates venv automatically)
+uv sync
+
+# The package is now installed in editable mode
+# Any code changes will be reflected immediately
+```
+
+#### Option 2: Using traditional pip
+
 ```bash
 # Clone the repository
 git clone https://gitlab.com/dat.tram/raiki-sdk.git
@@ -171,6 +240,19 @@ source venv/bin/activate  # On Windows: venv\Scripts\activate
 
 # Install dependencies
 pip install -e .
+```
+
+### Verify Installation
+
+```bash
+# Test imports
+python -c "from raiki_sdk import AuthenticateBase, YoloBase; print('✅ Success!')"
+
+# Check version
+python -c "import raiki_sdk; print(f'Version: {raiki_sdk.__version__}')"
+
+# Run validation script
+python test_import.py
 ```
 
 ## 📋 Requirements
