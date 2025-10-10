@@ -1,0 +1,13 @@
+.venv
+.python-version
+__pycache__
+*.log
+*.log.*
+*.pyc
+*.pyo
+*.pyd
+*.pyw
+*.pyz
+*.pywz
+
+.DS_Store
