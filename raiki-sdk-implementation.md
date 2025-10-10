@@ -162,12 +162,13 @@ setup(
 4. `/rolex-kag-api/core/image_preprocessor.py` → Filter classes
 5. `/rolex-kag-api/features/RedFrame/RedframeP01.py` → RedFrame logic
 
-### To-dos
+### To-dos[text]
 
-- [ ] Create raiki-sdk folder structure with all necessary __init__.py files
-- [ ] Implement Pydantic schemas in raiki_sdk/base/schemas.py
-- [ ] Create AuthenticateBase abstract class in raiki_sdk/base/authenticate_base.py
-- [ ] Create YoloBase abstract class in raiki_sdk/base/yolo_base.py
+- [x] Create raiki-sdk folder structure with all necessary __init__.py files
+- [x] Implement Pydantic schemas in raiki_sdk/base/schemas.py
+- [x] Create AuthenticateBase abstract class in raiki_sdk/base/authenticate_base.py
+- [x] Create YoloBase abstract class in raiki_sdk/base/yolo_base.py
+- [x] Validate import raiki-sdk
 - [ ] Port transform functions to raiki_sdk/preprocessing/transforms.py
 - [ ] Port filter classes to raiki_sdk/preprocessing/filters.py
 - [ ] Port mask classes to raiki_sdk/preprocessing/masks.py
