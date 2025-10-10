@@ -169,9 +169,8 @@ setup(
 - [x] Create AuthenticateBase abstract class in raiki_sdk/base/authenticate_base.py
 - [x] Create YoloBase abstract class in raiki_sdk/base/yolo_base.py
 - [x] Validate import raiki-sdk
-- [ ] Port transform functions to raiki_sdk/preprocessing/transforms.py
-- [ ] Port filter classes to raiki_sdk/preprocessing/filters.py
-- [ ] Port mask classes to raiki_sdk/preprocessing/masks.py
+- [x] Port transform functions to raiki_sdk/preprocessing/transforms.py
+- [x] Port filter classes to raiki_sdk/preprocessing/filters.py
 - [ ] Implement RedFrameService in raiki_sdk/services/red_frame.py
 - [ ] Create setup.py, requirements.txt, and .gitignore
 - [ ] Write comprehensive README.md with installation and usage examples
