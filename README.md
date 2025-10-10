@@ -1,93 +1,213 @@
-# raiki-sdk
+# Raiki SDK 🔍
 
+**Raiki SDK** - Base interfaces and utilities for authentication and detection systems.
 
+[![Python Version](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-## Getting started
+## 🚀 Features
 
-To make it easy for you to get started with GitLab, here's a list of recommended next steps.
+- **Abstract Base Classes**: Ready-to-extend interfaces for authentication and YOLO-based detection
+- **Pydantic Schemas**: Type-safe data validation for detection results
+- **Image Preprocessing**: Professional image processing utilities
+  - Resize and padding operations
+  - CLAHE (Contrast Limited Adaptive Histogram Equalization)
+  - LoG (Laplacian of Gaussian) filtering
+  - Brightness/Contrast adjustments
+  - White padding removal
 
-Already a pro? Just edit this README.md and make it your own. Want to make it easy? [Use the template at the bottom](#editing-this-readme)!
+## 📦 Installation
 
-## Add your files
+### Install from Git Repository
 
-- [ ] [Create](https://docs.gitlab.com/ee/user/project/repository/web_editor.html#create-a-file) or [upload](https://docs.gitlab.com/ee/user/project/repository/web_editor.html#upload-a-file) files
-- [ ] [Add files using the command line](https://docs.gitlab.com/topics/git/add_files/#add-files-to-a-git-repository) or push an existing Git repository with the following command:
+```bash
+# Latest version from main branch
+pip install git+https://gitlab.com/dat.tram/raiki-sdk.git
 
+# Or with uv
+uv pip install git+https://gitlab.com/dat.tram/raiki-sdk.git
 ```
-cd existing_repo
-git remote add origin https://gitlab.com/dat.tram/raiki-sdk.git
-git branch -M main
-git push -uf origin main
+
+### Install Specific Version
+
+```bash
+# Install version 0.1.0
+pip install git+https://gitlab.com/dat.tram/raiki-sdk.git@v0.1.0
 ```
 
-## Integrate with your tools
+### Add to requirements.txt
 
-- [ ] [Set up project integrations](https://gitlab.com/dat.tram/raiki-sdk/-/settings/integrations)
+```txt
+raiki-sdk @ git+https://gitlab.com/dat.tram/raiki-sdk.git@v0.1.0
+```
 
-## Collaborate with your team
+### Add to pyproject.toml
 
-- [ ] [Invite team members and collaborators](https://docs.gitlab.com/ee/user/project/members/)
-- [ ] [Create a new merge request](https://docs.gitlab.com/ee/user/project/merge_requests/creating_merge_requests.html)
-- [ ] [Automatically close issues from merge requests](https://docs.gitlab.com/ee/user/project/issues/managing_issues.html#closing-issues-automatically)
-- [ ] [Enable merge request approvals](https://docs.gitlab.com/ee/user/project/merge_requests/approvals/)
-- [ ] [Set auto-merge](https://docs.gitlab.com/user/project/merge_requests/auto_merge/)
+```toml
+[project]
+dependencies = [
+    "raiki-sdk @ git+https://gitlab.com/dat.tram/raiki-sdk.git@v0.1.0",
+]
+```
 
-## Test and Deploy
+## 🎯 Quick Start
 
-Use the built-in continuous integration in GitLab.
+### Using Base Classes
 
-- [ ] [Get started with GitLab CI/CD](https://docs.gitlab.com/ee/ci/quick_start/)
-- [ ] [Analyze your code for known vulnerabilities with Static Application Security Testing (SAST)](https://docs.gitlab.com/ee/user/application_security/sast/)
-- [ ] [Deploy to Kubernetes, Amazon EC2, or Amazon ECS using Auto Deploy](https://docs.gitlab.com/ee/topics/autodevops/requirements.html)
-- [ ] [Use pull-based deployments for improved Kubernetes management](https://docs.gitlab.com/ee/user/clusters/agent/)
-- [ ] [Set up protected environments](https://docs.gitlab.com/ee/ci/environments/protected_environments.html)
+```python
+from raiki_sdk import AuthenticateBase, YoloBase
+from raiki_sdk import AuthResult, YoloResult
 
-***
+class MyAuthenticator(AuthenticateBase):
+    """Custom authentication implementation"""
+    
+    def authenticate(self, image_path: str) -> AuthResult:
+        # Your authentication logic here
+        return AuthResult(
+            is_authentic=True,
+            confidence=0.95,
+            message="Product is authentic"
+        )
 
-# Editing this README
+class MyDetector(YoloBase):
+    """Custom YOLO detection implementation"""
+    
+    def __init__(self):
+        super().__init__(model_path="path/to/your/model.pt")
+    
+    def detect(self, image_path: str) -> YoloResult:
+        # Your detection logic here
+        pass
+```
 
-When you're ready to make this README your own, just edit this file and use the handy template below (or feel free to structure it however you want - this is just a starting point!). Thanks to [makeareadme.com](https://www.makeareadme.com/) for this template.
+### Using Preprocessing Utilities
 
-## Suggestions for a good README
+```python
+from raiki_sdk import (
+    resize_pwd,
+    padding_crop_yolo,
+    CLAHE,
+    LoGFilter,
+    AdjustBrightnessContrast
+)
+from PIL import Image
 
-Every project is different, so consider which of these sections apply to yours. The sections used in the template are suggestions for most open source projects. Also keep in mind that while a README can be too long and detailed, too long is better than too short. If you think your README is too long, consider utilizing another form of documentation rather than cutting out information.
+# Load image
+image = Image.open("product.jpg")
 
-## Name
-Choose a self-explaining name for your project.
+# Resize with aspect ratio preservation
+resized = resize_pwd(image, target_size=(640, 640))
 
-## Description
-Let people know what your project can do specifically. Provide context and add a link to any reference visitors might be unfamiliar with. A list of Features or a Background subsection can also be added here. If there are alternatives to your project, this is a good place to list differentiating factors.
+# Apply CLAHE enhancement
+clahe = CLAHE(clip_limit=2.0, tile_grid_size=(8, 8))
+enhanced = clahe(resized)
 
-## Badges
-On some READMEs, you may see small images that convey metadata, such as whether or not all the tests are passing for the project. You can use Shields to add some to your README. Many services also have instructions for adding a badge.
+# Apply LoG filter for edge detection
+log_filter = LoGFilter(sigma=1.5, kernel_size=5)
+edges = log_filter(enhanced)
 
-## Visuals
-Depending on what you are making, it can be a good idea to include screenshots or even a video (you'll frequently see GIFs rather than actual videos). Tools like ttygif can help, but check out Asciinema for a more sophisticated method.
+# Adjust brightness and contrast
+adjuster = AdjustBrightnessContrast(brightness_factor=1.2, contrast_factor=1.1)
+final_image = adjuster(edges)
+```
 
-## Installation
-Within a particular ecosystem, there may be a common way of installing things, such as using Yarn, NuGet, or Homebrew. However, consider the possibility that whoever is reading your README is a novice and would like more guidance. Listing specific steps helps remove ambiguity and gets people to using your project as quickly as possible. If it only runs in a specific context like a particular programming language version or operating system or has dependencies that have to be installed manually, also add a Requirements subsection.
+## 📚 API Reference
 
-## Usage
-Use examples liberally, and show the expected output if you can. It's helpful to have inline the smallest example of usage that you can demonstrate, while providing links to more sophisticated examples if they are too long to reasonably include in the README.
+### Base Classes
 
-## Support
-Tell people where they can go to for help. It can be any combination of an issue tracker, a chat room, an email address, etc.
+#### `AuthenticateBase`
+Abstract base class for authentication systems.
 
-## Roadmap
-If you have ideas for releases in the future, it is a good idea to list them in the README.
+**Methods:**
+- `authenticate(image_path: str) -> AuthResult`: Implement your authentication logic
 
-## Contributing
-State if you are open to contributions and what your requirements are for accepting them.
+#### `YoloBase`
+Abstract base class for YOLO-based detection systems.
 
-For people who want to make changes to your project, it's helpful to have some documentation on how to get started. Perhaps there is a script that they should run or some environment variables that they need to set. Make these steps explicit. These instructions could also be useful to your future self.
+**Methods:**
+- `detect(image_path: str) -> YoloResult`: Detect objects in image
+- `validate(image_path: str) -> YoloValidation`: Validate detection results
 
-You can also document commands to lint the code or run tests. These steps help to ensure high code quality and reduce the likelihood that the changes inadvertently break something. Having instructions for running tests is especially helpful if it requires external setup, such as starting a Selenium server for testing in a browser.
+### Schemas
 
-## Authors and acknowledgment
-Show your appreciation to those who have contributed to the project.
+#### `AuthResult`
+- `is_authentic: bool` - Authentication result
+- `confidence: float` - Confidence score (0-1)
+- `message: str` - Result message
+- `metadata: dict` - Additional metadata
 
-## License
-For open source projects, say how it is licensed.
+#### `YoloResult`
+- `boxes: List` - Detected bounding boxes
+- `confidences: List[float]` - Detection confidences
+- `class_ids: List[int]` - Class IDs
+- `class_names: List[str]` - Class names
 
-## Project status
-If you have run out of energy or time for your project, put a note at the top of the README saying that development has slowed down or stopped completely. Someone may choose to fork your project or volunteer to step in as a maintainer or owner, allowing your project to keep going. You can also make an explicit request for maintainers.
+### Preprocessing Functions
+
+#### Image Processors
+- `resize_pwd(image, target_size)` - Resize with aspect ratio
+- `padding_crop_yolo(image, target_size)` - Pad and crop for YOLO
+- `remove_white_padding(image)` - Remove white borders
+- `pil_to_tensor(image)` - Convert PIL to tensor
+
+#### Image Filters
+- `CLAHE()` - Contrast enhancement
+- `LoGFilter()` - Edge detection
+- `AdjustBrightnessContrast()` - Brightness/contrast adjustment
+- `UnsharpMask()` - Image sharpening
+
+## 🔧 Development
+
+### Setup Development Environment
+
+```bash
+# Clone the repository
+git clone https://gitlab.com/dat.tram/raiki-sdk.git
+cd raiki-sdk
+
+# Create virtual environment
+python -m venv venv
+source venv/bin/activate  # On Windows: venv\Scripts\activate
+
+# Install dependencies
+pip install -e .
+```
+
+## 📋 Requirements
+
+- Python >= 3.10
+- numpy >= 2.2.6
+- pillow >= 11.3.0
+- pydantic >= 2.12.0
+- ultralytics >= 8.3.208
+
+## 📄 License
+
+This project is licensed under the MIT License.
+
+## 👥 Authors
+
+- **Danny Tram** - [GitLab](https://gitlab.com/dat.tram)
+
+## 🤝 Contributing
+
+Contributions are welcome! Please feel free to submit a Pull Request.
+
+## 📞 Support
+
+For issues and questions, please use the [GitLab Issues](https://gitlab.com/dat.tram/raiki-sdk/-/issues) page.
+
+## 🗺️ Roadmap
+
+- [ ] Add Classify Base
+- [ ] Add Red Frame service
+- [ ] Add unit tests
+- [ ] Add CI/CD pipeline
+
+## 📊 Changelog
+
+See [CHANGELOG.md](CHANGELOG.md) for a detailed history of changes.
+
+### Latest Release: v0.1.0 (2025-10-10)
+- Initial SDK release with base classes and preprocessing utilities
+- See full changelog for details

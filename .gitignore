@@ -10,4 +10,10 @@ __pycache__
 *.pyz
 *.pywz
 
+# Build artifacts
+*.egg-info/
+dist/
+build/
+*.egg
+
 .DS_Store

@@ -1,12 +1,48 @@
 [project]
 name = "raiki-sdk"
 version = "0.1.0"
-description = "Add your description here"
+description = "Raiki SDK - Base interfaces and utilities for classification and counterfeit detection systems"
 readme = "README.md"
 requires-python = ">=3.10"
+license = {text = "MIT"}
+authors = [
+    { name = "Danny Tram", email = "dat.tram@rikai.technology" }
+]
+keywords = ["counterfeit", "detection", "yolo", "computer-vision", "authentication", "classify"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+    "Topic :: Scientific/Engineering :: Image Recognition",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+]
+
 dependencies = [
     "numpy>=2.2.6",
     "pillow>=11.3.0",
     "pydantic>=2.12.0",
     "ultralytics>=8.3.208",
 ]
+
+[project.urls]
+Homepage = "https://gitlab.com/dat.tram/raiki-sdk"
+Repository = "https://gitlab.com/dat.tram/raiki-sdk.git"
+Issues = "https://gitlab.com/dat.tram/raiki-sdk/-/issues"
+
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["raiki_sdk*"]
+exclude = ["tests*", "examples*"]
+
+[tool.setuptools]
+include-package-data = true
+
+[tool.setuptools.package-data]
+"*" = ["*.md"]

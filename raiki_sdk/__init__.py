@@ -1,7 +1,7 @@
 """
-Raiki SDK - Counterfeit Detection Toolkit
+Raiki SDK - LuxAuthen Toolkit
 
-A Python SDK providing base interfaces and utilities for counterfeit detection systems.
+A Python SDK providing base interfaces and utilities for counterfeit detection and product classification systems.
 """
 
 __version__ = "0.1.0"
