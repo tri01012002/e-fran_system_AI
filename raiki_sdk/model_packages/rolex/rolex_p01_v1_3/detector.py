@@ -18,8 +18,8 @@ class RolexP01Detector(YoloBase):
     YOLO detector for Rolex P01 part detection
     """
     
-    def __init__(self):
-        self.model = YOLO(YOLO_WEIGHTS)
+    def __init__(self, device: str):
+        self.model = YOLO(YOLO_WEIGHTS).to(device)
         self.yolo_conf = YOLO_CONF
         self.yolo_imgsz = YOLO_IMGSZ
     

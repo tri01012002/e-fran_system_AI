@@ -21,7 +21,6 @@ AUTH_WEIGHTS = hf_hub_download(repo_id="rikai-ai/rolex_p01_v1-3_efficientNetB4_2
 
 # AUTH parameters
 TARGET_SIZE = 224
-DEVICE = "mps"
 AUTH_MODEL_NAME = "tf_efficientnet_b4_ns"
 AUTH_NUM_CLASSES = 3
 AUTH_CLASS_LABELS = ['fake', 'crow_rolex', 'crow_triangle_rolex']

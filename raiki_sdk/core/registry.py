@@ -72,7 +72,7 @@ class ModelRegistry:
         except AttributeError as e:
             raise AttributeError(f"Invalid classifier package {package_path}: {e}")
     
-    def _load_auth_model_package(self, category: str, part: str, version: str) -> ModelInfo:
+    def _load_auth_model_package(self, category: str, part: str, version: str, device: str) -> ModelInfo:
         """Dynamically load a model package and cache its factory functions"""
         package_path, package_name = self._construct_package_path(category, part, version)
         key = package_name
@@ -109,7 +109,7 @@ class ModelRegistry:
         except AttributeError as e:
             raise AttributeError(f"Invalid model package {package_path}: {e}")
 
-    def get_classifier_model(self, category: str, part: str, model_version: str) -> dict:
+    def get_classifier_model(self, category: str, part: str, model_version: str, device: str) -> dict:
         """
         Get classifier model package - loads models lazily on first access
         
@@ -144,7 +144,7 @@ class ModelRegistry:
             'classifier': model_info._classifier
         }
 
-    def get_auth_model(self, category: str, part: str, model_version: str) -> dict:
+    def get_auth_model(self, category: str, part: str, model_version: str, device: str) -> dict:
         """
         Get model package - loads models lazily on first access
         
@@ -160,18 +160,18 @@ class ModelRegistry:
 
         # Load model package if not already cached
         if key not in self._models:
-            model_info = self._load_auth_model_package(category, part, model_version)
+            model_info = self._load_auth_model_package(category, part, model_version, device)
         else:
             model_info = self._models[key]
 
         # Lazy load: Only create instances when actually needed
         if model_info._detector is None:
             _logger.info(f"Loading detector for {category} - {part} - {model_version}")
-            model_info._detector = model_info.detector_factory()
+            model_info._detector = model_info.detector_factory(device)
 
         if model_info._authenticator is None:
             _logger.info(f"Loading authenticator for {category} - {part} - {model_version}")
-            model_info._authenticator = model_info.authenticator_factory()
+            model_info._authenticator = model_info.authenticator_factory(device)
 
         return {
             'category': model_info.category,
@@ -182,7 +182,7 @@ class ModelRegistry:
             'authenticator': model_info._authenticator
         }
 
-    def get_model(self, category: str, part: str, model_version: str) -> dict:
+    def get_model(self, category: str, part: str, model_version: str, device: str) -> dict:
         """
         Get model package - automatically determines if it's auth or classifier model
         
@@ -195,9 +195,9 @@ class ModelRegistry:
             dict with appropriate model instances based on part type
         """
         if part.lower() == "p00":
-            return self.get_classifier_model(category, part, model_version)
+            return self.get_classifier_model(category, part, model_version, device)
         else:
-            return self.get_auth_model(category, part, model_version)
+            return self.get_auth_model(category, part, model_version, device)
 
     def list_models(self) -> dict:
         """List all cached models (without loading them)"""

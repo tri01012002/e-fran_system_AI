@@ -7,7 +7,7 @@ Migrated from features/rolex/RolexP01.py
 
 from raiki_sdk.base import AuthenticateBase, AuthResult
 from raiki_sdk.model_packages.rolex.rolex_p01_v1_3.config import (
-    AUTH_WEIGHTS, DEVICE, AUTH_NUM_CLASSES,
+    AUTH_WEIGHTS, AUTH_NUM_CLASSES,
     AUTH_MODEL_NAME, AUTH_MODEL_VERSION,
     YOLO_MODEL_VERSION, AUTH_CLASS_LABELS)
 from raiki_sdk.model_packages.rolex.rolex_p01_v1_3.architecture import EfficientNetLoG
@@ -21,7 +21,7 @@ class RolexP01Authenticator(AuthenticateBase):
     Authentication model for Rolex P01
     """
     
-    def __init__(self):
+    def __init__(self, device: str):
         """
         Initialize authenticator
         
@@ -30,11 +30,12 @@ class RolexP01Authenticator(AuthenticateBase):
             transform: Image transformation pipeline
             device: Device to run model on (cuda/cpu)
         """
+        self.device = device
         self.model = EfficientNetLoG(model_name=AUTH_MODEL_NAME, 
                                     checkpoint=AUTH_WEIGHTS,
                                     num_classes=AUTH_NUM_CLASSES,
                                     in_chans=4,
-                                    log_sigma=1.0).to(DEVICE).eval()
+                                    log_sigma=1.0).to(self.device).eval()
 
         self.transform = get_transform()
 
@@ -57,7 +58,7 @@ class RolexP01Authenticator(AuthenticateBase):
         """
 
         with torch.no_grad():
-            tensor_image = self.transform(image).unsqueeze(0).to(DEVICE)
+            tensor_image = self.transform(image).unsqueeze(0).to(self.device)
             logits = self.model(tensor_image)
             probs = torch.softmax(logits, -1).squeeze(0)
             probs, label = self.get_prob(probs)
