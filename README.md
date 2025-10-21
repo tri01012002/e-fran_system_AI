@@ -8,6 +8,10 @@
 ## 🚀 Features
 
 - **Abstract Base Classes**: Ready-to-extend interfaces for authentication and YOLO-based detection
+- **Model Package Registry**: Dynamic model loading with lazy initialization and caching
+  - Part-based versioning (P00, P01, P02, etc.)
+  - Model version management (v1_1, v1_2, v1_3, etc.)
+  - Automatic model discovery and loading
 - **Pydantic Schemas**: Type-safe data validation for detection results
 - **Image Preprocessing**: Professional image processing utilities
   - Resize and padding operations
@@ -155,6 +159,58 @@ adjuster = AdjustBrightnessContrast(brightness_factor=1.2, contrast_factor=1.1)
 final_image = adjuster(edges)
 ```
 
+### Using Model Packages
+
+The SDK provides a registry system for managing different model versions:
+
+```python
+from raiki_sdk import get_model, list_available_models, list_models
+
+# List all available model packages (scans filesystem)
+available_models = list_available_models()
+for model in available_models:
+    print(f"{model['category']} - {model['part']} - {model['version']}")
+
+# Load a specific model package (lazy loading)
+# Automatically detects if it's an auth or classifier model
+model = get_model(category="rolex", part="P01", model_version="v1_3")
+
+# For authentication models (P01, P02, etc.)
+detector = model['detector']
+authenticator = model['authenticator']
+
+# Use the detector
+result = detector.detect("image.jpg")
+print(f"Detected: {result.class_names}")
+
+# Use the authenticator
+auth_result = authenticator.authenticate("image.jpg")
+print(f"Authentic: {auth_result.is_authentic}, Confidence: {auth_result.confidence}")
+
+# For classifier models (P00 only)
+classifier_model = get_model(category="rolex", part="P00", model_version="v1_1")
+classifier = classifier_model['classifier']
+
+# List currently cached models (already loaded in memory)
+cached_models = list_models()
+print(f"Cached models: {cached_models}")
+```
+
+#### Part Versioning
+
+The SDK supports different product parts with independent versioning:
+
+- **P00**: Classifier models (category classification)
+- **P01, P02, P03, ...**: Authentication models (counterfeit detection for specific parts)
+
+#### Model Versioning
+
+Version strings are automatically normalized:
+- `"v1.3"` → `"v1_3"`
+- `"v1_2"` → `"v1_2"`
+
+This allows for flexible version naming while maintaining consistency.
+
 ## 📚 API Reference
 
 ### Base Classes
@@ -199,6 +255,57 @@ Abstract base class for YOLO-based detection systems.
 - `LoGFilter()` - Edge detection
 - `AdjustBrightnessContrast()` - Brightness/contrast adjustment
 - `UnsharpMask()` - Image sharpening
+
+### Model Management
+
+#### `get_model(category, part, model_version)`
+Unified function to load any model package (auto-detects auth vs classifier).
+
+**Parameters:**
+- `category: str` - Brand category ("rolex", "lv", etc.)
+- `part: str` - Part identifier ("P00" for classifier, "P01", "P02", etc. for auth)
+- `model_version: str` - Version identifier ("v1_1", "v1_2", etc.)
+
+**Returns:** `dict` with model instances and metadata
+
+#### `get_auth_model(category, part, model_version)`
+Load authentication model package (P01, P02, etc.).
+
+**Returns:** `dict` with `detector` and `authenticator` instances
+
+#### `list_models()`
+List all currently cached models (loaded in memory).
+
+**Returns:** `dict` with model metadata and load status
+
+#### `list_available_models()`
+Scan filesystem and list all available model packages without loading them.
+
+**Returns:** `list` of available models with metadata
+
+#### `registry`
+Direct access to the global `ModelRegistry` instance for advanced usage.
+
+### Model Package Structure
+
+Model packages follow this structure:
+
+```
+raiki_sdk/model_packages/
+├── {category}/              # e.g., "rolex", "lv"
+│   └── {category}_{part}_{version}/   # e.g., "rolex_p01_v1_3"
+│       ├── __init__.py      # Factory functions
+│       ├── detector.py      # Detector implementation
+│       ├── authenticator.py # Authenticator implementation (for auth models)
+│       ├── classifier.py    # Classifier implementation (for P00)
+│       ├── config.py        # Model configuration
+│       └── preprocessor.py  # Preprocessing logic
+```
+
+Each package must provide factory functions in `__init__.py`:
+- `get_detector()` - Returns detector instance
+- `get_authenticator()` - Returns authenticator instance (auth models)
+- `get_classifier()` - Returns classifier instance (P00 models)
 
 ## 🔧 Development
 
@@ -249,9 +356,11 @@ python test_import.py
 ## 📋 Requirements
 
 - Python >= 3.10
+- huggingface-hub == 0.35.3
 - numpy >= 2.2.6
 - pillow >= 11.3.0
 - pydantic >= 2.12.0
+- timm == 1.0.20
 - ultralytics >= 8.3.208
 
 ## 📄 License
@@ -272,15 +381,23 @@ For issues and questions, please use the [GitLab Issues](https://gitlab.com/dat.
 
 ## 🗺️ Roadmap
 
+- [x] Add Model Package Registry
+- [x] Add Part Versioning
+- [x] Add Model Versioning
 - [ ] Add Classify Base
 - [ ] Add Red Frame service
 - [ ] Add unit tests
 - [ ] Add CI/CD pipeline
+- [ ] Add model performance benchmarking
+- [ ] Add model package validation utilities
 
 ## 📊 Changelog
 
 See [CHANGELOG.md](CHANGELOG.md) for a detailed history of changes.
 
-### Latest Release: v0.1.0 (2025-10-10)
-- Initial SDK release with base classes and preprocessing utilities
+### Latest Release: v0.1.1 (2025-10-21)
+- Added Model Package Registry system
+- Added Part Versioning (P00, P01, P02, etc.)
+- Added Model Versioning with automatic normalization
+- Added model discovery and lazy loading
 - See full changelog for details

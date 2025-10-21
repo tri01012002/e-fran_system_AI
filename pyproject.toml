@@ -1,6 +1,6 @@
 [project]
 name = "raiki-sdk"
-version = "0.1.0"
+version = "0.1.1"
 description = "Raiki SDK - Base interfaces and utilities for classification and counterfeit detection systems"
 readme = "README.md"
 requires-python = ">=3.10"
@@ -21,9 +21,11 @@ classifiers = [
 ]
 
 dependencies = [
+    "huggingface-hub==0.35.3",
     "numpy>=2.2.6",
     "pillow>=11.3.0",
     "pydantic>=2.12.0",
+    "timm==1.0.20",
     "ultralytics>=8.3.208",
 ]
 
