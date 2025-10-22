@@ -66,7 +66,7 @@ class ModelRegistry:
             if not detector_factory or not model_main_factory:
                 raise AttributeError(f"Model package {package_path} must provide 'get_detector' and 'get_main_model' functions")    
 
-            return ModelInfo(
+            model_info = ModelInfo(
                 category=category,
                 part=part,
                 version=version,
@@ -75,6 +75,11 @@ class ModelRegistry:
                 detector_factory=detector_factory,
                 model_main_factory=model_main_factory
             )
+            
+            _logger.info(f"Loaded model package {package_path} for {category} - {part} - {version}")
+            self._models[key] = model_info
+            return model_info
+
         except ImportError as e:
             raise ImportError(f"Failed to import classifier package {package_path}: {e}")
         except AttributeError as e:
