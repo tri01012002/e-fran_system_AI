@@ -5,6 +5,9 @@ import importlib
 from pathlib import Path
 from raiki_sdk.core import _normalize_version_str, _normalize_category_str
 import logging
+from pydantic import BaseModel
+from raiki_sdk.base import AuthenticateBase, YoloBase, ClassificatorBase
+# from raiki_sdk.base.classificator_base import 
 
 _logger = logging.getLogger(__name__)
 
@@ -17,13 +20,26 @@ class ModelInfo:
     package_path: str  # Full import path like "raiki_sdk.model_packages.rolex.rolex_p01_v1"
     package_name: str  # "rolex_p01_v1_3", etc.
     detector_factory: Optional[Callable] = None  # Factory function
-    authenticator_factory: Optional[Callable] = None  # Factory function
-    classifier_factory: Optional[Callable] = None # Factory function
+    model_main_factory: Optional[Callable] = None  # Factory function
 
     # Cache instances
     _detector: Optional[Any] = None
-    _authenticator: Optional[Any] = None
-    _classifier: Optional[Any] = None
+    _model_main: Optional[Any] = None
+@dataclass
+class AuthFeature:
+    category: str       # "rolex", "lv", "redframe"
+    part: str          # "P01", "P02", etc.
+    version: str       # "v1", "v2", etc.  
+    authenticator: Optional[AuthenticateBase] = None
+    detector: Optional[YoloBase] = None
+
+@dataclass
+class ClassificationFeature:
+    category: str       # "rolex", "lv", "redframe"
+    part: str          # "P00"
+    version: str       # "v1", "v2", etc.  
+    classifier: Optional[ClassificatorBase] = None
+    detector: Optional[YoloBase] = None
 
 class ModelRegistry:
     def __init__(self):
@@ -36,80 +52,37 @@ class ModelRegistry:
         package_name = f"{category}_{part}_{version}".lower()
         return f"raiki_sdk.model_packages.{category}.{package_name}", package_name
 
-    def _load_classifier_package(self, category: str, part: str, version: str) -> ModelInfo:
-        """Dynamically load a classifier package and cache its factory functions"""
-        category = _normalize_category_str(category)
+    def _load_model_package(self, category: str, part: str, version: str) -> ModelInfo:
         package_path, package_name = self._construct_package_path(category, part, version)
         key = package_name
-        
-        try:
-            # Import the classifier package
-            module = importlib.import_module(package_path)
-
-            # Get factory functions from the module
-            classifier_factory = getattr(module, 'get_classifier', None)
-
-            if not classifier_factory:
-                raise AttributeError(f"Model package {package_path} must provide 'get_classifier' function")
-            
-            # Create and cache model info
-            model_info = ModelInfo(
-                category=category,
-                part=part,
-                version=version,
-                package_path=package_path,
-                package_name=package_name,
-                classifier_factory=classifier_factory
-            )
-            
-            self._models[key] = model_info
-            _logger.info(f"✅ Loaded classifier package: {category} - {part} - {version}")
-            
-            return model_info
-
-        except ImportError as e:
-            raise ImportError(f"Failed to import classifier package {package_path}: {e}")
-        except AttributeError as e:
-            raise AttributeError(f"Invalid classifier package {package_path}: {e}")
-    
-    def _load_auth_model_package(self, category: str, part: str, version: str) -> ModelInfo:
-        """Dynamically load a model package and cache its factory functions"""
-        package_path, package_name = self._construct_package_path(category, part, version)
-        key = package_name
-        
         try:
             # Import the model package
             module = importlib.import_module(package_path)
             
             # Get factory functions from the module
             detector_factory = getattr(module, 'get_detector', None)
-            authenticator_factory = getattr(module, 'get_authenticator', None)
-            
-            if not detector_factory or not authenticator_factory:
-                raise AttributeError(f"Model package {package_path} must provide 'get_detector' and 'get_authenticator' functions")
-            
-            # Create and cache model info
-            model_info = ModelInfo(
+            model_main_factory = getattr(module, 'get_main_model', None)
+
+            if not detector_factory or not model_main_factory:
+                raise AttributeError(f"Model package {package_path} must provide 'get_detector' and 'get_main_model' functions")    
+
+            return ModelInfo(
                 category=category,
                 part=part,
                 version=version,
                 package_path=package_path,
                 package_name=package_name,
                 detector_factory=detector_factory,
-                authenticator_factory=authenticator_factory
+                model_main_factory=model_main_factory
             )
-            
-            self._models[key] = model_info
-            _logger.info(f"✅ Loaded model package: {category} - {part} - {version}")
-            
-            return model_info
-            
         except ImportError as e:
-            raise ImportError(f"Failed to import model package {package_path}: {e}")
+            raise ImportError(f"Failed to import classifier package {package_path}: {e}")
         except AttributeError as e:
-            raise AttributeError(f"Invalid model package {package_path}: {e}")
+            raise AttributeError(f"Invalid classifier package {package_path}: {e}")
+        except Exception as e:
+            raise e
 
-    def get_classifier_model(self, category: str, part: str, model_version: str, device: str) -> dict:
+    def get_classifier_model(self, category: str, part: str, model_version: str, device: str) -> ClassificationFeature:
         """
         Get classifier model package - loads models lazily on first access
         
@@ -123,28 +96,28 @@ class ModelRegistry:
         category = _normalize_category_str(category)
         _, key = self._construct_package_path(category, part, model_version)
 
-        if part.lower() != "p00":
-            raise ValueError(f"Only P00 is supported for classifier models, got {part}")
+        # if part.lower() != "p00":
+        #     raise ValueError(f"Only P00 is supported for classifier models, got {part}")
 
         # Load model package if not already cached
         if key not in self._models:
-            model_info = self._load_classifier_package(category, part, model_version)
+            model_info = self._load_model_package(category, part, model_version)
         else:
             model_info = self._models[key]
 
         if model_info._classifier is None:
             _logger.info(f"Loading classifier for {category} - {part} - {model_version}")
-            model_info._classifier = model_info.classifier_factory(device)
+            model_info._classifier = model_info.model_main_factory(device)
 
-        return {
-            'category': model_info.category,
-            'part': model_info.part,
-            'version': model_info.version,
-            'package_path': model_info.package_path,
-            'classifier': model_info._classifier
-        }
+        return ClassificationFeature(
+            category=model_info.category,
+            part=model_info.part,
+            version=model_info.version,
+            classifier=model_info._classifier,
+            detector=None  # Classifier models may not have a detector
+        )
 
-    def get_auth_model(self, category: str, part: str, model_version: str, device: str) -> dict:
+    def get_auth_model(self, category: str, part: str, model_version: str, device: str) -> AuthFeature:
         """
         Get model package - loads models lazily on first access
         
@@ -160,7 +133,7 @@ class ModelRegistry:
 
         # Load model package if not already cached
         if key not in self._models:
-            model_info = self._load_auth_model_package(category, part, model_version)
+            model_info = self._load_model_package(category, part, model_version)
         else:
             model_info = self._models[key]
 
@@ -169,20 +142,20 @@ class ModelRegistry:
             _logger.info(f"Loading detector for {category} - {part} - {model_version}")
             model_info._detector = model_info.detector_factory(device)
 
-        if model_info._authenticator is None:
+        if model_info._model_main is None:
             _logger.info(f"Loading authenticator for {category} - {part} - {model_version}")
-            model_info._authenticator = model_info.authenticator_factory(device)
+            model_info._model_main = model_info.model_main_factory(device)
+        
+        return AuthFeature(
+            category=model_info.category,
+            part=model_info.part,
+            version=model_info.version,
+            detector=model_info._detector,
+            authenticator=model_info._model_main
+        )
 
-        return {
-            'category': model_info.category,
-            'part': model_info.part,
-            'version': model_info.version,
-            'package_path': model_info.package_path,
-            'detector': model_info._detector,
-            'authenticator': model_info._authenticator
-        }
 
-    def get_model(self, category: str, part: str, model_version: str, device: str) -> dict:
+    def get_model(self, category: str, part: str, model_version: str, device: str) -> ClassificationFeature | AuthFeature:
         """
         Get model package - automatically determines if it's auth or classifier model
         
@@ -207,7 +180,7 @@ class ModelRegistry:
                 'part': info.part,
                 'version': info.version,
                 'package_path': info.package_path,
-                'loaded': info._detector is not None or info._authenticator is not None or info._classifier is not None
+                'loaded': info._detector is not None or info._model_main is not None
             }
             for key, info in self._models.items()
         }

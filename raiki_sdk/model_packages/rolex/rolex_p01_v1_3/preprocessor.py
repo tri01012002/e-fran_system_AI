@@ -6,7 +6,7 @@ Uses raiki-sdk preprocessing utilities.
 """
 
 from torchvision import transforms
-from raiki_sdk.model_packages.rolex.rolex_p01_v1_3.config import TARGET_SIZE
+from .config import TARGET_SIZE
 
 
 def get_transform():
