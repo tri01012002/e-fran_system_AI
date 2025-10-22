@@ -10,6 +10,8 @@ from raiki_sdk.base import (
     AuthenticateBase,
     YoloBase,
     AuthResult,
+    ClassificationResultModel,
+    ClassificationResultProb,
     YoloResult,
     YoloValidation,
     # RedFrameResult,
@@ -27,37 +29,49 @@ from raiki_sdk.preprocessing import (
 
 from raiki_sdk.core import registry
 
+from raiki_sdk.core.registry import (
+    AuthFeature,
+    ClassificationFeature
+)
 # from raiki_sdk.services import RedFrameService
 
-def get_auth_model(category: str, part: str, model_version: str, device: str) -> dict:
+def get_auth_model(category: str, part: str, model_version: str, device: str) -> AuthFeature:
     """
-    Load specific model version on-demand
+    Load specific authentication model version on-demand.    
     
     Args:
         category: Brand category ("rolex", "lv", etc.)
-        part: Part identifier ("P01", "P02", etc.)
-        model_version: Version identifier ("v1", "v2", etc.)
+        part: Part identifier ("P01", "P02", etc. for auth)
+        model_version: Version identifier ("v1_1", "v1_2", etc.)
     
     Returns:
-        dict with 'detector' and 'authenticator' instances
+        AuthFeature: Authentication model feature
     
     Example:
-        >>> model = get_model("rolex", "P01", "v1")
-        >>> detector = model['detector']
-        >>> authenticator = model['authenticator']
+        >>> model = get_auth_model("rolex", "P01", "v1_1", "cuda")
+        >>> detector = model.detector
+        >>> authenticator = model.authenticator
     """
     return registry.get_model(category, part, model_version, device)
 
-def get_model(category: str, part: str, model_version: str, device: str) -> dict:
+def get_classifier_model(category: str, part: str, model_version: str, device: str) -> ClassificationFeature:
     """
-    Get model package - automatically determines if it's auth or classifier model
+    Load specific classifier model version on-demand.    
     
     Args:
         category: Brand category ("rolex", "lv", etc.)
-        part: Part identifier ("P00" for classifier, "P01", "P02", etc. for auth)
+        part: Part identifier ("P00" for classifier)
         model_version: Version identifier ("v1_1", "v1_2", etc.)
+    
+    Returns:
+        ClassificationFeature: Classifier model feature
+    
+    Example:
+        >>> model = get_classifier_model("rolex", "P00", "v1_1", "cuda")
+        >>> classifier = model.classifier
     """
     return registry.get_model(category, part, model_version, device)
+
 
 def list_models() -> dict:
     """
@@ -95,7 +109,7 @@ __all__ = [
     "AdjustBrightnessContrast",
     # Model Management
     "get_auth_model",
-    "get_model",
+    "get_classifier_model",
     "list_models",
     "list_available_models",
     "registry",

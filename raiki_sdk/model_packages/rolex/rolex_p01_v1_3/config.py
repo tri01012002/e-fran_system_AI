@@ -15,7 +15,8 @@ YOLO_WEIGHTS = hf_hub_download(
     filename="rolex_p01_v1-3_yolov11m_241226_241226.pt", 
     cache_dir=MODEL_DIR)
 
-AUTH_WEIGHTS = hf_hub_download(repo_id="rikai-ai/rolex_p01_v1-3_efficientNetB4_241226_250926", 
+AUTH_WEIGHTS = hf_hub_download(
+    repo_id="rikai-ai/rolex_p01_v1-3_efficientNetB4_241226_250926", 
     filename="rolex_p01_v1-3_efficientNetB4_241226_250926.pth", 
     cache_dir=MODEL_DIR)
 

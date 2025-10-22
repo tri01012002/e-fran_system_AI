@@ -8,7 +8,7 @@ Migrated from dependencies/rolex/Rolex_P01.py
 from raiki_sdk.base import YoloBase, YoloResult, YoloValidation
 from raiki_sdk.preprocessing import padding_crop_yolo
 from ultralytics import YOLO
-from raiki_sdk.model_packages.rolex.rolex_p01_v1_3.config import YOLO_WEIGHTS, YOLO_CONF, YOLO_IMGSZ
+from .config import YOLO_WEIGHTS, YOLO_CONF, YOLO_IMGSZ
 from PIL import Image
 import cv2
 
@@ -41,9 +41,9 @@ class RolexP01Detector(YoloBase):
         results = self.model.predict(source=image, verbose=False, show=False, save=False, save_crop=False, 
                                         conf=self.yolo_conf, line_width=0, show_labels=False, show_conf=False, 
                                         imgsz=self.yolo_imgsz)
-        return YoloResult(results=results)  
-    
-    def validate(self, yolo_results) -> YoloValidation:
+        return results[0]
+
+    def validate(self, yolo_result: YoloResult) -> YoloValidation:
         """
         Validate detection results
         
@@ -55,11 +55,9 @@ class RolexP01Detector(YoloBase):
             position: The position of the detection
             class_id: The class id of the detection
         """
-        yolo_results = yolo_results.results
-
         # Extract boxes and classes
-        boxesn = yolo_results[0].boxes.xyxyn.cpu().numpy()  # Bounding boxesn
-        classes = yolo_results[0].boxes.cls.cpu().tolist()  # Class IDs
+        boxesn = yolo_result.boxes.xyxyn.cpu().numpy()  # Bounding boxesn
+        classes = yolo_result.boxes.cls.cpu().tolist()  # Class IDs
 
         # check validate
         valid = False
@@ -87,7 +85,7 @@ class RolexP01Detector(YoloBase):
 
         if len(p01_boxesn) > 0:
             valid = True
-            image_h, image_w = yolo_results[0].boxes.orig_shape
+            image_h, image_w = yolo_result.boxes.orig_shape
             x1n, y1n, x2n, y2n = p01_boxesn[0]
             x1, y1, x2, y2 = int(x1n * image_w), int(y1n * image_h), int(x2n * image_w), int(y2n * image_h)
             position = [x1, y1, x2, y2]
@@ -108,3 +106,5 @@ class RolexP01Detector(YoloBase):
         cropped_image = padding_crop_yolo(image, position)
         return Image.fromarray(cv2.cvtColor(cropped_image, cv2.COLOR_BGR2RGB))
 
+    def run_pipeline(self, image:  any, is_crop: bool = True) -> YoloValidation:
+        return super().run_pipeline(image, is_crop)

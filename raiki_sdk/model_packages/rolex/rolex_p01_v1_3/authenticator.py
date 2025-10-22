@@ -46,7 +46,7 @@ class RolexP01Authenticator(AuthenticateBase):
             "yolo_model_version": YOLO_MODEL_VERSION
         }
     
-    def forward(self, image) -> AuthResult:
+    def forward(self, image: Image.Image) -> AuthResult:
         """
         Authenticate Rolex P01 part
         
@@ -66,7 +66,7 @@ class RolexP01Authenticator(AuthenticateBase):
             
             return AuthResult(probability=probs, label=label, metadata=metadata)
 
-    def get_prob(self, probs) -> Tuple[float, str]:
+    def get_prob(self, probs: torch.Tensor) -> Tuple[float, str]:
         """
         Process the probability
 
