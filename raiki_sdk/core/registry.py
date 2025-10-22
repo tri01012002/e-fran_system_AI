@@ -72,7 +72,7 @@ class ModelRegistry:
         except AttributeError as e:
             raise AttributeError(f"Invalid classifier package {package_path}: {e}")
     
-    def _load_auth_model_package(self, category: str, part: str, version: str, device: str) -> ModelInfo:
+    def _load_auth_model_package(self, category: str, part: str, version: str) -> ModelInfo:
         """Dynamically load a model package and cache its factory functions"""
         package_path, package_name = self._construct_package_path(category, part, version)
         key = package_name
@@ -134,7 +134,7 @@ class ModelRegistry:
 
         if model_info._classifier is None:
             _logger.info(f"Loading classifier for {category} - {part} - {model_version}")
-            model_info._classifier = model_info.classifier_factory()
+            model_info._classifier = model_info.classifier_factory(device)
 
         return {
             'category': model_info.category,
@@ -160,7 +160,7 @@ class ModelRegistry:
 
         # Load model package if not already cached
         if key not in self._models:
-            model_info = self._load_auth_model_package(category, part, model_version, device)
+            model_info = self._load_auth_model_package(category, part, model_version)
         else:
             model_info = self._models[key]
 

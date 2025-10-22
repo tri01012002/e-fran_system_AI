@@ -29,7 +29,7 @@ from raiki_sdk.core import registry
 
 # from raiki_sdk.services import RedFrameService
 
-def get_auth_model(category: str, part: str, model_version: str) -> dict:
+def get_auth_model(category: str, part: str, model_version: str, device: str) -> dict:
     """
     Load specific model version on-demand
     
@@ -46,9 +46,9 @@ def get_auth_model(category: str, part: str, model_version: str) -> dict:
         >>> detector = model['detector']
         >>> authenticator = model['authenticator']
     """
-    return registry.get_model(category, part, model_version)
+    return registry.get_model(category, part, model_version, device)
 
-def get_model(category: str, part: str, model_version: str) -> dict:
+def get_model(category: str, part: str, model_version: str, device: str) -> dict:
     """
     Get model package - automatically determines if it's auth or classifier model
     
@@ -57,7 +57,7 @@ def get_model(category: str, part: str, model_version: str) -> dict:
         part: Part identifier ("P00" for classifier, "P01", "P02", etc. for auth)
         model_version: Version identifier ("v1_1", "v1_2", etc.)
     """
-    return registry.get_model(category, part, model_version)
+    return registry.get_model(category, part, model_version, device)
 
 def list_models() -> dict:
     """
