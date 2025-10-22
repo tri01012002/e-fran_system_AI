@@ -173,7 +173,7 @@ for model in available_models:
 
 # Load a specific model package (lazy loading)
 # Automatically detects if it's an auth or classifier model
-model = get_model(category="rolex", part="P01", model_version="v1_3")
+model = get_model(category="rolex", part="P01", model_version="v1_3", device="cuda")
 
 # For authentication models (P01, P02, etc.)
 detector = model['detector']
@@ -188,7 +188,7 @@ auth_result = authenticator.authenticate("image.jpg")
 print(f"Authentic: {auth_result.is_authentic}, Confidence: {auth_result.confidence}")
 
 # For classifier models (P00 only)
-classifier_model = get_model(category="rolex", part="P00", model_version="v1_1")
+classifier_model = get_model(category="rolex", part="P00", model_version="v1_1", device="cuda")
 classifier = classifier_model['classifier']
 
 # List currently cached models (already loaded in memory)
