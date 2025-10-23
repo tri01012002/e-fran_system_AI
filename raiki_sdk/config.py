@@ -1,1 +1,1 @@
-MODEL_DIR = "raiki_sdk/models/"
+FOLDER_CACHE_MODEL_HF = "raiki_sdk/models/"
