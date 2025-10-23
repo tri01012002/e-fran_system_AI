@@ -87,7 +87,26 @@ class ModelRegistry:
         except Exception as e:
             raise e
 
-    def get_classifier_model(self, category: str, part: str, model_version: str, device: str) -> ClassificationFeature:
+    def _get_load_model_info(self, category: str, part: str, version: str, device: str) -> ModelInfo:
+        category = _normalize_category_str(category)
+        _, key = self._construct_package_path(category, part, version)
+
+        # if part.lower() != "p00":
+        #     raise ValueError(f"Only P00 is supported for classifier models, got {part}")
+
+        # Load model package if not already cached
+        if key not in self._models:
+            model_info = self._load_model_package(category, part, version)
+        else:
+            model_info = self._models[key]
+
+        if model_info._model_main is None:
+            _logger.info(f"Loading classifier for {category} - {part} - {version}")
+            model_info._model_main = model_info.model_main_factory(device)
+    
+
+
+    def get_classification_feature(self, category: str, part: str, model_version: str, device: str) -> ClassificationFeature:
         """
         Get classifier model package - loads models lazily on first access
         
@@ -98,31 +117,17 @@ class ModelRegistry:
             part: Only P00 is supported for classifier models
             model_version: Version identifier ("v1_1", "v1_2", etc.)
         """
-        category = _normalize_category_str(category)
-        _, key = self._construct_package_path(category, part, model_version)
-
-        # if part.lower() != "p00":
-        #     raise ValueError(f"Only P00 is supported for classifier models, got {part}")
-
-        # Load model package if not already cached
-        if key not in self._models:
-            model_info = self._load_model_package(category, part, model_version)
-        else:
-            model_info = self._models[key]
-
-        if model_info._classifier is None:
-            _logger.info(f"Loading classifier for {category} - {part} - {model_version}")
-            model_info._classifier = model_info.model_main_factory(device)
+        model_info = self._get_load_model_info(category, part, model_version, device)
 
         return ClassificationFeature(
             category=model_info.category,
             part=model_info.part,
             version=model_info.version,
-            classifier=model_info._classifier,
-            detector=None  # Classifier models may not have a detector
+            classifier=model_info._model_main,
+            detector=model_info._detector 
         )
 
-    def get_auth_model(self, category: str, part: str, model_version: str, device: str) -> AuthFeature:
+    def get_auth_feature(self, category: str, part: str, model_version: str, device: str) -> AuthFeature:
         """
         Get model package - loads models lazily on first access
         
@@ -134,22 +139,7 @@ class ModelRegistry:
         Returns:
             dict with 'detector' and 'authenticator' instances
         """
-        _, key = self._construct_package_path(category, part, model_version)
-
-        # Load model package if not already cached
-        if key not in self._models:
-            model_info = self._load_model_package(category, part, model_version)
-        else:
-            model_info = self._models[key]
-
-        # Lazy load: Only create instances when actually needed
-        if model_info._detector is None:
-            _logger.info(f"Loading detector for {category} - {part} - {model_version}")
-            model_info._detector = model_info.detector_factory(device)
-
-        if model_info._model_main is None:
-            _logger.info(f"Loading authenticator for {category} - {part} - {model_version}")
-            model_info._model_main = model_info.model_main_factory(device)
+        model_info = self._get_load_model_info(category, part, model_version, device)
         
         return AuthFeature(
             category=model_info.category,
@@ -158,24 +148,6 @@ class ModelRegistry:
             detector=model_info._detector,
             authenticator=model_info._model_main
         )
-
-
-    def get_model(self, category: str, part: str, model_version: str, device: str) -> ClassificationFeature | AuthFeature:
-        """
-        Get model package - automatically determines if it's auth or classifier model
-        
-        Args:
-            category: Brand category ("rolex", "lv", etc.)
-            part: Part identifier ("P00" for classifier, "P01", "P02", etc. for auth)
-            model_version: Version identifier ("v1_1", "v1_2", etc.)
-        
-        Returns:
-            dict with appropriate model instances based on part type
-        """
-        if part.lower() == "p00":
-            return self.get_classifier_model(category, part, model_version, device)
-        else:
-            return self.get_auth_model(category, part, model_version, device)
 
     def list_models(self) -> dict:
         """List all cached models (without loading them)"""
