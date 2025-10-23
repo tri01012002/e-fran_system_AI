@@ -13,6 +13,62 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Add unit tests
 - Add CI/CD pipeline
 
+## [0.1.2] - 2025-10-23
+
+### ✨ New Features
+
+- **RedFrame Service**: Image quality assessment and frame validation service
+  - `get_redframe_service()`: Factory function with intelligent caching
+  - Support for two operation modes:
+    - **Basic Mode**: Simple IQA using standard LIQE (pyiqa)
+      - Full image quality validation
+      - No additional parameters required
+      - Fast and lightweight
+    - **Advanced Mode**: Full RedFrame validation with custom LIQE
+      - XGBoost-based RedFrame classification
+      - Geometric frame/position validation
+      - Cropped region quality analysis
+      - Distortion type detection (blur, noise, etc.)
+      - Requires `crop_method` parameter
+  
+- **RedFrame Service Caching**:
+  - Singleton pattern per configuration to avoid redundant model loading
+  - Cache key based on: category, part, advanced_mode, device
+  - Threshold parameter doesn't trigger model reload
+  - Optimized for API/service deployment scenarios
+
+- **IQA Service**: Unified LIQE-based image quality assessment
+  - `LIQEServices` class with dual model support
+  - Standard LIQE via `pyiqa` (basic mode)
+  - Custom LIQE with distortion detection (advanced mode)
+  - Class-level model caching for memory efficiency
+
+### 🔧 Technical Details
+
+- **New Services Added**:
+  - `raiki_sdk.services.RedFrameService`: Main RedFrame validation class
+  - `raiki_sdk.services.LIQEServices`: LIQE IQA service with caching
+  - `raiki_sdk.services.get_redframe_service()`: Cached factory function
+
+- **New Schema**:
+  - `RedFrameResult`: Result schema for RedFrame validation
+    - `result: bool` - Overall validation result
+    - `iqa_result: Optional[IqaResult]` - IQA details
+    - `error_type: Optional[str]` - Error classification
+
+- **Dependencies**:
+  - Added `pyiqa>=0.1.14.1` for standard LIQE model
+  - Added `xgboost>=3.1.1` for RedFrame classification
+  - Added `joblib>=1.5.2` for model loading
+  - Added `pandas>=2.3.3` for feature preparation
+
+### 📖 Documentation
+
+- Added comprehensive RedFrame Service guide in README
+- Mode comparison table (Basic vs Advanced)
+- Caching behavior documentation
+- Usage examples for both modes
+
 ## [0.1.1] - 2025-10-21
 
 Changes from v0.1.0 to v0.1.1.
@@ -72,6 +128,7 @@ See full release details
 - Package structure with proper `__init__.py` exports
 - Dependencies: numpy, pillow, pydantic, ultralytics
 
-[Unreleased]: https://gitlab.com/dat.tram/raiki-sdk/-/compare/v0.1.1...HEAD
+[Unreleased]: https://gitlab.com/dat.tram/raiki-sdk/-/compare/v0.1.2...HEAD
+[0.1.2]: https://gitlab.com/dat.tram/raiki-sdk/-/compare/v0.1.1...v0.1.2
 [0.1.1]: https://gitlab.com/dat.tram/raiki-sdk/-/compare/v0.1.0...v0.1.1
 [0.1.0]: https://gitlab.com/dat.tram/raiki-sdk/-/releases/v0.1.0
