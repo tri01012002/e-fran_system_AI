@@ -25,6 +25,3 @@ build/
 .DS_Store
 
 models/
-
-test_main.py
-test_raiki_sdk.py
