@@ -1,7 +1,7 @@
 """Services for specialized detection tasks."""
 
 from .redframe_service import RedFrameService
-from .iqa_service import LIQEServices, LIQECustomServices
+from .iqa_service import LIQEServices
 import logging
 from typing import Dict
 
@@ -46,7 +46,7 @@ def get_redframe_service(
         class_labels = ["good", "wide", "angle", "close"]
     
     # Create cache key based on configuration parameters
-    cache_key = f"{category.lower()}_{part.lower()}_{advanced_mode}_{device}_{threshold}"
+    cache_key = f"{category.lower()}_{part.lower()}_{advanced_mode}_{device}"
     
     if cache_key not in _redframe_service_cache:
         _logger.info(f"Creating new RedFrameService for {category}-{part} on {device} (advanced={advanced_mode})")
@@ -63,5 +63,5 @@ def get_redframe_service(
     
     return _redframe_service_cache[cache_key]
 
-__all__ = ["get_redframe_service", "LIQEServices", "LIQECustomServices"]
+__all__ = ["get_redframe_service", "LIQEServices"]
 

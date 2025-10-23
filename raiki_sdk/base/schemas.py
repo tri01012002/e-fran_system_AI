@@ -33,14 +33,16 @@ class YoloValidation(BaseModel):
 
 class IqaResult(BaseModel):
     iqa_score: float
+    iqa_threshold: float | None = None
     distortion_type: str | None = None
-    image_quality_validate: Literal["pass", "fail"]
+    image_quality_validate: bool
 
 class RedFrameResult(BaseModel):
-    result: Literal["failed", "ok"]
-    image_quality_validate: Literal["pass", "fail"] | None = None
-    iqa_score: float | None = None
-    distortion_type: str | None = None
+    result: bool
+    iqa_result: Optional[IqaResult] = None
+    # image_quality_validate: Literal["pass", "fail"] | None = None
+    # iqa_score: float | None = None
+    # distortion_type: str | None = None
     error_type: Literal[
         "angle_error", 
         "wide_error", 

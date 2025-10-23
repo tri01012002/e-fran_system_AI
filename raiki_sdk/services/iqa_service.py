@@ -1,6 +1,5 @@
 from PIL import Image
-from raiki_sdk.base import IqaBase
-from raiki_sdk.base import IqaResult
+from raiki_sdk.base import IqaBase, IqaResult
 import pyiqa
 from .config import LIQE_CUSTOM_WEIGHTS
 from .iqa_core import LIQE, pil_to_tensor
@@ -8,67 +7,60 @@ import torch
 import numpy as np
 import cv2
 
+
 class LIQEServices(IqaBase):
-    def __init__(self, device: str = "cuda", threshold: float = 0.1):
+    _base_model = None  # pyiqa model cache
+    _custom_model = None  # custom model cache
+
+    def __init__(self, device: str = "cuda", threshold: float = 0.1, use_advance_iqa: bool = False):
+        """
+        Unified LIQE IQA service supporting both standard and custom models.
+
+        Args:
+            device (str): "cuda" or "cpu".
+            threshold (float): Quality threshold.
+            use_advance_iqa (bool): If True, use custom LIQE model. If False, use pyiqa model.
+        """
+        self.device = device
+        self.threshold = threshold
+        self.use_advance_iqa = use_advance_iqa
         self.resize_target = (224, 224)
-        self.device = device
-        self.model = pyiqa.create_metric('liqe', as_loss=False)
-        self.threshold = threshold
-    
-    def iqa_detect(self, image: Image.Image) -> IqaResult:
-        """
-        Check the quality of the image using LIQE metric.
-        
-        Args:
-            image: PIL.Image.Image
-        Returns:
-            IqaResult: Result of the IQA metric.
-        """
 
-        if not isinstance(image, Image.Image):
-            image = Image.fromarray(cv2.cvtColor(image, cv2.COLOR_BGR2RGB)) if isinstance(image, np.ndarray) else None
-            if image is None:
-                raise ValueError("Input must be a PIL Image or a valid numpy array.")
-
-        # Resize the image to 224x224 for IQA
-        img_rsed = image.resize(self.resize_target, Image.LANCZOS)
-        score = self.model(img_rsed).item()
-
-        if score < self.threshold:
-            return IqaResult(iqa_score=score, image_quality_validate="fail")
+        # Lazy load the models
+        if use_advance_iqa:
+            if LIQEServices._custom_model is None:
+                LIQEServices._custom_model = LIQE(LIQE_CUSTOM_WEIGHTS, device)
         else:
-            return IqaResult(iqa_score=score, image_quality_validate="pass")
-
-
-class LIQECustomServices(IqaBase):
-    def __init__(self, device: str = "cuda", threshold: float = 0.1):
-        self.device = device
-        self.threshold = threshold
-        self.model = LIQE(LIQE_CUSTOM_WEIGHTS, device)
+            if LIQEServices._base_model is None:
+                LIQEServices._base_model = pyiqa.create_metric('liqe', as_loss=False)
 
     def iqa_detect(self, image: Image.Image) -> IqaResult:
         """
         Check the quality of the image using LIQE metric.
-        
-        Args:
-            image: PIL.Image.Image
-        Returns:
-            IqaResult: Result of the IQA metric.
         """
+        # Ensure image is a valid PIL image
         if not isinstance(image, Image.Image):
-            image = Image.fromarray(cv2.cvtColor(image, cv2.COLOR_BGR2RGB)) if isinstance(image, np.ndarray) else None
-            if image is None:
+            if isinstance(image, np.ndarray):
+                image = Image.fromarray(cv2.cvtColor(image, cv2.COLOR_BGR2RGB))
+            else:
                 raise ValueError("Input must be a PIL Image or a valid numpy array.")
 
-        # Convert the image to tensor
-        img_tensor = pil_to_tensor(image, device=self.device)
-
-        # Forward pass through the model
-        with torch.no_grad():
-            quality, _, distortion = self.model(img_tensor)
-
-        if quality < self.threshold:
-            return IqaResult(iqa_score=quality.item(), distortion_type=distortion, image_quality_validate="fail")
+        if not self.use_advance_iqa:
+            # --- Standard LIQE via pyiqa ---
+            img_rsed = image.resize(self.resize_target, Image.LANCZOS)
+            score = LIQEServices._base_model(img_rsed).item()
+            return IqaResult(iqa_score=score, iqa_threshold=self.threshold, image_quality_validate=score >= self.threshold)
         else:
-            return IqaResult(iqa_score=quality.item(), distortion_type=distortion, image_quality_validate="pass")
+            # --- Advanced LIQE via custom model ---
+            img_tensor = pil_to_tensor(image, device=self.device)
+            with torch.no_grad():
+                quality, _, distortion = LIQEServices._custom_model(img_tensor)
 
+            score = quality.item()
+
+            return IqaResult(
+                iqa_score=score,
+                iqa_threshold=self.threshold,
+                distortion_type=distortion,
+                image_quality_validate=score >= self.threshold
+            )

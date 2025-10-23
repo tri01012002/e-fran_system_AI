@@ -196,12 +196,141 @@ cached_models = list_models()
 print(f"Cached models: {cached_models}")
 ```
 
-#### Part Versioning
+### Using RedFrame Service
 
-The SDK supports different product parts with independent versioning:
+The SDK provides a RedFrame service for image quality assessment (IQA) and frame validation with two operation modes.
 
-- **P00**: Classifier models (category classification)
-- **P01, P02, P03, ...**: Authentication models (counterfeit detection for specific parts)
+#### Basic Mode - Simple IQA Only
+
+Basic mode uses the standard LIQE model from `pyiqa` library and performs simple image quality validation on the entire image.
+
+```python
+from raiki_sdk import get_redframe_service
+from PIL import Image
+import cv2
+
+# Initialize service in basic mode
+redframe_service = get_redframe_service(
+    category="rolex",
+    part="p01",
+    advanced_mode=False,  # Basic mode
+    device="cuda",  # or "mps", "cpu"
+    threshold=0.1  # Quality threshold (0-1)
+)
+
+# Load image
+image = cv2.imread("product.jpg")
+
+# Simple IQA validation (no crop_method needed)
+result = redframe_service.forward(image)
+
+print(f"Image Quality Valid: {result.result}")
+print(f"IQA Score: {result.iqa_result.iqa_score}")
+print(f"Threshold: {result.iqa_result.iqa_threshold}")
+```
+
+**Basic Mode Features:**
+- ✅ Uses standard LIQE via `pyiqa` library
+- ✅ Validates entire image (no cropping required)
+- ✅ No `crop_method` parameter needed
+- ✅ No frame/position validation
+- ✅ Fast and simple quality check
+
+#### Advanced Mode - Full RedFrame + Custom IQA
+
+Advanced mode uses a custom LIQE model with additional RedFrame validation including geometric checks and cropped region analysis.
+
+```python
+from raiki_sdk import get_redframe_service, get_auth_feature
+import cv2
+
+# Get detector for crop method
+model_package = get_auth_feature("rolex", "p01", "v1_3", device="cuda")
+detector = model_package.detector
+
+# Initialize service in advanced mode
+redframe_service = get_redframe_service(
+    category="rolex",
+    part="p01",
+    advanced_mode=True,  # Advanced mode
+    device="cuda",
+    threshold=0.1
+)
+
+# Load image and detect
+image = cv2.imread("product.jpg")
+yolo_result = detector.yolo_detect(image)
+validation = detector.validate(yolo_result)
+
+# Advanced validation with RedFrame checks (crop_method REQUIRED)
+result = redframe_service.forward(
+    image=image,
+    frame="0.1,0.2,0.9,0.8",  # Normalized frame coordinates
+    position=validation.position,  # [x1, y1, x2, y2] in pixels
+    crop_method=detector.crop  # REQUIRED: Method to crop image
+)
+
+print(f"Validation Passed: {result.result}")
+print(f"Error Type: {result.error_type}")
+
+if result.iqa_result:
+    print(f"IQA Score: {result.iqa_result.iqa_score}")
+    print(f"Distortion Type: {result.iqa_result.distortion_type}")
+```
+
+**Advanced Mode Features:**
+- ✅ Uses custom LIQE model with distortion detection
+- ✅ Validates position within frame boundaries
+- ✅ Performs XGBoost RedFrame classification
+- ✅ Analyzes cropped region quality
+- ✅ Provides detailed error types:
+  - `out_of_frame_error`: Position outside frame
+  - `wide_error`, `angle_error`, `close_error`: RedFrame model predictions
+  - `blur_error`, `noise_error`, etc.: IQA distortion types
+
+**Required Parameters for Advanced Mode:**
+- `frame`: Normalized coordinates (x1,y1,x2,y2) as string
+- `position`: Pixel coordinates [x1, y1, x2, y2] as list
+- `crop_method`: Callable to crop image region (e.g., `detector.crop`)
+
+#### Mode Comparison
+
+| Feature | Basic Mode | Advanced Mode |
+|---------|-----------|---------------|
+| IQA Model | Standard LIQE (pyiqa) | Custom LIQE with distortion detection |
+| Input Image | Full image | Cropped region |
+| Frame Validation | ❌ No | ✅ Yes |
+| RedFrame Check | ❌ No | ✅ Yes (XGBoost model) |
+| Distortion Type | ❌ No | ✅ Yes |
+| `crop_method` Required | ❌ No | ✅ Yes |
+| Performance | Faster | More comprehensive |
+| Use Case | Quick quality check | Full authentication pipeline |
+
+#### Caching and Performance
+
+The `get_redframe_service()` function implements intelligent caching to optimize performance:
+
+```python
+# First call: Loads models (slower)
+service1 = get_redframe_service("rolex", "p01", advanced_mode=True, device="cuda")
+
+# Second call with SAME config: Uses cache (instant)
+service2 = get_redframe_service("rolex", "p01", advanced_mode=True, device="cuda")
+
+# Different threshold: Still uses cache (instant, threshold updated)
+service3 = get_redframe_service("rolex", "p01", advanced_mode=True, device="cuda", threshold=0.5)
+
+# Different device: New instance created (slower)
+service4 = get_redframe_service("rolex", "p01", advanced_mode=True, device="mps")
+```
+
+**Cache Key:** `{category}_{part}_{advanced_mode}_{device}`
+
+**Important Notes:**
+- 🔄 Models are cached per configuration (category, part, mode, device)
+- ⚡ Threshold changes don't trigger model reload
+- 💾 Cache persists for the lifetime of the Python process
+- 🔁 Cache is cleared on process restart (e.g., API reload)
 
 #### Model Versioning
 
@@ -395,9 +524,9 @@ For issues and questions, please use the [GitLab Issues](https://gitlab.com/dat.
 
 See [CHANGELOG.md](CHANGELOG.md) for a detailed history of changes.
 
-### Latest Release: v0.1.1 (2025-10-21)
-- Added Model Package Registry system
-- Added Part Versioning (P00, P01, P02, etc.)
-- Added Model Versioning with automatic normalization
-- Added model discovery and lazy loading
+### Latest Release: v0.1.2 (2025-10-23)
+- Added RedFrame Service with Basic and Advanced modes
+- Added IQA Service with dual LIQE model support
+- Added intelligent caching for RedFrame service
+- Added XGBoost-based frame validation
 - See full changelog for details

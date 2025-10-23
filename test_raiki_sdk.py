@@ -69,7 +69,7 @@ async def check_part_test(
         print(f"[/check/ {category} - {part}] - Validation ok")
 
         # 5. Check Red Frame
-        redframe_service = get_redframe_service(category, part, advanced_mode=True, device="mps", threshold=0.1)
+        redframe_service = get_redframe_service(category, part, advanced_mode=True, device="mps", threshold=3.2)
         redframe_result = redframe_service.forward(image, frame, position, detector.crop)
         print(f"Red Frame result: {redframe_result}")
 

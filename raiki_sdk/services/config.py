@@ -1,30 +1,30 @@
 """
 Configuration for LIQE Custom Services and Red Frame Services
 """
-from raiki_sdk.config import MODEL_DIR
-from huggingface_hub import hf_hub_download
+from raiki_sdk.config import FOLDER_CACHE_MODEL_HF
+from raiki_sdk.utils.hf_lib import download_file_from_hf
 
 # Model weights paths (relative to package root or absolute)
-LIQE_CUSTOM_WEIGHTS = hf_hub_download(
+LIQE_CUSTOM_WEIGHTS = download_file_from_hf(
     repo_id="rikai-ai/liqe_iqa_model", 
-    filename="LIQE.pt", 
-    cache_dir=MODEL_DIR)
+    filename="LIQE.pt"
+)
 
 # Xgboost Rolex model weights path
-ROLEX_P01_XGB = hf_hub_download(
+ROLEX_P01_XGB = download_file_from_hf(
     repo_id="rikai-ai/rolex_p01_redframe_v1", 
-    filename="rolex_p01_redframe_v1_xgb_250915.pkl", 
-    cache_dir=MODEL_DIR)
+    filename="rolex_p01_redframe_v1_xgb_250915_251023.pkl"
+)
 
-ROLEX_P02_XGB = hf_hub_download(
+ROLEX_P02_XGB = download_file_from_hf(
     repo_id="rikai-ai/rolex_p02_redframe_v1", 
-    filename="rolex_p02_redframe_v1_xgb_250917.pkl", 
-    cache_dir=MODEL_DIR)
+    filename="rolex_p02_redframe_v1_xgb_250917_251023.pkl"
+)
 
-ROLEX_P03_XGB = hf_hub_download(
+ROLEX_P03_XGB = download_file_from_hf(
     repo_id="rikai-ai/rolex_p03_redframe_v1", 
-    filename="rolex_p03_redframe_v1_xgb_250918.pkl", 
-    cache_dir=MODEL_DIR)
+    filename="rolex_p03_redframe_v1_xgb_250918_251023.pkl"
+)
 
 # Helper function to get model path based on category and part
 def get_redframe_model_path(category: str, part: str) -> str:
