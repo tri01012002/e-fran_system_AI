@@ -4,7 +4,7 @@ Raiki SDK - LuxAuthen Toolkit
 A Python SDK providing base interfaces and utilities for counterfeit detection and product classification systems.
 """
 
-__version__ = "0.1.1"
+__version__ = "0.1.2"
 
 from raiki_sdk.base import (
     AuthenticateBase,
@@ -31,12 +31,12 @@ from raiki_sdk.preprocessing import (
 )
 
 from raiki_sdk.core import registry
-from raiki_sdk.config import FOLDER_CACHE_MODEL_HF, HF_TOKEN
+from raiki_sdk.config import FOLDER_CACHE_MODEL_HF
 from raiki_sdk.core.registry import (
     AuthFeature,
     ClassificationFeature
 )
-from raiki_sdk.services import get_redframe_service, LIQEServices, LIQECustomServices
+from raiki_sdk.services import get_redframe_service, LIQEServices
 
 def get_auth_feature(category: str, part: str, model_version: str, device: str) -> AuthFeature:
     """
@@ -98,7 +98,6 @@ __all__ = [
     # Base classes
     "AuthenticateBase",
     "FOLDER_CACHE_MODEL_HF",
-    "HF_TOKEN",
     "YoloBase",
     "ClassificatorBase",
     "IqaBase",
@@ -128,6 +127,5 @@ __all__ = [
     # Services
     "get_redframe_service",
     "LIQEServices",
-    "LIQECustomServices",
 ]
 
