@@ -103,8 +103,12 @@ class ModelRegistry:
         if model_info._model_main is None:
             _logger.info(f"Loading classifier for {category} - {part} - {version}")
             model_info._model_main = model_info.model_main_factory(device)
-    
 
+        if model_info._detector is None:
+            _logger.info(f"Loading detector for {category} - {part} - {version}")
+            model_info._detector = model_info.detector_factory(device)
+
+        return model_info
 
     def get_classification_feature(self, category: str, part: str, model_version: str, device: str) -> ClassificationFeature:
         """
