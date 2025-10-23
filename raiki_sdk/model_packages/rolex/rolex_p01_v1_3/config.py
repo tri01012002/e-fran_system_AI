@@ -11,13 +11,13 @@ YOLO_MODEL_VERSION = "v1_3"
 
 # Model weights paths (relative to package root or absolute)
 YOLO_WEIGHTS = hf_hub_download(
-    repo_id="rikai-ai/rolex_p01_v1-3_yolov11m_241226_241226", 
-    filename="rolex_p01_v1-3_yolov11m_241226_241226.pt", 
+    repo_id="rikai-ai/rolex_p01_detector_v1-3", 
+    filename="rolex_p01_detector_v1-3_yolov11m_241226_241226.pt", 
     cache_dir=MODEL_DIR)
 
 AUTH_WEIGHTS = hf_hub_download(
-    repo_id="rikai-ai/rolex_p01_v1-3_efficientNetB4_241226_250926", 
-    filename="rolex_p01_v1-3_efficientNetB4_241226_250926.pth", 
+    repo_id="rikai-ai/rolex_p01_auth_v1-3", 
+    filename="rolex_p01_auth_v1-3_efficientNetB4_241226_250926.pth", 
     cache_dir=MODEL_DIR)
 
 # AUTH parameters

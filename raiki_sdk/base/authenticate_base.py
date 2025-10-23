@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 from typing import Any, Tuple
 from PIL import Image
-from raiki_sdk.base.schemas import AuthResult
+from .schemas import AuthResult
 
 class AuthenticateBase(ABC):
     @abstractmethod

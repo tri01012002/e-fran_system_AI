@@ -1,7 +1,6 @@
 from abc import ABC, abstractmethod
-from typing import Any, Tuple
 from PIL import Image
-from raiki_sdk.base.schemas import AuthResult, ClassificationResultProb, ClassificationResultModel
+from .schemas import ClassificationResultProb, ClassificationResultModel
 
 class ClassificatorBase(ABC):
     @abstractmethod
