@@ -1,20 +1,20 @@
 """Image preprocessing utilities including processors, filters, and masks."""
 
-from raiki_sdk.preprocessing.processors import (
+from .processors import (
     resize_pwd,
     padding_crop_yolo,
     remove_white_padding,
     pil_to_tensor,
 )
 
-from raiki_sdk.preprocessing.filters import (
+from .filters import (
     CLAHE,
     UnsharpMask,
     LoGFilter,
     AdjustBrightnessContrast,
 )
 
-# from raiki_sdk.preprocessing.masks import (
+# from .masks import (
 #     GridMaskLVP02,
 #     Grid6x6Mask,
 # )

@@ -1,24 +1,22 @@
 """
 Configuration for Rolex P01 Model
 """
-from raiki_sdk.config import MODEL_DIR
-from huggingface_hub import hf_hub_download
-
+from raiki_sdk.utils.hf_lib import download_file_from_hf
 # Model version
 AUTH_MODEL_VERSION = "v1_3" 
 YOLO_MODEL_VERSION = "v1_3"
 
 
 # Model weights paths (relative to package root or absolute)
-YOLO_WEIGHTS = hf_hub_download(
-    repo_id="rikai-ai/rolex_p01_v1-3_yolov11m_241226_241226", 
-    filename="rolex_p01_v1-3_yolov11m_241226_241226.pt", 
-    cache_dir=MODEL_DIR)
+YOLO_WEIGHTS = download_file_from_hf(
+    repo_id="rikai-ai/rolex_p01_detector_v1-3", 
+    filename="rolex_p01_detector_v1-3_yolov11m_241226_241226.pt"
+)
 
-AUTH_WEIGHTS = hf_hub_download(
-    repo_id="rikai-ai/rolex_p01_v1-3_efficientNetB4_241226_250926", 
-    filename="rolex_p01_v1-3_efficientNetB4_241226_250926.pth", 
-    cache_dir=MODEL_DIR)
+AUTH_WEIGHTS = download_file_from_hf(
+    repo_id="rikai-ai/rolex_p01_auth_v1-3", 
+    filename="rolex_p01_auth_v1-3_efficientNetB4_241226_250926.pth"
+)
 
 # AUTH parameters
 TARGET_SIZE = 224

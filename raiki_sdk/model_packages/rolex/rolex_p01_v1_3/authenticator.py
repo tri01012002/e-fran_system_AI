@@ -6,12 +6,12 @@ Migrated from features/rolex/RolexP01.py
 """
 
 from raiki_sdk.base import AuthenticateBase, AuthResult
-from raiki_sdk.model_packages.rolex.rolex_p01_v1_3.config import (
+from .config import (
     AUTH_WEIGHTS, AUTH_NUM_CLASSES,
     AUTH_MODEL_NAME, AUTH_MODEL_VERSION,
     YOLO_MODEL_VERSION, AUTH_CLASS_LABELS)
-from raiki_sdk.model_packages.rolex.rolex_p01_v1_3.architecture import EfficientNetLoG
-from raiki_sdk.model_packages.rolex.rolex_p01_v1_3.preprocessor import get_transform
+from .architecture import EfficientNetLoG
+from .preprocessor import get_transform
 import torch
 from typing import Tuple
 from PIL import Image

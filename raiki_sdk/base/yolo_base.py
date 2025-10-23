@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 import numpy as np
 from PIL import Image
-from raiki_sdk.base.schemas import YoloResult, YoloValidation
+from .schemas import YoloResult, YoloValidation
 
 
 class YoloBase(ABC):

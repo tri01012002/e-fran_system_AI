@@ -14,7 +14,10 @@ from raiki_sdk.base import (
     ClassificationResultProb,
     YoloResult,
     YoloValidation,
-    # RedFrameResult,
+    IqaResult,
+    RedFrameResult,
+    ClassificatorBase,
+    IqaBase,
 )
 
 from raiki_sdk.preprocessing import (
@@ -28,14 +31,14 @@ from raiki_sdk.preprocessing import (
 )
 
 from raiki_sdk.core import registry
-
+from raiki_sdk.config import FOLDER_CACHE_MODEL_HF, HF_TOKEN
 from raiki_sdk.core.registry import (
     AuthFeature,
     ClassificationFeature
 )
-# from raiki_sdk.services import RedFrameService
+from raiki_sdk.services import get_redframe_service, LIQEServices, LIQECustomServices
 
-def get_auth_model(category: str, part: str, model_version: str, device: str) -> AuthFeature:
+def get_auth_feature(category: str, part: str, model_version: str, device: str) -> AuthFeature:
     """
     Load specific authentication model version on-demand.    
     
@@ -52,9 +55,9 @@ def get_auth_model(category: str, part: str, model_version: str, device: str) ->
         >>> detector = model.detector
         >>> authenticator = model.authenticator
     """
-    return registry.get_model(category, part, model_version, device)
+    return registry.get_auth_feature(category, part, model_version, device)
 
-def get_classifier_model(category: str, part: str, model_version: str, device: str) -> ClassificationFeature:
+def get_classification_feature(category: str, part: str, model_version: str, device: str) -> ClassificationFeature:
     """
     Load specific classifier model version on-demand.    
     
@@ -70,7 +73,7 @@ def get_classifier_model(category: str, part: str, model_version: str, device: s
         >>> model = get_classifier_model("rolex", "P00", "v1_1", "cuda")
         >>> classifier = model.classifier
     """
-    return registry.get_model(category, part, model_version, device)
+    return registry.get_classification_feature(category, part, model_version, device)
 
 
 def list_models() -> dict:
@@ -94,11 +97,19 @@ def list_available_models() -> list:
 __all__ = [
     # Base classes
     "AuthenticateBase",
+    "FOLDER_CACHE_MODEL_HF",
+    "HF_TOKEN",
     "YoloBase",
+    "ClassificatorBase",
+    "IqaBase",
     # Schemas
     "AuthResult",
     "YoloResult",
     "YoloValidation",
+    "ClassificationResultModel",
+    "ClassificationResultProb",
+    "IqaResult",
+    "RedFrameResult",
     # Preprocessing
     "resize_pwd",
     "padding_crop_yolo",
@@ -112,8 +123,11 @@ __all__ = [
     "get_classifier_model",
     "list_models",
     "list_available_models",
-    "registry",
+    "get_auth_feature",
+    "get_classification_feature",
     # Services
-    # "RedFrameService",
+    "get_redframe_service",
+    "LIQEServices",
+    "LIQECustomServices",
 ]
 
