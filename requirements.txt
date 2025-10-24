@@ -7,3 +7,8 @@ ultralytics>=8.3.208
 xgboost==3.1.1
 joblib==1.5.2
 pandas==2.3.3
+git+https://github.com/mapillary/inplace_abn.git@b50bfe9c7cd7116a3ab091a352b48d6ba5ee701c
+git+https://gitlab.com/dat.tram/tresnet-utils.git
+# uvicorn==0.37.0
+# fastapi==0.119.0
+# python-multipart==0.0.20
