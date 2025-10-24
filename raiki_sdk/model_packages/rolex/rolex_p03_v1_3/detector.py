@@ -20,39 +20,22 @@ class RolexP03Detector(YoloBase):
         self.output_size = 224
         self.color_padding = (85, 85, 85)
 
-    def yolo_detect(self, image, frame=None, iqa=True):
+    def yolo_detect(self, image) -> YoloResult:
         img_input_yolo_cv2 = image
         img_input_yolo_pil = Image.fromarray(cv2.cvtColor(img_input_yolo_cv2, cv2.COLOR_BGR2GRAY))
 
         results = self.model.predict(source=img_input_yolo_pil, verbose=False, show=False, save=False,
                                      save_crop=False, conf=self.yolo_conf, line_width=0,
                                      show_labels=False, show_conf=False, imgsz=self.yolo_imgsz)
-        # validation = self.validate(results, frame)
-        #
-        # if not validation.is_valid:
-        #     return False
-        #
-        # self.position = validation.position
-        #
-        # img_padding_yolo_cv2 = padding_crop_yolo(img_input_yolo_cv2, self.position, p=0)
-        #
-        # self.image_detect = self.resize_pwd_training_compatible(
-        #     img_padding_yolo_cv2,
-        #     output_size=self.output_size,
-        #     color_padding=self.color_padding
-        # )
-        #
-        # if iqa:
-        #     self.iqa_image = img_padding_yolo_cv2
 
-        return results
+        return results[0]
 
-    def validate(self, yolo_results, frame=None):
-        boxesn = yolo_results[0].boxes.xyxyn.cpu().numpy()
-        classes = yolo_results[0].boxes.cls.cpu().to(torch.int).numpy()
+    def validate(self, yolo_results: YoloResult) -> YoloValidation:
+        boxesn = yolo_results.boxes.xyxyn.cpu().numpy()
+        classes = yolo_results.boxes.cls.cpu().to(torch.int).numpy()
 
         for i in range(len(classes)):
-            if (classes[i] == 1 and yolo_results[0].boxes[i].conf < 0.55):
+            if (classes[i] == 1 and yolo_results.boxes[i].conf < 0.55):
                 return False, {}
 
         bbox_class_inner = [boxesn[i] for i in range(len(classes)) if classes[i] == 0]
@@ -73,13 +56,9 @@ class RolexP03Detector(YoloBase):
                         p03_boxesn.append(
                             [max(0, x_min2 - p), max(0, y_min2 - p), min(x_max2 + p, 1), min(1, y_max2 + p)])
 
-        if frame:
-            p03_boxesn = [boxn for boxn in p03_boxesn if
-                          boxn[0] > frame[0] and boxn[1] > frame[1] and boxn[2] < frame[2] and boxn[3] < frame[3]]
-
         if len(p03_boxesn) > 0:
             valid = True
-            image_h, image_w = yolo_results[0].boxes.orig_shape
+            image_h, image_w = yolo_results.boxes.orig_shape
             x1n, y1n, x2n, y2n = p03_boxesn[0]
             x1, y1, x2, y2 = int(x1n * image_w), int(y1n * image_h), int(x2n * image_w), int(y2n * image_h)
             position = [x1, y1, x2, y2]
@@ -92,23 +71,3 @@ class RolexP03Detector(YoloBase):
 
     def run_pipeline(self, image: any, is_crop: bool = True) -> YoloValidation:
         return super().run_pipeline(image, is_crop)
-
-    def resize_pwd_training_compatible(self, img, output_size=224, color_padding=(85, 85, 85)):
-        if isinstance(img, Image.Image):
-            img = np.array(img)
-
-        h, w = img.shape[:2]
-
-        scale = min(output_size / h, output_size / w)
-        new_h, new_w = int(h * scale), int(w * scale)
-
-        img_resized = cv2.resize(img, (new_w, new_h), interpolation=cv2.INTER_LINEAR)
-
-        canvas = np.full((output_size, output_size, 3), color_padding, dtype=np.uint8)
-
-        y_offset = (output_size - new_h) // 2
-        x_offset = (output_size - new_w) // 2
-
-        canvas[y_offset:y_offset + new_h, x_offset:x_offset + new_w] = img_resized
-
-        return canvas

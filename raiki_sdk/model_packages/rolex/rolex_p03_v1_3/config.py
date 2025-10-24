@@ -36,5 +36,5 @@ PART = "P03"
 PACKAGE_NAME = "rolex_p03_v1_3"
 
 # YOLO parameters
-YOLO_CONF = 0.55
+YOLO_CONF = 0.25
 YOLO_IMGSZ = 640
