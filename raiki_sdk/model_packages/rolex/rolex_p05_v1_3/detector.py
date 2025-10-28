@@ -1,5 +1,5 @@
 from raiki_sdk.base import YoloBase, YoloResult, YoloValidation
-from raiki_sdk.preprocessing import padding_crop_yolo
+from raiki_sdk.preprocessing import padding_crop_yolo, resize_pwd
 from ultralytics import YOLO
 from .config import YOLO_WEIGHTS, YOLO_CONF, YOLO_IMGSZ
 from PIL import Image
@@ -52,7 +52,12 @@ class RolexP05Detector(YoloBase):
 
     def crop(self, image, position) -> Image.Image:
         cropped_image = padding_crop_yolo(image, position)
-        return Image.fromarray(cv2.cvtColor(image, cv2.COLOR_BGR2RGB))
+        self.image_detect = resize_pwd(
+            cropped_image,
+            output_size=self.output_size,
+            color_padding=self.color_padding
+        )
+        return Image.fromarray(cv2.cvtColor(self.image_detect, cv2.COLOR_BGR2RGB))
 
     def run_pipeline(self, image: any, is_crop: bool = True) -> YoloValidation:
         return super().run_pipeline(image, is_crop)
