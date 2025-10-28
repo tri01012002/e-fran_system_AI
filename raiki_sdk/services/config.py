@@ -42,6 +42,7 @@ def get_redframe_model_path(category: str, part: str) -> str:
         ("rolex", "p03"): ROLEX_P03_XGB,
     }
     key = (category.lower(), part.lower())
-    if key not in MODEL_REGISTRY:
-        raise ValueError(f"Model không tồn tại cho {category} - {part}")
+    model_path = MODEL_REGISTRY[key]
+    if model_path is None:
+        print(f"[INFO] Model không tồn tại cho {category} - {part}, skipping")
     return MODEL_REGISTRY[key]

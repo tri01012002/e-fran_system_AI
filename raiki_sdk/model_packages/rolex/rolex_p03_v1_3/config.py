@@ -20,7 +20,7 @@ AUTH_WEIGHTS = download_file_from_hf(
 
 # AUTH parameters
 TARGET_SIZE = 256
-AUTH_MODEL_NAME = "tf_efficientnet_b4_ns"
+AUTH_MODEL_NAME = "EfficientNet_V2_S_Weights.IMAGENET1K_V1"
 AUTH_NUM_CLASSES = 3
 AUTH_CLASS_LABELS = [
     'fake',
