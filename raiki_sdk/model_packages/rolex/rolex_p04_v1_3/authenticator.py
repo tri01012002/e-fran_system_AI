@@ -34,17 +34,17 @@ class RolexP04Authenticator(AuthenticateBase):
             device: Device to run model on (cuda/cpu)
         """
         self.device = device
-        self.model_1 = GGNet_P04(checkpoint=AUTH_WEIGHTS_1,device=device).to(self.device)
-        self.model_2 = create_rolex_model(num_classes=3,checkpoint=AUTH_WEIGHTS_2, device=device).to(self.device).eval()
+        self.model_1 = GGNet_P04(checkpoint=AUTH_WEIGHTS_1,device=self.device).to(self.device).eval()
+        self.model_2 = create_rolex_model(num_classes=3,checkpoint=AUTH_WEIGHTS_2, device=self.device).to(self.device).eval()
 
         self.transform = get_transform()
 
         self.metadata = {
             "auth_model_1_name": AUTH_MODEL_1_NAME,
-            "auth_model_1_num_classes": AUTH_MODEL_1_NUM_CLASSES,
+            "auth_model_1_classes": AUTH_MODEL_1_CLASS_LABELS,
             "auth_model_1_version": AUTH_MODEL_1_VERSION,
             "auth_model_2_name": AUTH_MODEL_2_NAME,
-            "auth_model_2_num_classes": AUTH_MODEL_2_NUM_CLASSES,
+            "auth_model_2_classes": AUTH_MODEL_2_CLASS_LABELS,
             "auth_model_2_version": AUTH_MODEL_2_VERSION,
             "yolo_model_version": YOLO_MODEL_VERSION
         }
@@ -64,8 +64,10 @@ class RolexP04Authenticator(AuthenticateBase):
             tensor_image_1 = self.transform(image).unsqueeze(0).to(self.device)
             probs_1 = self.model_1(tensor_image_1.float(), flag="val")
             result_1 = torch.softmax(probs_1, dim=-1)
+            # print(f"RolexP04: result_1: {result_1}")
             probs_sm_1, labels_p1 = self.get_prob(result_1)
             metadata = self.metadata
+            # print(f"RolexP04: probs_v1: {probs_sm_1}, labels_p1: {labels_p1}")
 
             # Check if the first model predicts 'real' and real_prob => Use model_auth_v2
             if labels_p1 == "real" and probs_sm_1 >= 0.8:
@@ -78,6 +80,8 @@ class RolexP04Authenticator(AuthenticateBase):
                     max_prob, predicted_index = torch.max(probs_2, dim=1)
                     predicted_index = predicted_index.item()
                     max_prob = max_prob.item()
+
+                    # print(f"RolexP04: probs_v2: {max_prob}, index_v2: {AUTH_MODEL_2_CLASS_LABELS[predicted_index]}")
 
                 if predicted_index == 0:  # "broken"
                     final_prob = probs_sm_1 * 0.7 if probs_sm_1 > 0.9 else probs_sm_1 * 0.75
@@ -96,11 +100,8 @@ class RolexP04Authenticator(AuthenticateBase):
     def get_prob(self, probs: torch.Tensor) -> Tuple[float, str]:
         _, index = torch.max(probs, 1)
         label = AUTH_MODEL_1_CLASS_LABELS[index]
-        # if index == 0:
-        #     return min(0.5, 1 - probs[0][0].item()), label
+        # print(f"Probs: {1 - probs[0][0].item()}")
         return 1 - probs[0][0].item(), label
-        # index = torch.argmax(probs, -1)
-        # return probs[1].item(), P04_CLASSES[index]
 
     def generate_heatmap(self) -> Image.Image:
         pass

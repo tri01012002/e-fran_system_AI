@@ -23,8 +23,15 @@ class RedFrameService:
         """Initialize RedFrameService."""
         self.category = category
         self.part = part
-        self.model_path = get_redframe_model_path(self.category.lower(), self.part.lower())
-        self.model_redframe: Booster = joblib.load(self.model_path)
+        self.model_path = None
+        self.model_redframe = None
+
+        if advanced_mode:
+            self.model_path = get_redframe_model_path(self.category.lower(), self.part.lower())
+
+        if self.model_path:
+            self.model_redframe: Booster = joblib.load(self.model_path)
+            
         self.class_labels = class_labels
 
         if "good" not in self.class_labels:

@@ -19,7 +19,7 @@ async def check_part_test(
 ):
     try:
         # 1. Get model from registry
-        model_package = get_auth_feature(category, part, model_version, device="mps")
+        model_package = get_auth_feature(category, part, model_version, device="cuda")
         print(f"Model package: {model_package}")
         detector = model_package.detector
         authenticator = model_package.authenticator
@@ -69,8 +69,8 @@ async def check_part_test(
         print(f"[/check/ {category} - {part}] - Validation ok")
 
         # 5. Check Red Frame
-        redframe_service = get_redframe_service(category, part, advanced_mode=True, device="mps", threshold=3.2)
-        redframe_result = redframe_service.forward(image, frame, position, detector.crop)
+        redframe_service = get_redframe_service(category, part, advanced_mode=False, device="cuda", threshold=3.2)
+        redframe_result = redframe_service.forward(image, frame, position)
         print(f"Red Frame result: {redframe_result}")
 
         # 5. Crop detector region
