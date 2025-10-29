@@ -1,5 +1,5 @@
 """
-Image Preprocessing for Rolex P01
+Image Preprocessing for Rolex P02
 
 Handles image transformations and preprocessing.
 Uses raiki-sdk preprocessing utilities.

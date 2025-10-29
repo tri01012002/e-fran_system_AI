@@ -2,11 +2,10 @@
 YOLO Detector for Rolex P02
 
 Handles object detection logic using YOLO model.
-Migrated from dependencies/rolex/Rolex_P02.py
 """
 
 from raiki_sdk import YoloBase, YoloResult, YoloValidation
-from raiki_sdk import resize_pwd, padding_crop_yolo
+from raiki_sdk import padding_crop_yolo
 from ultralytics import YOLO
 from .config import YOLO_WEIGHTS, YOLO_CONF, YOLO_IMGSZ
 from PIL import Image

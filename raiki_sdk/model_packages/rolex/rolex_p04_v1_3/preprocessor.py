@@ -6,8 +6,6 @@ Uses raiki-sdk preprocessing utilities.
 """
 
 from torchvision import transforms
-from .config import TARGET_SIZE
-
 
 def get_transform():
     """

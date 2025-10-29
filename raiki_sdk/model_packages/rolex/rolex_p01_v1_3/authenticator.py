@@ -2,7 +2,6 @@
 Authenticator for Rolex P01
 
 Handles authentication logic using trained model.
-Migrated from features/rolex/RolexP01.py
 """
 
 from raiki_sdk.base import AuthenticateBase, AuthResult
@@ -41,7 +40,7 @@ class RolexP01Authenticator(AuthenticateBase):
 
         self.metadata = {
             "auth_model_name": AUTH_MODEL_NAME,
-            "auth_num_classes": AUTH_NUM_CLASSES,
+            "auth_class_labels": AUTH_CLASS_LABELS,
             "auth_model_version": AUTH_MODEL_VERSION,
             "yolo_model_version": YOLO_MODEL_VERSION
         }

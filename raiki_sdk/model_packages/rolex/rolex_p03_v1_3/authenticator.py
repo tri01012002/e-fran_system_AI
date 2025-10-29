@@ -2,7 +2,6 @@
 Authenticator for Rolex P01
 
 Handles authentication logic using trained model.
-Migrated from features/rolex/RolexP01.py
 """
 
 from raiki_sdk.base import AuthenticateBase, AuthResult
@@ -31,13 +30,13 @@ class RolexP03Authenticator(AuthenticateBase):
             device: Device to run model on (cuda/cpu)
         """
         self.device = device
-        self.model = create_rolex_model(num_classes=3,checkpoint=AUTH_WEIGHTS, device=device).to(self.device).eval()
+        self.model = create_rolex_model(num_classes=AUTH_NUM_CLASSES,checkpoint=AUTH_WEIGHTS, device=device).to(self.device).eval()
 
         self.transform = get_transform()
 
         self.metadata = {
             "auth_model_name": AUTH_MODEL_NAME,
-            "auth_num_classes": AUTH_NUM_CLASSES,
+            "auth_class_labels": AUTH_CLASS_LABELS,
             "auth_model_version": AUTH_MODEL_VERSION,
             "yolo_model_version": YOLO_MODEL_VERSION
         }

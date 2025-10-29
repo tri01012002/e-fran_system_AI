@@ -2,7 +2,6 @@
 YOLO Detector for Rolex P01
 
 Handles object detection logic using YOLO model.
-Migrated from dependencies/rolex/Rolex_P01.py
 """
 
 from raiki_sdk.base import YoloBase, YoloResult, YoloValidation

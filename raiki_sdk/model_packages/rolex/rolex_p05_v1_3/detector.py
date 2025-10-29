@@ -1,11 +1,9 @@
 from raiki_sdk.base import YoloBase, YoloResult, YoloValidation
 from raiki_sdk.preprocessing import padding_crop_yolo, resize_pwd
 from ultralytics import YOLO
-from .config import YOLO_WEIGHTS, YOLO_CONF, YOLO_IMGSZ
+from .config import YOLO_WEIGHTS, YOLO_CONF, YOLO_IMGSZ, TARGET_SIZE, COLOR_PADDING
 from PIL import Image
 import cv2
-import numpy as np
-import torch
 
 
 class RolexP05Detector(YoloBase):
@@ -14,11 +12,10 @@ class RolexP05Detector(YoloBase):
         self.model = YOLO(YOLO_WEIGHTS).to(device)
         self.yolo_conf = YOLO_CONF
         self.yolo_imgsz = YOLO_IMGSZ
-        self.position = {}
         self.image_detect = None
         self.iqa_image = None
-        self.output_size = 224
-        self.color_padding = (85, 85, 85)
+        self.output_size = TARGET_SIZE
+        self.color_padding = COLOR_PADDING
 
     def yolo_detect(self, image) -> YoloResult:
         img_input_yolo_cv2 = image

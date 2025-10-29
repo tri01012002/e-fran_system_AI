@@ -1,5 +1,5 @@
 """
-Image Preprocessing for Rolex P01
+Image Preprocessing for Rolex P05
 
 Handles image transformations and preprocessing.
 Uses raiki-sdk preprocessing utilities.
@@ -11,7 +11,7 @@ from .config import TARGET_SIZE
 
 def get_transform():
     """
-    Get image transformation pipeline for Rolex P01
+    Get image transformation pipeline for Rolex P05
 
     Returns:
         Transform pipeline

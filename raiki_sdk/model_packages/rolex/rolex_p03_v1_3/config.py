@@ -1,5 +1,5 @@
 """
-Configuration for Rolex P01 Model
+Configuration for Rolex P03 Model
 """
 from raiki_sdk.utils.hf_lib import download_file_from_hf
 # Model version

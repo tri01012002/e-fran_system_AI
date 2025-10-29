@@ -2,12 +2,11 @@
 Authenticator for Rolex P04
 
 Handles authentication logic using trained model.
-Migrated from features/rolex/RolexP01.py
 """
 
 from raiki_sdk.base import AuthenticateBase, AuthResult
 from .config import (
-    AUTH_WEIGHTS_1,AUTH_WEIGHTS_2, AUTH_MODEL_1_NUM_CLASSES, AUTH_MODEL_2_NUM_CLASSES,
+    AUTH_WEIGHTS_1,AUTH_WEIGHTS_2, AUTH_MODEL_2_NUM_CLASSES,
     AUTH_MODEL_1_NAME, AUTH_MODEL_1_VERSION, AUTH_MODEL_2_NAME, AUTH_MODEL_2_VERSION,
     YOLO_MODEL_VERSION, AUTH_MODEL_1_CLASS_LABELS, AUTH_MODEL_2_CLASS_LABELS,
     AUTH_MODEL_2_NAME, AUTH_MODEL_2_VERSION, AUTH_MODEL_2_NUM_CLASSES)
@@ -21,7 +20,7 @@ import cv2
 
 class RolexP04Authenticator(AuthenticateBase):
     """
-    Authentication model for Rolex P01
+    Authentication model for Rolex P04
     """
 
     def __init__(self, device: str):
@@ -29,13 +28,16 @@ class RolexP04Authenticator(AuthenticateBase):
         Initialize authenticator
 
         Args:
-            model: RolexP01Architecture instance
+            model: RolexP04Architecture instance
             transform: Image transformation pipeline
             device: Device to run model on (cuda/cpu)
         """
         self.device = device
         self.model_1 = GGNet_P04(checkpoint=AUTH_WEIGHTS_1,device=self.device).to(self.device).eval()
-        self.model_2 = create_rolex_model(num_classes=3,checkpoint=AUTH_WEIGHTS_2, device=self.device).to(self.device).eval()
+        self.model_2 = create_rolex_model(
+            num_classes=AUTH_MODEL_2_NUM_CLASSES,
+            checkpoint=AUTH_WEIGHTS_2, 
+            device=self.device).to(self.device).eval()
 
         self.transform = get_transform()
 
@@ -51,7 +53,7 @@ class RolexP04Authenticator(AuthenticateBase):
 
     def forward(self, image: Image.Image) -> AuthResult:
         """
-        Authenticate Rolex P01 part
+        Authenticate Rolex P04 part
 
         Args:
             image: Image.Image

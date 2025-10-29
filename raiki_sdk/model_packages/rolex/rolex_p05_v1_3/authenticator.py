@@ -1,15 +1,14 @@
 """
-Authenticator for Rolex P01
+Authenticator for Rolex P05
 
 Handles authentication logic using trained model.
-Migrated from features/rolex/RolexP01.py
 """
 
 from raiki_sdk.base import AuthenticateBase, AuthResult
 from .config import (
-    AUTH_WEIGHTS, AUTH_NUM_CLASSES,
+    AUTH_WEIGHTS, AUTH_CLASS_LABELS,
     AUTH_MODEL_NAME, AUTH_MODEL_VERSION,
-    YOLO_MODEL_VERSION, AUTH_CLASS_LABELS)
+    YOLO_MODEL_VERSION, AUTH_NUM_CLASSES)
 from .architecture import Maxvit
 from .preprocessor import get_transform
 import torch
@@ -18,7 +17,7 @@ from PIL import Image
 
 class RolexP05Authenticator(AuthenticateBase):
     """
-    Authentication model for Rolex P01
+    Authentication model for Rolex P05
     """
 
     def __init__(self, device: str):
@@ -26,25 +25,25 @@ class RolexP05Authenticator(AuthenticateBase):
         Initialize authenticator
 
         Args:
-            model: RolexP01Architecture instance
+            model: RolexP05Architecture instance
             transform: Image transformation pipeline
             device: Device to run model on (cuda/cpu)
         """
         self.device = device
-        self.model = Maxvit(num_classes=4,checkpoint=AUTH_WEIGHTS, device=device).to(self.device).eval()
+        self.model = Maxvit(num_classes=AUTH_NUM_CLASSES,checkpoint=AUTH_WEIGHTS, device=device).to(self.device).eval()
 
         self.transform = get_transform()
 
         self.metadata = {
             "auth_model_name": AUTH_MODEL_NAME,
-            "auth_num_classes": AUTH_NUM_CLASSES,
+            "auth_class_labels": AUTH_CLASS_LABELS,
             "auth_model_version": AUTH_MODEL_VERSION,
             "yolo_model_version": YOLO_MODEL_VERSION
         }
 
     def forward(self, image: Image.Image) -> AuthResult:
         """
-        Authenticate Rolex P01 part
+        Authenticate Rolex P05 part
 
         Args:
             image: Image.Image

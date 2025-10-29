@@ -1,7 +1,7 @@
 """
-Rolex P04 V2 Model Package
+Rolex P04 Model Package
 
-This package provides detector and authenticator for Rolex P04 models version 2.
+This package provides detector and authenticator for Rolex P04 models version 1.3.
 """
 
 def get_detector(device: str):
