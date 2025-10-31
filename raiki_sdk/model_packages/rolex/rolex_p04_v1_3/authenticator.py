@@ -15,8 +15,6 @@ from .preprocessor import get_transform
 import torch
 from typing import Tuple
 from PIL import Image
-from raiki_sdk.preprocessing import resize_pwd
-import cv2
 
 class RolexP04Authenticator(AuthenticateBase):
     """

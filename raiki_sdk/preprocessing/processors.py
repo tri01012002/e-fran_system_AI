@@ -90,7 +90,7 @@ def remove_white_padding(image: np.ndarray, threshold: int = 250) -> np.ndarray:
     # Crop the image to remove white padding
     return image[top:bottom, left:right]
 
-def padding_crop_yolo(image: np.ndarray, position: list[int], p: int = 0, remove_padding: bool = False) -> np.ndarray:
+def padding_crop_yolo(image: np.ndarray, position: list[int], p: int = 0, rotate_180: bool = False, remove_padding: bool = False) -> np.ndarray:
     """
     Pad the image based on the position and return the padded image.
 
@@ -98,24 +98,43 @@ def padding_crop_yolo(image: np.ndarray, position: list[int], p: int = 0, remove
         image: np.ndarray (cv2) BGR image
         position: list [x1, y1, x2, y2] in pixel (not normalized)
         p: padding ratio
+        rotate_180: whether to rotate the image 180 degrees
         remove_padding: whether to remove white padding
 
     Returns:
         Padded image
     """
 
+    if len(position) != 4:
+        raise ValueError("position must have 4 elements [x1, y1, x2, y2]")
+
     x1, y1, x2, y2 = position
+    if x1 >= x2 or y1 >= y2:
+        raise ValueError("Invalid coordinates: x1 < x2 and y1 < y2 required")
+    
     if p<1: px,py = int((x2 - x1) * p), int((y2 - y1) * p)
     else: px,py = p,p  
 
-    height, width, _ = image.shape
+    if len(image.shape) == 2:
+        height, width = image.shape
+        # Handle grayscale
+    else:
+        height, width, _ = image.shape
+
     x1 = max(0, x1 - px)
     y1 = max(0, y1 - py)
     x2 = min(width, x2 + px)
     y2 = min(height, y2 + py)
+    
+    # Ensure valid crop coordinates after padding
+    if x1 >= x2 or y1 >= y2:
+        raise ValueError(f"Invalid crop coordinates after padding: x1={x1}, y1={y1}, x2={x2}, y2={y2}")
+    
     cropped_img = image[y1:y2, x1:x2]
     if remove_padding:
         cropped_img = remove_white_padding(cropped_img)
+    if rotate_180:
+        cropped_img = cv2.rotate(cropped_img, cv2.ROTATE_180)
     return cropped_img
 
 class AdaptiveResize(object):
