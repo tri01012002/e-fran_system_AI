@@ -42,3 +42,6 @@ PACKAGE_NAME = "lv_p03_v1_2"
 # YOLO parameters
 YOLO_CONF = 0.50
 YOLO_IMGSZ = 640
+
+# Crop Parameters
+PAD = 50

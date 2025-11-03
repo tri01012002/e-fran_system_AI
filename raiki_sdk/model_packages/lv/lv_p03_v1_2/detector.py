@@ -7,7 +7,7 @@ Handles object detection logic using YOLO model.
 from raiki_sdk import YoloBase, YoloResult, YoloValidation
 from raiki_sdk import resize_pwd, padding_crop_yolo
 from ultralytics import YOLO
-from .config import YOLO_WEIGHTS_1, YOLO_WEIGHTS_2, YOLO_CONF, YOLO_IMGSZ
+from .config import YOLO_WEIGHTS_1, YOLO_WEIGHTS_2, YOLO_CONF, YOLO_IMGSZ, PAD
 from PIL import Image
 import cv2
 import logging
@@ -108,7 +108,7 @@ class LVP03Detector(YoloBase):
         Returns:
             image: Image.Image (PIL) cropped image
         """
-        cropped_image = padding_crop_yolo(image, position, p=0, remove_padding=True)
+        cropped_image = padding_crop_yolo(image, position, p=PAD, remove_padding=True)
         return Image.fromarray(cv2.cvtColor(cropped_image, cv2.COLOR_BGR2RGB))
 
     def run_pipeline(self, image:  any, is_crop: bool = True) -> YoloValidation:

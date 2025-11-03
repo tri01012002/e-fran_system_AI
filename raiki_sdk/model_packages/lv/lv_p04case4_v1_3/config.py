@@ -4,7 +4,7 @@ Configuration for Louis Vuitton P04 Case 4 Models Version 1.4
 from raiki_sdk.utils import download_file_from_hf
 
 # Model version
-AUTH_MODEL_VERSION = "v1_4"
+AUTH_MODEL_VERSION = "v1_3"
 YOLO_MODEL_VERSION = "v1_2"
 
 # Model weights paths (relative to package root or absolute)

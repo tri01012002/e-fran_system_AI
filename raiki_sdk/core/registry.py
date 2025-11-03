@@ -3,7 +3,7 @@ from typing import Dict, Optional, List, Callable, Any
 from dataclasses import dataclass
 import importlib
 from pathlib import Path
-from raiki_sdk.core import _normalize_version_str, _normalize_category_str
+from raiki_sdk.core import _normalize_version_str, _normalize_category_str, _normalize_part_str
 import logging
 from pydantic import BaseModel
 from raiki_sdk.base import AuthenticateBase, YoloBase, ClassificatorBase
@@ -48,8 +48,11 @@ class ModelRegistry:
     def _construct_package_path(self, category: str, part: str, version: str) -> tuple[str, str]:
         """Construct the import path for a model package"""
         version = _normalize_version_str(version)
+        category = _normalize_category_str(category)
+        part = _normalize_part_str(part)
 
         package_name = f"{category}_{part}_{version}".lower()
+        print(f"package_name: {package_name}")
         return f"raiki_sdk.model_packages.{category}.{package_name}", package_name
 
     def _load_model_package(self, category: str, part: str, version: str) -> ModelInfo:
@@ -88,8 +91,8 @@ class ModelRegistry:
             raise e
 
     def _get_load_model_info(self, category: str, part: str, version: str, device: str) -> ModelInfo:
-        category = _normalize_category_str(category)
         _, key = self._construct_package_path(category, part, version)
+        print(f"category: {category}, part: {part}, version: {version}, key: {key}")
 
         # if part.lower() != "p00":
         #     raise ValueError(f"Only P00 is supported for classifier models, got {part}")

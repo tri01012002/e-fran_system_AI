@@ -8,7 +8,7 @@ from raiki_sdk.base import AuthenticateBase, AuthResult
 from .config import (
     AUTH_WEIGHTS, AUTH_NUM_CLASSES,
     AUTH_MODEL_NAME, AUTH_MODEL_VERSION,
-    YOLO_MODEL_VERSION, AUTH_CLASS_LABELS)
+    YOLO_MODEL_1_VERSION, YOLO_MODEL_2_VERSION, AUTH_CLASS_LABELS)
 from .architecture import Network_Wrapper
 from .preprocessor import get_transform
 from raiki_sdk.utils import map_generate, highlight_im
@@ -42,7 +42,8 @@ class LVP04Authenticator(AuthenticateBase):
             "auth_model_name": AUTH_MODEL_NAME,
             "auth_class_labels": AUTH_CLASS_LABELS,
             "auth_model_version": AUTH_MODEL_VERSION,
-            "yolo_model_version": YOLO_MODEL_VERSION
+            "yolo_model_1_version": YOLO_MODEL_1_VERSION,
+            "yolo_model_2_version": YOLO_MODEL_2_VERSION
         }
 
     def _load_model(self, weights_path: str) -> Network_Wrapper:
@@ -148,7 +149,7 @@ class LVP04Authenticator(AuthenticateBase):
             # Calculate average confidence
             average_conf = sum(pred[1] for pred in new_pred_list) / len(new_pred_list)
 
-            if int(pred_main) == 0:
+            if int(pred_main) in [0,1]:
                 return AuthResult(probability=1-average_conf, label=AUTH_CLASS_LABELS[int(pred_main)], metadata=metadata)
 
             return AuthResult(probability=average_conf, label=AUTH_CLASS_LABELS[int(pred_main)], metadata=metadata)

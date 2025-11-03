@@ -85,9 +85,9 @@ class LVP02Authenticator(AuthenticateBase):
         metadata = self.metadata
 
         with torch.inference_mode():
-            tensor_image = self.transform(image).unsqueeze(0).to(self.device)
+            scource = self.transform(image).unsqueeze(0).to(self.device)
 
-            output1, output2, output3, output_concat, map1, map2, map3 = self.model(tensor_image)
+            output1, output2, output3, output_concat, map1, map2, map3 = self.model(scource)
 
             # Generate attention maps using the same logic as training/testing
             p1 = self.model.state_dict()['classifier3.1.weight']
@@ -103,13 +103,13 @@ class LVP02Authenticator(AuthenticateBase):
             att_map_1 = map_generate(map1, output1, p1, p2)
 
             # Apply attention to input image
-            inputs_ATT = highlight_im(tensor_image, att_map_1, att_map_2, att_map_3)
+            inputs_ATT = highlight_im(scource, att_map_1, att_map_2, att_map_3)
             output_1_ATT, output_2_ATT, output_3_ATT, output_concat_ATT, _, _, _ = self.model(inputs_ATT)
 
             # Combine predictions (same as in test function)
             outputs_com2 = output1 + output2 + output3 + output_concat
             outputs_com = outputs_com2 + output_1_ATT + output_2_ATT + output_3_ATT + output_concat_ATT
-
+            
             # Use combined prediction as the main prediction
             main_output = outputs_com
 
@@ -120,7 +120,7 @@ class LVP02Authenticator(AuthenticateBase):
             pred_concat = torch.argmax(output_concat, dim=1).cpu().numpy()[0]
             pred_main = torch.argmax(main_output, dim=1).cpu().numpy()[0]
 
-            # print(f"pred1: {int(pred1)}, pred2: {int(pred2)}, pred3: {int(pred3)}, pred_concat: {int(pred_concat)}, pred_main: {int(pred_main)}")
+            print(f"pred1: {int(pred1)}, pred2: {int(pred2)}, pred3: {int(pred3)}, pred_concat: {int(pred_concat)}, pred_main: {int(pred_main)}")
 
             # Apply softmax to get probabilities
             prob1 = torch.softmax(output1, dim=1).cpu().numpy()[0]
@@ -129,15 +129,15 @@ class LVP02Authenticator(AuthenticateBase):
             prob_concat = torch.softmax(output_concat, dim=1).cpu().numpy()[0]
             prob_main = torch.softmax(main_output, dim=1).cpu().numpy()[0]
 
-            # print(f"prob1: {float(np.max(prob1))}, prob2: {float(np.max(prob2))}, prob3: {float(np.max(prob3))}, prob_concat: {float(np.max(prob_concat))}, prob_main: {float(np.max(prob_main))}")
+            print(f"prob1: {float(np.max(prob1))}, prob2: {float(np.max(prob2))}, prob3: {float(np.max(prob3))}, prob_concat: {float(np.max(prob_concat))}, prob_main: {float(np.max(prob_main))}")
 
             # Create pair of prediction list of tuple. e.g: [(pred1_cls, conf_pred1),...]
-            pred_list = [(int(pred1), float(np.max(prob1))),
-                         (int(pred2), float(np.max(prob2))),
-                         (int(pred3), float(np.max(prob3))),
-                         (int(pred_concat), float(np.max(prob_concat))),
+            pred_list = [(int(pred1), float(np.max(prob1))), 
+                         (int(pred2), float(np.max(prob2))), 
+                         (int(pred3), float(np.max(prob3))), 
+                         (int(pred_concat), float(np.max(prob_concat))), 
                          (int(pred_main), float(np.max(prob_main)))]
-
+            
             # Create new pair of prediction list of tuple if all pred equal pred_main
 
             new_pred_list = []
@@ -147,10 +147,9 @@ class LVP02Authenticator(AuthenticateBase):
 
             # Calculate average confidence
             average_conf = sum(pred[1] for pred in new_pred_list) / len(new_pred_list)
-
-            if int(pred_main) == 0:
+            
+            if int(pred_main) in [1,3,5,7]:
                 return AuthResult(probability=1-average_conf, label=AUTH_CLASS_LABELS[int(pred_main)], metadata=metadata)
-
             return AuthResult(probability=average_conf, label=AUTH_CLASS_LABELS[int(pred_main)], metadata=metadata)
 
     def get_prob(self, probs) -> Tuple[float, str]:

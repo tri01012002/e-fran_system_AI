@@ -20,6 +20,18 @@ def _normalize_version_str(version: str) -> str:
     except Exception as e:
         raise ValueError(f"Error normalizing version '{version}': {e}")
 
+def _normalize_part_str(part: str) -> str:
+    """Ensure part normalization
+    # e.g. - "LV_P01" => "p01", "ROLEX_P01" => "p01"
+    """
+    try:
+        if "_" in part:
+            return part.split("_")[1].lower()
+        else:
+            return part
+    except Exception as e:
+        raise ValueError(f"Error normalizing part '{part}': {e}")
+
 def _normalize_category_str(category: str) -> str:
     """Ensure category normalization
     "bag-lv" => "lv"
