@@ -35,3 +35,6 @@ PACKAGE_NAME = "rolex_p02_v1_4"
 # YOLO parameters
 YOLO_CONF = 0.55
 YOLO_IMGSZ = 640
+
+# Resize parameters
+COLOR_PADDING = (85, 85, 85)

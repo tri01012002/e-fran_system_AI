@@ -34,8 +34,8 @@ class LVP04Case4Detector(YoloBase):
             YoloResult: Detection results
         """
         max_hw = max(image.shape[:2])
-        img_rsed_square = resize_pwd(image, output_size=max_hw, color_padding=COLOR_PADDING)
-        pil_img_rsed_square_gray = Image.fromarray(cv2.cvtColor(img_rsed_square, cv2.COLOR_BGR2GRAY))
+        self.img_rsed_square = resize_pwd(image, output_size=max_hw, color_padding=COLOR_PADDING)
+        pil_img_rsed_square_gray = Image.fromarray(cv2.cvtColor(self.img_rsed_square, cv2.COLOR_BGR2GRAY))
         results = self.model.predict(source=pil_img_rsed_square_gray, verbose=False, show=False, save=False, save_crop=False,
                                         conf=self.yolo_conf, line_width=0, show_labels=False, show_conf=False,
                                         imgsz=self.yolo_imgsz)
@@ -90,10 +90,12 @@ class LVP04Case4Detector(YoloBase):
         Returns:
             image: Image.Image (PIL) cropped image
         """
-        cropped_image = padding_crop_yolo(image, position)
 
-        self.image_detect = resize_pwd(cropped_image, output_size=TARGET_SIZE, color_padding=COLOR_PADDING)
-        return Image.fromarray(cv2.cvtColor(self.image_detect, cv2.COLOR_BGR2RGB))
+        cropped_image = padding_crop_yolo(self.img_rsed_square, position)
+
+        image_detect = resize_pwd(cropped_image, output_size=412, color_padding=COLOR_PADDING)
+        image_detect = Image.fromarray(cv2.cvtColor(image_detect, cv2.COLOR_BGR2RGB))
+        return image_detect
 
     def run_pipeline(self, image:  any, is_crop: bool = True) -> YoloValidation:
         return super().run_pipeline(image, is_crop)

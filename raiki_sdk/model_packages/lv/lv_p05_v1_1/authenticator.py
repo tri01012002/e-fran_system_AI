@@ -68,7 +68,7 @@ class LVP05Authenticator(AuthenticateBase):
         if index in [0,2]:  # fake - must be C
             return min(0.5, 1.0 - probs[index].item()), f"{probs[index]}-{label}"
         elif index in [1,3]:  # real - can be B or C
-            return max(0.6, probs[index].item() * 0.75), f"{probs[index]}-{label}"
+            return max(0.6, probs[index].item()), f"{probs[index]}-{label}"
 
     def generate_heatmap(self) -> Image.Image:
         pass

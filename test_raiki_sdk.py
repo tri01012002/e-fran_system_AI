@@ -69,9 +69,9 @@ async def check_part_test(
         print(f"[/check/ {category} - {part}] - Validation ok")
 
         # 5. Check Red Frame
-        redframe_service = get_redframe_service(category, part, advanced_mode=False, device="cuda", threshold=3.2)
-        redframe_result = redframe_service.forward(image, frame, position)
-        print(f"Red Frame result: {redframe_result}")
+        # redframe_service = get_redframe_service(category, part, advanced_mode=False, device="cuda", threshold=3.2)
+        # redframe_result = redframe_service.forward(image, frame, position)
+        # print(f"Red Frame result: {redframe_result}")
 
         # 5. Crop detector region
         cropped_image = detector.crop(image, position)

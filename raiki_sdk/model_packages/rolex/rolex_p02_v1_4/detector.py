@@ -5,9 +5,9 @@ Handles object detection logic using YOLO model.
 """
 
 from raiki_sdk import YoloBase, YoloResult, YoloValidation
-from raiki_sdk import padding_crop_yolo
+from raiki_sdk import padding_crop_yolo, resize_pwd
 from ultralytics import YOLO
-from .config import YOLO_WEIGHTS, YOLO_CONF, YOLO_IMGSZ
+from .config import YOLO_WEIGHTS, YOLO_CONF, YOLO_IMGSZ, TARGET_SIZE, COLOR_PADDING
 from PIL import Image
 import cv2
 
@@ -96,6 +96,7 @@ class RolexP02Detector(YoloBase):
             image: Image.Image (PIL) cropped image
         """
         cropped_image = padding_crop_yolo(image, position)
+        cropped_image = resize_pwd(cropped_image, output_size=TARGET_SIZE, color_padding=COLOR_PADDING)
         return Image.fromarray(cv2.cvtColor(cropped_image, cv2.COLOR_BGR2RGB))
 
     def run_pipeline(self, image:  any, is_crop: bool = True) -> YoloValidation:

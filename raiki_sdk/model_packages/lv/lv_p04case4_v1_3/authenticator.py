@@ -9,10 +9,9 @@ from .config import (
     AUTH_WEIGHTS, AUTH_NUM_CLASSES,
     AUTH_MODEL_NAME, AUTH_MODEL_VERSION,
     YOLO_MODEL_VERSION, AUTH_CLASS_LABELS)
-from .architecture import Network_Wrapper
+from .architecture import _load_model
 from .preprocessor import get_transform
 from raiki_sdk.utils import map_generate, highlight_im
-from tresnet_utils import TResnetL_V2
 import torch
 from typing import Tuple
 from PIL import Image
@@ -34,7 +33,7 @@ class LVP04Case4Authenticator(AuthenticateBase):
         """
         self.device = device
 
-        self.model = self._load_model(AUTH_WEIGHTS)
+        self.model = _load_model(AUTH_WEIGHTS, device)
 
         self.transform = get_transform()
 
@@ -44,33 +43,6 @@ class LVP04Case4Authenticator(AuthenticateBase):
             "auth_model_version": AUTH_MODEL_VERSION,
             "yolo_model_version": YOLO_MODEL_VERSION
         }
-
-    def _load_model(self, weights_path: str) -> Network_Wrapper:
-        """Load model weights into architecture"""
-
-        checkpoint = torch.load(weights_path, map_location=self.device, weights_only=False)
-
-        # Initialize the base TResNet-L model
-        model_params = {'num_classes': AUTH_NUM_CLASSES}
-        base_model = TResnetL_V2(model_params)
-
-        # Extract layers for Network_Wrapper
-        net_layers = list(base_model.children())
-        net_layers = net_layers[0]
-        net_layers = list(net_layers.children())
-
-        # Create the network wrapper
-        net = Network_Wrapper(net_layers, AUTH_NUM_CLASSES)
-
-        # Load the trained weights
-        net.load_state_dict(checkpoint['model'])
-
-        # Move model to device and set to evaluation mode
-        net.to(self.device)
-        net.eval()
-
-        return net
-
 
     def forward(self, image) -> AuthResult:
         """
@@ -123,7 +95,7 @@ class LVP04Case4Authenticator(AuthenticateBase):
             pred_concat = torch.argmax(output_concat, dim=1).cpu().numpy()[0]
             pred_main = torch.argmax(main_output, dim=1).cpu().numpy()[0]
 
-            # print(f"pred1: {int(pred1)}, pred2: {int(pred2)}, pred3: {int(pred3)}, pred_concat: {int(pred_concat)}, pred_main: {int(pred_main)}")
+            print(f"pred1: {int(pred1)}, pred2: {int(pred2)}, pred3: {int(pred3)}, pred_concat: {int(pred_concat)}, pred_main: {int(pred_main)}")
 
             # Apply softmax to get probabilities
             prob1 = torch.softmax(output1, dim=1).cpu().numpy()[0]
@@ -132,7 +104,7 @@ class LVP04Case4Authenticator(AuthenticateBase):
             prob_concat = torch.softmax(output_concat, dim=1).cpu().numpy()[0]
             prob_main = torch.softmax(main_output, dim=1).cpu().numpy()[0]
 
-            # print(f"prob1: {float(np.max(prob1))}, prob2: {float(np.max(prob2))}, prob3: {float(np.max(prob3))}, prob_concat: {float(np.max(prob_concat))}, prob_main: {float(np.max(prob_main))}")
+            print(f"prob1: {float(np.max(prob1))}, prob2: {float(np.max(prob2))}, prob3: {float(np.max(prob3))}, prob_concat: {float(np.max(prob_concat))}, prob_main: {float(np.max(prob_main))}")
 
             # Create pair of prediction list of tuple. e.g: [(pred1_cls, conf_pred1),...]
             pred_list = [(int(pred1), float(np.max(prob1))), 

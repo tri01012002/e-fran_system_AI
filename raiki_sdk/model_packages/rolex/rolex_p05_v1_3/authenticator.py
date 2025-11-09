@@ -76,11 +76,11 @@ class RolexP05Authenticator(AuthenticateBase):
         elif index == 2:  # real_c - can be B or C
             # 0.6 - 0.75
             # 0.9 => 0.68; # 0.7 => 0.6; 0.5 => 0.6
-            return max(0.6, probs[index].item() * 0.75), f"{probs[index]}-{label}"
+            return max(0.6, probs[index].item()), f"{probs[index]}-{label}"
         else:  # superfake - can be B or C
             # 0.5 - 0.75
             # 0.9 => 0.68; # 0.7 => 0.52; 0.4 => 0.5
-            return max(0.5, probs[index].item() * 0.75), f"{probs[index]}-{label}"
+            return min(0.5, 1 - probs[index].item()), f"{probs[index]}-{label}"
 
     def generate_heatmap(self) -> Image.Image:
         pass

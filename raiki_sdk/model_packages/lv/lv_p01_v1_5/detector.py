@@ -27,6 +27,7 @@ class LVP01Detector(YoloBase):
         self.yolo_conf = YOLO_CONF
         self.yolo_imgsz = YOLO_IMGSZ
         self.rotate_180 = False
+        self.img_rsed_square = None
 
     def yolo_detect(self, image) -> YoloResult:
         """
@@ -39,8 +40,8 @@ class LVP01Detector(YoloBase):
             YoloResult: Detection results
         """
         max_hw = max(image.shape[:2])
-        img_rsed_square = resize_pwd(image, output_size=max_hw, color_padding=(255, 255, 255))
-        pil_image = Image.fromarray(cv2.cvtColor(img_rsed_square, cv2.COLOR_BGR2RGB))
+        self.img_rsed_square = resize_pwd(image, output_size=max_hw, color_padding=(255, 255, 255))
+        pil_image = Image.fromarray(cv2.cvtColor(self.img_rsed_square, cv2.COLOR_BGR2RGB))
         pil_image_gray = pil_image.convert("L")
         results = self.model.predict(source=pil_image_gray, verbose=False, show=False, save=False, save_crop=False,
                                         conf=self.yolo_conf, line_width=0, show_labels=False, show_conf=False,
@@ -101,6 +102,8 @@ class LVP01Detector(YoloBase):
         x1, y1, x2, y2 = int(x1n * image_w), int(y1n * image_h), int(x2n * image_w), int(y2n * image_h)
         
         position = [x1, y1, x2, y2]
+
+        print(f"Rotate 180: {self.rotate_180}")
         
         return YoloValidation(is_valid=True, position=position, class_id=None)
 
@@ -115,7 +118,7 @@ class LVP01Detector(YoloBase):
         Returns:
             image: Image.Image (PIL) cropped image
         """
-        cropped_image = padding_crop_yolo(image, position, rotate_180=self.rotate_180)
+        cropped_image = padding_crop_yolo(self.img_rsed_square, position, rotate_180=self.rotate_180)
         return Image.fromarray(cv2.cvtColor(cropped_image, cv2.COLOR_BGR2RGB))
 
     def run_pipeline(self, image: np.ndarray, is_crop: bool = True) -> YoloValidation:

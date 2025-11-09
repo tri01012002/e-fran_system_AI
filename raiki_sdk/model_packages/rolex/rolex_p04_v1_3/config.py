@@ -1,7 +1,7 @@
 """
 Configuration for Rolex P04 Model
 """
-from raiki_sdk.utils.hf_lib import download_file_from_hf
+from raiki_sdk.utils import download_file_from_hf
 # Model version
 AUTH_MODEL_1_VERSION = "v1_3"
 AUTH_MODEL_2_VERSION = "v1_4"

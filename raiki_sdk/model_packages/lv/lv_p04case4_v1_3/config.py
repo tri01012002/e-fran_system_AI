@@ -9,13 +9,13 @@ YOLO_MODEL_VERSION = "v1_2"
 
 # Model weights paths (relative to package root or absolute)
 YOLO_WEIGHTS = download_file_from_hf(
-    repo_id="rikai-ai/lv_p04_case4_detector_v1-2",
-    filename="lv_p04_detector_v1-2_yolov11_250714_250715.pt"
+    repo_id="rikai-ai/lv_p04case4_detector_v1-2",
+    filename="lv_p04case4_detector_v1-2_yolov11_250714_250715.pt"
 )
 
 AUTH_WEIGHTS = download_file_from_hf(
-    repo_id="rikai-ai/lv_p04-case4_auth_v1-3",
-    filename="lv_p04-case4_auth_v1-3_cmal_250926_251015.pth"
+    repo_id="rikai-ai/lv_p04case4_auth_v1-3",
+    filename="lv_p04case4_auth_v1-3_cmal_250925_250926.pth"
 )
 
 # AUTH parameters

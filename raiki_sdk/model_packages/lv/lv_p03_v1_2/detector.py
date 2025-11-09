@@ -25,6 +25,7 @@ class LVP03Detector(YoloBase):
         self.model_v2 = YOLO(YOLO_WEIGHTS_2).to(device)
         self.yolo_conf = YOLO_CONF
         self.yolo_imgsz = YOLO_IMGSZ
+        self.img_rsed_square = None
 
     def yolo_detect(self, image) -> YoloResult:
         """
@@ -37,9 +38,9 @@ class LVP03Detector(YoloBase):
             YoloResult: Detection results
         """
         max_hw = max(image.shape[:2])
-        img_rsed_square = resize_pwd(image, output_size=max_hw, color_padding=(255, 255, 255))
+        self.img_rsed_square = resize_pwd(image, output_size=max_hw, color_padding=(255, 255, 255))
 
-        pil_img_rsed_square = Image.fromarray(cv2.cvtColor(img_rsed_square, cv2.COLOR_BGR2RGB))
+        pil_img_rsed_square = Image.fromarray(cv2.cvtColor(self.img_rsed_square, cv2.COLOR_BGR2RGB))
         pil_img_rsed_square_gray = pil_img_rsed_square.convert("L")
         results_flip = self.model_v2.predict(
             source=pil_img_rsed_square_gray, verbose=False, 
@@ -51,9 +52,9 @@ class LVP03Detector(YoloBase):
         # 0: 'flip', 1: 'hook-logo', 2: 'louis', 3: 'lu', 4: 'lv_circle', 5: 'lv_logo_thick', 6: 'lv_logo_thin', 7: 'paris', 8: 'ton', 9: 'vui', 10: 'vuitton'
         if len(results_flip[0].boxes) > 0 and (results_flip[0].boxes.cls == 0).any():
             _logger.info("Image rotated 180 degrees")
-            img_rsed_square = cv2.rotate(img_rsed_square, cv2.ROTATE_180)
+            self.img_rsed_square = cv2.rotate(self.img_rsed_square, cv2.ROTATE_180)
 
-        pil_image_gray  = Image.fromarray(cv2.cvtColor(img_rsed_square, cv2.COLOR_BGR2GRAY))
+        pil_image_gray  = Image.fromarray(cv2.cvtColor(self.img_rsed_square, cv2.COLOR_BGR2GRAY))
 
         results = self.model.predict(source=pil_image_gray, verbose=False, show=False, save=False, save_crop=False, conf=self.yolo_conf, line_width=0, show_labels=False, show_conf=False, imgsz=self.yolo_imgsz)
 
@@ -108,7 +109,7 @@ class LVP03Detector(YoloBase):
         Returns:
             image: Image.Image (PIL) cropped image
         """
-        cropped_image = padding_crop_yolo(image, position, p=PAD, remove_padding=True)
+        cropped_image = padding_crop_yolo(self.img_rsed_square, position, p=PAD, remove_padding=True)
         return Image.fromarray(cv2.cvtColor(cropped_image, cv2.COLOR_BGR2RGB))
 
     def run_pipeline(self, image:  any, is_crop: bool = True) -> YoloValidation:

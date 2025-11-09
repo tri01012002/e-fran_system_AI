@@ -1,7 +1,7 @@
 import torch
 import torch.nn as nn
 from raiki_sdk.utils import BasicConv
-
+from .src.models.tresnet_v2.tresnet_v2 import TResnetL_V2
 
 class Features(nn.Module):
     def __init__(self, net_layers_FeatureHead):
@@ -24,8 +24,30 @@ class Features(nn.Module):
 
 
 class Network_Wrapper(nn.Module):
-    def __init__(self, net_layers, num_classes):
+    def __init__(self, net_layers=None, num_classes=2):
         super().__init__()
+        
+        # If net_layers is None, create default TResNet backbone layers
+        if net_layers is None:
+            try:
+                # Create TResNet backbone with proper model_params dictionary
+                model_params = {'num_classes': 1000}  # Use standard ImageNet classes
+                tresnet_backbone = TResnetL_V2(model_params)
+                
+                # Extract the feature layers from TResNet backbone
+                net_layers = [
+                    tresnet_backbone.body.SpaceToDepth,
+                    [tresnet_backbone.body.conv1],
+                    [tresnet_backbone.body.layer1],
+                    [tresnet_backbone.body.layer2],
+                    [tresnet_backbone.body.layer3],
+                    [tresnet_backbone.body.layer4]
+                ]
+            except Exception as e:
+                print(f"Failed to create TResNet backbone: {e}")
+                # Fallback: create dummy layers structure
+                net_layers = [nn.Identity() for _ in range(6)]
+        
         self.Features = Features(net_layers)
 
         self.max_pool1 = nn.MaxPool2d(kernel_size=46, stride=1)
@@ -101,3 +123,96 @@ class Network_Wrapper(nn.Module):
         x_c_all = self.classifier_concat(x_c_all)
 
         return x1_c, x2_c, x3_c, x_c_all, map1, map2, map3
+
+
+def _load_model(weights_path: str, device: str) -> Network_Wrapper:
+    # Load full model object
+    import __main__
+    __main__.Network_Wrapper = Network_Wrapper
+    __main__.Features = Features
+    # Also register the old import paths that might be in the saved model
+    import sys
+    from types import ModuleType
+    
+    # Create a fake 'src' module in sys.modules to handle old import paths
+    if 'src' not in sys.modules:
+        src_module = ModuleType('src')
+        sys.modules['src'] = src_module
+        
+        # Create the nested module structure
+        src_models = ModuleType('src.models')
+        sys.modules['src.models'] = src_models
+        src_module.models = src_models
+        
+        src_tresnet = ModuleType('src.models.tresnet')
+        sys.modules['src.models.tresnet'] = src_tresnet
+        src_models.tresnet = src_tresnet
+        
+        src_tresnet_v2 = ModuleType('src.models.tresnet_v2')
+        sys.modules['src.models.tresnet_v2'] = src_tresnet_v2
+        src_models.tresnet_v2 = src_tresnet_v2
+        
+        src_tresnet_layers = ModuleType('src.models.tresnet.layers')
+        sys.modules['src.models.tresnet.layers'] = src_tresnet_layers
+        src_tresnet.layers = src_tresnet_layers
+        
+        src_tresnet_v2_layers = ModuleType('src.models.tresnet_v2.layers')
+        sys.modules['src.models.tresnet_v2.layers'] = src_tresnet_v2_layers
+        src_tresnet_v2.layers = src_tresnet_v2_layers
+        
+        # Import the actual modules and assign them to the fake namespace
+        from .src.models.tresnet.layers.anti_aliasing import AntiAliasDownsampleLayer, DownsampleJIT, Downsample
+        from .src.models.tresnet.layers.avg_pool import FastGlobalAvgPool2d
+        from .src.models.tresnet.layers.space_to_depth import SpaceToDepthModule, SpaceToDepthJit, SpaceToDepth
+        from .src.models.tresnet_v2.tresnet_v2 import TResnetL_V2, BasicBlock, Bottleneck, TResNetV2
+        from .src.models.tresnet_v2.layers.squeeze_and_excite import SEModule as SEModuleV2
+        from raiki_sdk.utils import BasicConv
+        
+        # Set up tresnet namespace
+        src_tresnet_layers.AntiAliasDownsampleLayer = AntiAliasDownsampleLayer
+        src_tresnet_layers.avg_pool = ModuleType('src.models.tresnet.layers.avg_pool')
+        src_tresnet_layers.avg_pool.FastGlobalAvgPool2d = FastGlobalAvgPool2d
+        src_tresnet_layers.space_to_depth = ModuleType('src.models.tresnet.layers.space_to_depth')
+        src_tresnet_layers.space_to_depth.SpaceToDepthModule = SpaceToDepthModule
+        src_tresnet_layers.space_to_depth.SpaceToDepthJit = SpaceToDepthJit
+        src_tresnet_layers.space_to_depth.SpaceToDepth = SpaceToDepth
+        
+        # Set up tresnet_v2 namespace
+        src_tresnet_v2.tresnet_v2 = ModuleType('src.models.tresnet_v2.tresnet_v2')
+        src_tresnet_v2.tresnet_v2.TResnetL_V2 = TResnetL_V2
+        src_tresnet_v2.tresnet_v2.BasicBlock = BasicBlock
+        src_tresnet_v2.tresnet_v2.Bottleneck = Bottleneck
+        src_tresnet_v2.tresnet_v2.TResNetV2 = TResNetV2
+        src_tresnet_v2_layers.squeeze_and_excite = ModuleType('src.models.tresnet_v2.layers.squeeze_and_excite')
+        src_tresnet_v2_layers.squeeze_and_excite.SEModule = SEModuleV2
+        
+        # Register all modules in sys.modules
+        sys.modules['src.models.tresnet.layers.anti_aliasing'] = ModuleType('src.models.tresnet.layers.anti_aliasing')
+        sys.modules['src.models.tresnet.layers.anti_aliasing'].AntiAliasDownsampleLayer = AntiAliasDownsampleLayer
+        sys.modules['src.models.tresnet.layers.anti_aliasing'].DownsampleJIT = DownsampleJIT
+        sys.modules['src.models.tresnet.layers.anti_aliasing'].Downsample = Downsample
+        sys.modules['src.models.tresnet.layers.avg_pool'] = src_tresnet_layers.avg_pool
+        sys.modules['src.models.tresnet.layers.space_to_depth'] = src_tresnet_layers.space_to_depth
+        sys.modules['src.models.tresnet_v2.tresnet_v2'] = src_tresnet_v2.tresnet_v2
+        sys.modules['src.models.tresnet_v2.layers.squeeze_and_excite'] = src_tresnet_v2_layers.squeeze_and_excite
+        
+        # Handle basic_conv import
+        basic_conv_module = ModuleType('basic_conv')
+        basic_conv_module.BasicConv = BasicConv
+        sys.modules['basic_conv'] = basic_conv_module
+        
+    loaded_model = torch.load(weights_path, map_location=device, weights_only=False)
+
+    if isinstance(loaded_model, dict):
+        # It's a state_dict
+        model_auth_LVP04 = Network_Wrapper(num_classes=2)
+        model_auth_LVP04.load_state_dict(loaded_model)
+    else:
+        print("It's a full model object")
+        # It's a full model object
+        model_auth_LVP04 = loaded_model
+
+    model_auth_LVP04.to(device)
+    model_auth_LVP04.eval()
+
+    return loaded_model

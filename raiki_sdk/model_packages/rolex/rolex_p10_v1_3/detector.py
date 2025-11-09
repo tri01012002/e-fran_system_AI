@@ -21,9 +21,9 @@ class RolexP10Detector(YoloBase):
 
     def yolo_detect(self, image) -> YoloResult:
         max_hw = max(image.shape[:2])
-        img_rsed_square = resize_pwd(image, output_size=max_hw, color_padding=(255, 255, 255))
+        self.img_rsed_square = resize_pwd(image, output_size=max_hw, color_padding=(255, 255, 255))
 
-        pil_img_rsed_square = Image.fromarray(cv2.cvtColor(img_rsed_square, cv2.COLOR_BGR2RGB))
+        pil_img_rsed_square = Image.fromarray(cv2.cvtColor(self.img_rsed_square, cv2.COLOR_BGR2RGB))
 
         results = self.model.predict(source=pil_img_rsed_square, verbose=False, show=False, save=False,
                                      save_crop=False, conf=self.yolo_conf, line_width=0,
@@ -53,9 +53,7 @@ class RolexP10Detector(YoloBase):
         return YoloValidation(is_valid=valid, position=position, class_id=None)
 
     def crop(self, image, position) -> Image.Image:
-        max_hw = max(image.shape[:2])
-        img_rsed_square = resize_pwd(image, output_size=max_hw, color_padding=(255, 255, 255))
-        img_padding_yolo = padding_crop_yolo(img_rsed_square, position)
+        img_padding_yolo = padding_crop_yolo(self.img_rsed_square, position)
         self.image_detect = img_padding_yolo
         return Image.fromarray(cv2.cvtColor(self.image_detect, cv2.COLOR_BGR2RGB))
 

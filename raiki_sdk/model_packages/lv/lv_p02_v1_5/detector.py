@@ -21,6 +21,7 @@ class LVP02Detector(YoloBase):
         self.model = YOLO(YOLO_WEIGHTS).to(device)
         self.yolo_conf = YOLO_CONF
         self.yolo_imgsz = YOLO_IMGSZ
+        self.img_rsed_square = None
 
     def yolo_detect(self, image) -> YoloResult:
         """
@@ -33,9 +34,10 @@ class LVP02Detector(YoloBase):
             YoloResult: Detection results
         """
         max_hw = max(image.shape[:2])
-        img_rsed_square = resize_pwd(image, output_size=max_hw, color_padding=(255, 255, 255))
-        image = Image.fromarray(cv2.cvtColor(img_rsed_square, cv2.COLOR_BGR2RGB)).convert("L")
-        results = self.model.predict(source=image, verbose=False, show=False, save=False, save_crop=False,
+        self.img_rsed_square = resize_pwd(image, output_size=max_hw, color_padding=(255, 255, 255))
+        pil_image = Image.fromarray(cv2.cvtColor(self.img_rsed_square, cv2.COLOR_BGR2RGB))
+        pil_image_gray = pil_image.convert("L")
+        results = self.model.predict(source=pil_image_gray, verbose=False, show=False, save=False, save_crop=False,
                                         conf=self.yolo_conf, line_width=0, show_labels=False, show_conf=False,
                                         imgsz=self.yolo_imgsz)
         return results[0]
@@ -87,7 +89,7 @@ class LVP02Detector(YoloBase):
         Returns:
             image: Image.Image (PIL) cropped image
         """
-        cropped_image = padding_crop_yolo(image, position, p=0, remove_padding=True)
+        cropped_image = padding_crop_yolo(self.img_rsed_square, position, p=0, remove_padding=True)
         return Image.fromarray(cv2.cvtColor(cropped_image, cv2.COLOR_BGR2RGB))
 
     def run_pipeline(self, image:  any, is_crop: bool = True) -> YoloValidation:

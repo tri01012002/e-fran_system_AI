@@ -8,6 +8,6 @@ __all__ = [
     "attention_im",
     "highlight_im",
     "BasicConv",
-    "download_file_from_hf"
+    "download_file_from_hf",
 ]
 
