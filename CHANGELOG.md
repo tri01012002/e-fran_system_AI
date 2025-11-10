@@ -13,6 +13,77 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Add unit tests
 - Add CI/CD pipeline
 
+## [Unreleased]
+
+### Planned
+- Add unit tests
+- Add CI/CD pipeline
+
+## [0.1.3] - 2025-10-24
+
+### ✨ New Features
+
+- **Expanded Model Package Support**: Full support for multiple brands and parts
+  - **Louis Vuitton (LV)**: LV_P01, LV_P02, LV_P03, LV_P04, LV_P04case4, LV_P05
+  - **Rolex**: Rolex_P01, Rolex_P02, Rolex_P03, Rolex_P04, Rolex_P05, Rolex_P08, Rolex_P09, Rolex_P10
+  - Standardized model package structure across all brands
+  - Centralized management through ModelRegistry
+
+- **Unified API for Model Loading**:
+  - `get_auth_feature(category, part, model_version, device)`: Simple API to load any model package
+    - Automatically discovers and loads detector and authenticator
+    - Supports multiple devices: "cuda", "mps", "cpu"
+    - Lazy loading for memory efficiency
+    - Built-in caching to avoid redundant loading
+
+### 📦 Model Package Inventory
+
+#### Louis Vuitton (LV) Models
+| Part | Description |
+|------|-------------|
+| LV_P01 | Primary part authentication |
+| LV_P02 | Secondary part authentication |
+| LV_P03 | Tertiary part authentication |
+| LV_P04 | Quaternary part authentication |
+| LV_P04case4 | Special variant of P04 |
+| LV_P05 | Additional part authentication |
+
+#### Rolex Models
+| Part | Description |
+|------|-------------|
+| Rolex_P01 | Primary part authentication |
+| Rolex_P02 | Secondary part authentication |
+| Rolex_P03 | Tertiary part authentication |
+| Rolex_P04 | Quaternary part authentication |
+| Rolex_P05 | Quinary part authentication |
+| Rolex_P08 | Octary part authentication |
+| Rolex_P09 | Nonary part authentication |
+| Rolex_P10 | Denary part authentication |
+
+### 🔧 Technical Details
+
+- **Model Package Organization**:
+  - Each brand has dedicated directory: `raiki_sdk/model_packages/{category}/`
+  - Each part has versioned subdirectory: `{category}_{part}_{version}/`
+  - Standardized structure with `detector.py`, `authenticator.py`, `config.py`
+  - Factory functions in `__init__.py` for easy instantiation
+
+- **AI Engineer Workflow**:
+  - Simple import: `from raiki_sdk import get_auth_feature`
+  - Single function call to load models: `get_auth_feature(category, part, version, device)`
+  - Automatic detection of model type
+  - Centralized model management and versioning
+
+### 🎯 Breaking Changes
+
+None - This is a purely additive release.
+
+### 📖 Documentation
+
+- Updated README with comprehensive model package inventory
+- Added supported brands and parts reference
+- Updated usage examples with both APIs: `get_model()` and `get_auth_feature()`
+
 ## [0.1.2] - 2025-10-23
 
 ### ✨ New Features
@@ -128,7 +199,8 @@ See full release details
 - Package structure with proper `__init__.py` exports
 - Dependencies: numpy, pillow, pydantic, ultralytics
 
-[Unreleased]: https://gitlab.com/dat.tram/raiki-sdk/-/compare/v0.1.2...HEAD
+[Unreleased]: https://gitlab.com/dat.tram/raiki-sdk/-/compare/v0.1.3...HEAD
+[0.1.3]: https://gitlab.com/dat.tram/raiki-sdk/-/compare/v0.1.2...v0.1.3
 [0.1.2]: https://gitlab.com/dat.tram/raiki-sdk/-/compare/v0.1.1...v0.1.2
 [0.1.1]: https://gitlab.com/dat.tram/raiki-sdk/-/compare/v0.1.0...v0.1.1
 [0.1.0]: https://gitlab.com/dat.tram/raiki-sdk/-/releases/v0.1.0

@@ -100,101 +100,94 @@ pip install git+https://oauth2:${GITLAB_TOKEN}@gitlab.com/dat.tram/raiki-sdk.git
 
 ## 🎯 Quick Start
 
-### Using Base Classes
+### Supported Brands and Parts
 
-```python
-from raiki_sdk import AuthenticateBase, YoloBase
-from raiki_sdk import AuthResult, YoloResult
+The SDK supports counterfeit detection for multiple luxury brands with multiple parts per brand:
 
-class MyAuthenticator(AuthenticateBase):
-    """Custom authentication implementation"""
-    
-    def authenticate(self, image_path: str) -> AuthResult:
-        # Your authentication logic here
-        return AuthResult(
-            is_authentic=True,
-            confidence=0.95,
-            message="Product is authentic"
-        )
+#### Louis Vuitton (LV)
 
-class MyDetector(YoloBase):
-    """Custom YOLO detection implementation"""
-    
-    def __init__(self):
-        super().__init__(model_path="path/to/your/model.pt")
-    
-    def detect(self, image_path: str) -> YoloResult:
-        # Your detection logic here
-        pass
+```
+from raiki_sdk import get_auth_feature
+
+# Load Louis Vuitton model packages
+lv_p01 = get_auth_feature("lv", "P01", "v1_1", device="cuda")
+detector_p01 = lv_p01.detector
+authenticator_p01 = lv_p01.authenticator
 ```
 
-### Using Preprocessing Utilities
+# Supported LV parts: P01, P02, P03, P04, P04case4, P05| Part | Purpose |
+|------|---------|
+| LV_P01 | Primary part authentication |
+| LV_P02 | Secondary part authentication |
+| LV_P03 | Tertiary part authentication |
+| LV_P04 | Quaternary part authentication |
+| LV_P04case4 | Special variant of P04 |
+| LV_P05 | Additional part authentication |
 
-```python
-from raiki_sdk import (
-    resize_pwd,
-    padding_crop_yolo,
-    CLAHE,
-    LoGFilter,
-    AdjustBrightnessContrast
+#### Rolex
+
+```
+from raiki_sdk import get_auth_feature
+
+# Load Rolex model packages
+rolex_p01 = get_auth_feature("rolex", "P01", "v1_3", device="cuda")
+detector_p01 = rolex_p01.detector
+authenticator_p01 = rolex_p01.authenticator
+```
+
+# Supported Rolex parts: P01, P02, P03, P04, P05, P08, P09, P10| Part | Purpose |
+|------|---------|
+| Rolex_P01 | Primary part authentication |
+| Rolex_P02 | Secondary part authentication |
+| Rolex_P03 | Tertiary part authentication |
+| Rolex_P04 | Quaternary part authentication |
+| Rolex_P05 | Quinary part authentication |
+| Rolex_P08 | Octary part authentication |
+| Rolex_P09 | Nonary part authentication |
+| Rolex_P10 | Denary part authentication |
+
+#### Using get_auth_feature() - Simplified API
+
+For AI Engineers, the `get_auth_feature()` function provides a simplified interface for loading authentication models:
+
+from raiki_sdk import get_auth_feature
+
+```
+# Simple one-liner to load any model package
+model_package = get_auth_feature(
+    category="rolex",    # Brand: "rolex", "lv", etc.
+    part="P01",          # Part identifier: "P01", "P02", etc.
+    model_version="v1_3",  # Model version: "v1_3", "v1_4", etc.
+    device="cuda"        # Device: "cuda", "mps", "cpu"
 )
-from PIL import Image
-
-# Load image
-image = Image.open("product.jpg")
-
-# Resize with aspect ratio preservation
-resized = resize_pwd(image, target_size=(640, 640))
-
-# Apply CLAHE enhancement
-clahe = CLAHE(clip_limit=2.0, tile_grid_size=(8, 8))
-enhanced = clahe(resized)
-
-# Apply LoG filter for edge detection
-log_filter = LoGFilter(sigma=1.5, kernel_size=5)
-edges = log_filter(enhanced)
-
-# Adjust brightness and contrast
-adjuster = AdjustBrightnessContrast(brightness_factor=1.2, contrast_factor=1.1)
-final_image = adjuster(edges)
 ```
 
-### Using Model Packages
-
-The SDK provides a registry system for managing different model versions:
-
-```python
-from raiki_sdk import get_model, list_available_models, list_models
-
-# List all available model packages (scans filesystem)
-available_models = list_available_models()
-for model in available_models:
-    print(f"{model['category']} - {model['part']} - {model['version']}")
-
-# Load a specific model package (lazy loading)
-# Automatically detects if it's an auth or classifier model
-model = get_model(category="rolex", part="P01", model_version="v1_3", device="cuda")
-
-# For authentication models (P01, P02, etc.)
-detector = model['detector']
-authenticator = model['authenticator']
-
-# Use the detector
-result = detector.detect("image.jpg")
-print(f"Detected: {result.class_names}")
-
-# Use the authenticator
-auth_result = authenticator.authenticate("image.jpg")
-print(f"Authentic: {auth_result.is_authentic}, Confidence: {auth_result.confidence}")
-
-# For classifier models (P00 only)
-classifier_model = get_model(category="rolex", part="P00", model_version="v1_1", device="cuda")
-classifier = classifier_model['classifier']
-
-# List currently cached models (already loaded in memory)
-cached_models = list_models()
-print(f"Cached models: {cached_models}")
 ```
+# Access detector and authenticator
+detector = model_package.detector
+authenticator = model_package.authenticator
+```
+
+```
+# Use for detection
+image = cv2.imread("product.jpg")
+yolo_result = detector.yolo_detect(image)
+```
+
+```
+# Use for authentication
+cropped_image = detector.crop(image, validation.position)
+auth_result = authenticator.forward(cropped_image)
+
+print(f"Real: {auth_result.is_authentic}, Confidence: {auth_result.confidence}")
+```
+
+**Key Features:**
+- ✅ Unified API for all brands and parts
+- ✅ Automatic detector and authenticator loading
+- ✅ Built-in caching to avoid redundant model loading
+- ✅ Support for multiple devices (CUDA, MPS, CPU)
+- ✅ Simple one-liner usage for AI Engineers
 
 ### Using RedFrame Service
 
@@ -306,32 +299,6 @@ if result.iqa_result:
 | Performance | Faster | More comprehensive |
 | Use Case | Quick quality check | Full authentication pipeline |
 
-#### Caching and Performance
-
-The `get_redframe_service()` function implements intelligent caching to optimize performance:
-
-```python
-# First call: Loads models (slower)
-service1 = get_redframe_service("rolex", "p01", advanced_mode=True, device="cuda")
-
-# Second call with SAME config: Uses cache (instant)
-service2 = get_redframe_service("rolex", "p01", advanced_mode=True, device="cuda")
-
-# Different threshold: Still uses cache (instant, threshold updated)
-service3 = get_redframe_service("rolex", "p01", advanced_mode=True, device="cuda", threshold=0.5)
-
-# Different device: New instance created (slower)
-service4 = get_redframe_service("rolex", "p01", advanced_mode=True, device="mps")
-```
-
-**Cache Key:** `{category}_{part}_{advanced_mode}_{device}`
-
-**Important Notes:**
-- 🔄 Models are cached per configuration (category, part, mode, device)
-- ⚡ Threshold changes don't trigger model reload
-- 💾 Cache persists for the lifetime of the Python process
-- 🔁 Cache is cleared on process restart (e.g., API reload)
-
 #### Model Versioning
 
 Version strings are automatically normalized:
@@ -385,11 +352,6 @@ Abstract base class for YOLO-based detection systems.
 - `AdjustBrightnessContrast()` - Brightness/contrast adjustment
 - `UnsharpMask()` - Image sharpening
 
-### Model Management
-
-#### `get_model(category, part, model_version)`
-Unified function to load any model package (auto-detects auth vs classifier).
-
 **Parameters:**
 - `category: str` - Brand category ("rolex", "lv", etc.)
 - `part: str` - Part identifier ("P00" for classifier, "P01", "P02", etc. for auth)
@@ -433,8 +395,8 @@ raiki_sdk/model_packages/
 
 Each package must provide factory functions in `__init__.py`:
 - `get_detector()` - Returns detector instance
-- `get_authenticator()` - Returns authenticator instance (auth models)
-- `get_classifier()` - Returns classifier instance (P00 models)
+- `get_auth_feature()` - Returns authenticator instance (auth models)
+- `get_classification_feature()` - Returns classifier instance (P00 models)
 
 ## 🔧 Development
 
@@ -513,20 +475,20 @@ For issues and questions, please use the [GitLab Issues](https://gitlab.com/dat.
 - [x] Add Model Package Registry
 - [x] Add Part Versioning
 - [x] Add Model Versioning
-- [ ] Add Classify Base
-- [ ] Add Red Frame service
+- [x] Add Classify Base
+- [x] Add Red Frame service
+- [x] Add model package validation utilities
 - [ ] Add unit tests
 - [ ] Add CI/CD pipeline
 - [ ] Add model performance benchmarking
-- [ ] Add model package validation utilities
 
 ## 📊 Changelog
 
 See [CHANGELOG.md](CHANGELOG.md) for a detailed history of changes.
 
-### Latest Release: v0.1.2 (2025-10-23)
-- Added RedFrame Service with Basic and Advanced modes
-- Added IQA Service with dual LIQE model support
-- Added intelligent caching for RedFrame service
-- Added XGBoost-based frame validation
+### Latest Release: v0.1.3 (2025-10-24)
+- Expanded model packages for Louis Vuitton and Rolex brands
+- Support for multiple parts per brand (6 LV parts, 8 Rolex parts)
+- Simplified `get_auth_feature()` API for AI Engineers
+- Centralized model package management
 - See full changelog for details
