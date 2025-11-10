@@ -1,7 +1,7 @@
 """
 Rolex P01 Model Package
 
-This package provides detector and authenticator for Rolex P01 models version 1.3.
+This package provides detector and authenticator for Rolex P01 models version 1.4.
 """
 
 def get_detector(device: str):

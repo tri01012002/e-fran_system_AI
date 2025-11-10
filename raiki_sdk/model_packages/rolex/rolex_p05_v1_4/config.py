@@ -3,7 +3,7 @@ Configuration for Rolex P05 Model
 """
 from raiki_sdk.utils import download_file_from_hf
 # Model version
-AUTH_MODEL_VERSION = "v1_3" 
+AUTH_MODEL_VERSION = "v1_4" 
 YOLO_MODEL_VERSION = "v1_3"
 
 
@@ -14,8 +14,8 @@ YOLO_WEIGHTS = download_file_from_hf(
 )
 
 AUTH_WEIGHTS = download_file_from_hf(
-    repo_id="rikai-ai/rolex_p05_auth_v1-3",
-    filename="rolex_p05_auth_v1-3_maxvittiny_251015_251016.pth"
+    repo_id="rikai-ai/rolex_p05_auth_v1-4",
+    filename="rolex_p05_auth_v1-4_maxvittiny_251015_251016.pth"
 )
 
 # AUTH parameters

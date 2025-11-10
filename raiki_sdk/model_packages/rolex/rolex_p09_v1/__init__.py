@@ -1,7 +1,7 @@
 """
 Rolex P09 Model Package
 
-This package provides detector and authenticator for Rolex P09 models version 1.3.
+This package provides detector and authenticator for Rolex P09 models version 1.
 """
 
 def get_detector(device: str):

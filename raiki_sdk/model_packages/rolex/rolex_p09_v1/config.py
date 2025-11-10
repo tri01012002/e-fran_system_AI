@@ -3,19 +3,19 @@ Configuration for Rolex P09 Model
 """
 from raiki_sdk.utils import download_file_from_hf
 # Model version
-AUTH_MODEL_VERSION = "v1_3" 
-YOLO_MODEL_VERSION = "v1_3"
+AUTH_MODEL_VERSION = "v1" 
+YOLO_MODEL_VERSION = "v1"
 
 
 # Model weights paths (relative to package root or absolute)
 YOLO_WEIGHTS = download_file_from_hf(
-    repo_id="rikai-ai/rolex_p09_detector_v1-3",
-    filename="rolex_p09_detector_v1-3_yolo_241216_241217.pt"
+    repo_id="rikai-ai/rolex_p09_detector_v1",
+    filename="rolex_p09_detector_v1_yolo_241216_241217.pt"
 )
 
 AUTH_WEIGHTS = download_file_from_hf(
-    repo_id="rikai-ai/rolex_p09_auth_v1-3",
-    filename="rolex_p09_auth_v1-3_resnet50_241224_241224.pth"
+    repo_id="rikai-ai/rolex_p09_auth_v1",
+    filename="rolex_p09_auth_v1_resnet50_241224_241224.pth"
 )
 
 # AUTH parameters
