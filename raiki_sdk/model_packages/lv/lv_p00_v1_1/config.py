@@ -1,5 +1,5 @@
 """
-Configuration for Rolex P02 Models Version 1.4
+Configuration for Louis Vuitton P00 Models Version 1.1
 """
 from raiki_sdk.utils import download_file_from_hf
 
