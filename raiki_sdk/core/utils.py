@@ -15,10 +15,12 @@ def _normalize_version_str(version: str) -> str:
             return version.replace(".", "_")
         elif "v" in version.lower() and "_" in version:
             return version  # Already normalized
+        elif "v" in version.lower():
+            return version  
         else:
             raise ValueError(f"Error normalizing version '{version}'")
     except Exception as e:
-        raise ValueError(f"Error normalizing version '{version}': {e}")
+        raise ValueError(f"Error normalizing version '{version}': {e}") from e
 
 def _normalize_part_str(part: str) -> str:
     """Ensure part normalization
@@ -42,6 +44,8 @@ def _normalize_category_str(category: str) -> str:
             return category.replace("bag-", "")
         elif "rolex" in category.lower():
             return "rolex"
+        elif "omg" in category.lower():
+            return "omg"
         else:
             raise ValueError(f"Error normalizing category '{category}'")
     except Exception as e:

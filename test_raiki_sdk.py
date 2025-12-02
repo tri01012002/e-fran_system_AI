@@ -19,7 +19,7 @@ async def check_part_test(
 ):
     try:
         # 1. Get model from registry
-        model_package = get_auth_feature(category, part, model_version, device="cuda")
+        model_package = get_auth_feature(category, part, model_version, device="cpu")
         print(f"Model package: {model_package}")
         detector = model_package.detector
         authenticator = model_package.authenticator
