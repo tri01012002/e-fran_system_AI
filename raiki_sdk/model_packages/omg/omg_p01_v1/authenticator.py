@@ -3,16 +3,6 @@ Authenticator for Louis Vuitton P02
 
 Handles authentication logic using trained model.
 """
-# import sys
-# import os
-# sys.path.insert(
-#     0,
-#     os.path.join(
-#         os.path.dirname(__file__),
-#         '..', '..', '..', '..',  # omg_p01_v1 -> omg -> model_packages -> raiki_sdk -> project root
-#         'tresnet-utils-cpu',
-#     ),
-# )
 
 from raiki_sdk.base import AuthenticateBase, AuthResult
 from .config import (
@@ -22,7 +12,7 @@ from .config import (
 from .architecture import Network_Wrapper
 from .preprocessor import get_transform
 from raiki_sdk.utils import map_generate, highlight_im
-# from tresnet_utils import TResnetL_V2
+from tresnet_utils import TResnetL_V2
 import torch
 from typing import Tuple
 from PIL import Image
@@ -158,20 +148,20 @@ class OMGP01Authenticator(AuthenticateBase):
                 return AuthResult(probability=1-average_conf, label=AUTH_CLASS_LABELS[int(pred_main)], metadata=metadata)
             return AuthResult(probability=average_conf, label=AUTH_CLASS_LABELS[int(pred_main)], metadata=metadata)
 
-    # def get_prob(self, probs) -> Tuple[float, str]:
-    #     """
-    #     Process the probability
+    def get_prob(self, probs) -> Tuple[float, str]:
+        """
+        Process the probability
 
-    #     Args:
-    #         probs: torch.Tensor
+        Args:
+            probs: torch.Tensor
 
-    #     Returns:
-    #         Tuple[float, str]: Probability and label
-    #     """
-    #     pass
+        Returns:
+            Tuple[float, str]: Probability and label
+        """
+        pass
 
-    # def generate_heatmap(self) -> Image.Image:
-    #     pass
+    def generate_heatmap(self) -> Image.Image:
+        pass
 
 
 
