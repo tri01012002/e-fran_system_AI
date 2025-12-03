@@ -1,5 +1,5 @@
 """
-Authenticator for Louis Vuitton P02
+Authenticator for Omega P02
 
 Handles authentication logic using trained model.
 """
@@ -20,7 +20,7 @@ import numpy as np
 
 class OMGP01Authenticator(AuthenticateBase):
     """
-    Authentication model for Louis Vuitton P02
+    Authentication model for Omega P02
     """
 
     def __init__(self, device: str):
@@ -71,7 +71,7 @@ class OMGP01Authenticator(AuthenticateBase):
 
     def forward(self, image) -> AuthResult:
         """
-        Authenticate Louis Vuitton P02 part
+        Authenticate Omega P02 part
 
         Args:
             image: Image.Image
