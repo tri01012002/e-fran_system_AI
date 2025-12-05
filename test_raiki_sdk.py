@@ -40,7 +40,7 @@ async def check_part_test(
 
         # 3. YOLO detection
         try:
-            yolo_result = detector.yolo_detect(image)
+            yolo_result = detector.detect(image)
             print(f"Yolo result: {yolo_result}")
         except Exception as e:
             print(f"[/check/ {category} - {part}] - YOLO error {e}")
@@ -142,7 +142,7 @@ async def classify(
     detector = model_package.detector
 
     #3. YOLO detection
-    detector_result = detector.yolo_detect(image)
+    detector_result = detector.detect(image)
     print(f"Detector result: {detector_result}")
     validation = detector.validate(detector_result)
     print(f"Validation: {validation}")

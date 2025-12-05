@@ -171,7 +171,7 @@ authenticator = model_package.authenticator
 ```
 # Use for detection
 image = cv2.imread("product.jpg")
-yolo_result = detector.yolo_detect(image)
+    yolo_result = detector.detect(image)
 ```
 
 ```
@@ -252,7 +252,7 @@ redframe_service = get_redframe_service(
 
 # Load image and detect
 image = cv2.imread("product.jpg")
-yolo_result = detector.yolo_detect(image)
+    yolo_result = detector.detect(image)
 validation = detector.validate(yolo_result)
 
 # Advanced validation with RedFrame checks (crop_method REQUIRED)

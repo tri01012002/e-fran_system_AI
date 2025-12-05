@@ -67,9 +67,9 @@ class LVP01Detector(DetectorBase):
         if boxes is None:
             return YoloValidation(is_valid=False, position=None, class_id=None)
         
-        boxesn = results.xyxyn.cpu().numpy() 
-        classes = results.cls.cpu().int().numpy()  
-        confs = results.conf.cpu().numpy()
+        boxesn = boxes.xyxyn.cpu().numpy()
+        classes = boxes.cls.cpu().int().numpy()
+        confs = boxes.conf.cpu().numpy()
         
         # Check if no detections found
         if len(classes) == 0:
