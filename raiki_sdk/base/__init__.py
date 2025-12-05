@@ -10,13 +10,13 @@ from .schemas import (
     RedFrameResult,
 )
 from .authenticate_base import AuthenticateBase
-from .yolo_base import YoloBase
+from .detector_base import DetectorBase
 from .classificator_base import ClassificatorBase
 from .iqa_base import IqaBase
 
 __all__ = [
     "AuthenticateBase",
-    "YoloBase",
+    "DetectorBase",
     "IqaBase",
     "ClassificationResultModel",
     "ClassificationResultProb",

@@ -1,4 +1,4 @@
-from raiki_sdk.base import YoloBase, YoloResult, YoloValidation
+from raiki_sdk.base import DetectorBase, YoloResult, YoloValidation
 from raiki_sdk.preprocessing import padding_crop_yolo, resize_pwd
 from ultralytics import YOLO
 from .config import YOLO_WEIGHTS, YOLO_CONF, YOLO_IMGSZ, COLOR_PADDING, RESIZE_OUTPUT_SIZE
@@ -8,7 +8,7 @@ import numpy as np
 import torch
 
 
-class RolexP03Detector(YoloBase):
+class RolexP03Detector(DetectorBase):
 
     def __init__(self, device: str):
         self.model = YOLO(YOLO_WEIGHTS).to(device)
@@ -20,7 +20,7 @@ class RolexP03Detector(YoloBase):
         self.output_size = 224
         self.color_padding = (85, 85, 85)
 
-    def yolo_detect(self, image) -> YoloResult:
+    def detect(self, image) -> YoloResult:
         img_input_yolo_cv2 = image
         img_input_yolo_pil = Image.fromarray(cv2.cvtColor(img_input_yolo_cv2, cv2.COLOR_BGR2GRAY))
 
@@ -30,12 +30,12 @@ class RolexP03Detector(YoloBase):
 
         return results[0]
 
-    def validate(self, yolo_results: YoloResult) -> YoloValidation:
-        boxesn = yolo_results.boxes.xyxyn.cpu().numpy()
-        classes = yolo_results.boxes.cls.cpu().to(torch.int).numpy()
+    def validate(self, results: YoloResult) -> YoloValidation:
+        boxesn = results.boxes.xyxyn.cpu().numpy()
+        classes = results.boxes.cls.cpu().to(torch.int).numpy()
 
         for i in range(len(classes)):
-            if (classes[i] == 1 and yolo_results.boxes[i].conf < 0.55):
+            if (classes[i] == 1 and results.boxes[i].conf < 0.55):
                 return False, {}
 
         bbox_class_inner = [boxesn[i] for i in range(len(classes)) if classes[i] == 0]
@@ -58,7 +58,7 @@ class RolexP03Detector(YoloBase):
 
         if len(p03_boxesn) > 0:
             valid = True
-            image_h, image_w = yolo_results.boxes.orig_shape
+            image_h, image_w = results.boxes.orig_shape
             x1n, y1n, x2n, y2n = p03_boxesn[0]
             x1, y1, x2, y2 = int(x1n * image_w), int(y1n * image_h), int(x2n * image_w), int(y2n * image_h)
             position = [x1, y1, x2, y2]

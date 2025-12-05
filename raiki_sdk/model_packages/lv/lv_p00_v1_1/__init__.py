@@ -16,12 +16,12 @@ def get_detector(device: str):
 
 def get_main_model(device: str):
     """
-    Factory function to create authenticator instance
+    Factory function to create classifier instance
 
     Returns:
-        LVP00Classificator: Authenticator instance
+        LVP00Classificator: Classifier instance
     """
-    from .authenticator import LVP00Classificator
+    from .classifier import LVP00Classificator
     return LVP00Classificator(device)
 
 __all__ = ['get_detector', 'get_main_model']

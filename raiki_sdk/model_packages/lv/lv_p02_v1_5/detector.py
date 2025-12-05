@@ -4,7 +4,7 @@ YOLO Detector for Louis Vuitton P02
 Handles object detection logic using YOLO model.
 """
 
-from raiki_sdk import YoloBase, YoloResult, YoloValidation
+from raiki_sdk import DetectorBase, YoloResult, YoloValidation
 from raiki_sdk import resize_pwd, padding_crop_yolo
 from ultralytics import YOLO
 from .config import YOLO_WEIGHTS, YOLO_CONF, YOLO_IMGSZ
@@ -12,7 +12,7 @@ from PIL import Image
 import cv2
 
 
-class LVP02Detector(YoloBase):
+class LVP02Detector(DetectorBase):
     """
     YOLO detector for Louis Vuitton P02 part detection
     """
@@ -23,7 +23,7 @@ class LVP02Detector(YoloBase):
         self.yolo_imgsz = YOLO_IMGSZ
         self.img_rsed_square = None
 
-    def yolo_detect(self, image) -> YoloResult:
+    def detect(self, image) -> YoloResult:
         """
         Detect Louis Vuitton P02 parts in the image
 
@@ -42,7 +42,7 @@ class LVP02Detector(YoloBase):
                                         imgsz=self.yolo_imgsz)
         return results[0]
 
-    def validate(self, yolo_results) -> YoloValidation:
+    def validate(self, results) -> YoloValidation:
         """
         Validate detection results
 
@@ -59,7 +59,7 @@ class LVP02Detector(YoloBase):
         position = None
         valid = False
         # Process detected boxes
-        for box in yolo_results.boxes:
+        for box in results.boxes:
             cls_id = int(box.cls)
             conf = box.conf.item()
 

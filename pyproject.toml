@@ -22,13 +22,13 @@ classifiers = [
 
 dependencies = [
     "huggingface-hub==0.35.3",
-    "inplace-abn",
     "joblib>=1.5.2",
     "numpy>=2.2.6",
     "pandas>=2.3.3",
     "pillow>=11.3.0",
     "pydantic>=2.12.0",
     "pyiqa>=0.1.14.1",
+    "supervision>=0.27.0",
     "timm==1.0.20",
     "tresnet-utils",
     "ultralytics>=8.3.208",
@@ -57,4 +57,3 @@ include-package-data = true
 
 [tool.uv.sources]
 tresnet-utils = { git = "https://gitlab.com/dat.tram/tresnet-utils.git" }
-inplace-abn = { git = "https://github.com/mapillary/inplace_abn.git", rev = "b50bfe9c7cd7116a3ab091a352b48d6ba5ee701c" }

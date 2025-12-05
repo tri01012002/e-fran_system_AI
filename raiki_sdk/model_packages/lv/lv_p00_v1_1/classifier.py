@@ -9,6 +9,7 @@ import torch
 from PIL import Image
 from .architecture import MViTArcFaceModel
 from .vector_storage import VectorStorageManager
+from typing import Any
 
 class LVP00Classificator(ClassificatorBase):
     def __init__(self, device: str):
@@ -83,9 +84,8 @@ class LVP00Classificator(ClassificatorBase):
         )
 
 
-    def get_prob(self, image: Image.Image, topk: int =3) -> ClassificationResultProb:
-        vector_nor = self.forward(image)
-        results = self.vector_storage_manager.search_vector(vector_nor, topk)
+    def get_topk(self, result_model: Any, topk: int =3) -> ClassificationResultProb:
+        results = self.vector_storage_manager.search_vector(result_model, topk)
         return self.normalize_output(results, topk=topk)
 
     def generate_heatmap(self) -> Image.Image:

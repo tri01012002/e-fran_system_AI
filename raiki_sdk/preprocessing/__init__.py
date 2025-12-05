@@ -5,6 +5,7 @@ from .processors import (
     padding_crop_yolo,
     remove_white_padding,
     pil_to_tensor,
+    pad_to_square,
 )
 
 from .filters import (
@@ -25,6 +26,7 @@ __all__ = [
     "padding_crop_yolo",
     "remove_white_padding",
     "pil_to_tensor",
+    "pad_to_square",
     # Filters
     "CLAHE",
     "UnsharpMask",

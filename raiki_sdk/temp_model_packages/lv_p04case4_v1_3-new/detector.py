@@ -4,7 +4,7 @@ YOLO Detector for Rolex P04
 Handles object detection logic using YOLO model.
 """
 
-from raiki_sdk import YoloBase, YoloResult, YoloValidation
+from raiki_sdk import DetectorBase, YoloResult, YoloValidation
 from raiki_sdk import resize_pwd, padding_crop_yolo
 from ultralytics import YOLO
 from .config import YOLO_WEIGHTS, YOLO_CONF, YOLO_IMGSZ, COLOR_PADDING, TARGET_SIZE
@@ -13,7 +13,7 @@ import cv2
 import numpy as np
 import io
 
-class LVP04Case4Detector(YoloBase):
+class LVP04Case4Detector(DetectorBase):
     """
     YOLO detector for Louis Vuitton P04 Case 4 part detection
     """
@@ -23,7 +23,7 @@ class LVP04Case4Detector(YoloBase):
         self.yolo_conf = YOLO_CONF
         self.yolo_imgsz = YOLO_IMGSZ
 
-    def yolo_detect(self, image) -> YoloResult:
+    def detect(self, image) -> YoloResult:
         """
         Detect Louis Vuitton P04 Case 4 parts in the image
 
@@ -43,7 +43,7 @@ class LVP04Case4Detector(YoloBase):
 
         return results[0]
 
-    def validate(self, yolo_results: YoloResult) -> YoloValidation:
+    def validate(self, results: YoloResult) -> YoloValidation:
         """
         Validate detection results
 
@@ -55,14 +55,14 @@ class LVP04Case4Detector(YoloBase):
             position: The position of the detection
             class_id: The class id of the detection
         """
-        if len(yolo_results.boxes) == 0:
+        if len(results.boxes) == 0:
             return YoloValidation(is_valid=False, position=None, class_id=None)
 
         best_box = None
         best_conf = -1
         valid = False
         # Iterate over all detected boxes
-        for box in yolo_results.boxes:
+        for box in results.boxes:
             cls_id = int(box.cls)
             conf = box.conf.item()
             valid = True

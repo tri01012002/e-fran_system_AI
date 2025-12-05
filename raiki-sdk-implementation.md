@@ -18,7 +18,7 @@ raiki-sdk/
 │   ├── base/
 │   │   ├── __init__.py
 │   │   ├── authenticate_base.py    # AuthenticateBase abstract class
-│   │   ├── yolo_base.py            # YoloBase abstract class  
+│   │   ├── detector_base.py            # DetectorBase abstract class  
 │   │   └── schemas.py              # Pydantic output models
 │   ├── preprocessing/
 │   │   ├── __init__.py
@@ -56,9 +56,9 @@ raiki-sdk/
   - `get_prob(output) -> tuple[float, str]`: Extract probability and label
   - `generate_heatmap() -> HeatmapResult`: Generate attention heatmap
 
-**yolo_base.py:**
+**detector_base.py:**
 
-- `YoloBase` abstract class with methods:
+- `DetectorBase` abstract class with methods:
   - `validate(yolo_results, frame) -> YoloValidation`: Validate detection
   - `detect(image, frame, iqa) -> YoloResult`: Run detection pipeline
 
@@ -167,7 +167,7 @@ setup(
 - [x] Create raiki-sdk folder structure with all necessary __init__.py files
 - [x] Implement Pydantic schemas in raiki_sdk/base/schemas.py
 - [x] Create AuthenticateBase abstract class in raiki_sdk/base/authenticate_base.py
-- [x] Create YoloBase abstract class in raiki_sdk/base/yolo_base.py
+- [x] Create DetectorBase abstract class in raiki_sdk/base/yolo_base.py
 - [x] Validate import raiki-sdk
 - [x] Port transform functions to raiki_sdk/preprocessing/transforms.py
 - [x] Port filter classes to raiki_sdk/preprocessing/filters.py

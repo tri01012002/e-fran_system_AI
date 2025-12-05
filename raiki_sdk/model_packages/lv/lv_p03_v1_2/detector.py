@@ -4,7 +4,7 @@ YOLO Detector for Louis Vuitton P03
 Handles object detection logic using YOLO model.
 """
 
-from raiki_sdk import YoloBase, YoloResult, YoloValidation
+from raiki_sdk import DetectorBase, YoloResult, YoloValidation
 from raiki_sdk import resize_pwd, padding_crop_yolo
 from ultralytics import YOLO
 from .config import YOLO_WEIGHTS_1, YOLO_WEIGHTS_2, YOLO_CONF, YOLO_IMGSZ, PAD
@@ -15,7 +15,7 @@ import logging
 _logger = logging.getLogger(__name__)
 
 
-class LVP03Detector(YoloBase):
+class LVP03Detector(DetectorBase):
     """
     YOLO detector for Louis Vuitton P03 part detection
     """
@@ -27,7 +27,7 @@ class LVP03Detector(YoloBase):
         self.yolo_imgsz = YOLO_IMGSZ
         self.img_rsed_square = None
 
-    def yolo_detect(self, image) -> YoloResult:
+    def detect(self, image) -> YoloResult:
         """
         Detect Louis Vuitton P03 parts in the image
 
@@ -60,7 +60,7 @@ class LVP03Detector(YoloBase):
 
         return results[0]
 
-    def validate(self, yolo_results: YoloResult) -> YoloValidation:
+    def validate(self, results: YoloResult) -> YoloValidation:
         """
         Validate detection results
 
@@ -73,14 +73,14 @@ class LVP03Detector(YoloBase):
             class_id: The class id of the detection
         """
         # Extract boxes and classes
-        if len(yolo_results.boxes) == 0:
+        if len(results.boxes) == 0:
             return YoloValidation(is_valid=False, position=None, class_id=None)
 
         best_box = None
         best_conf = -1
         valid = False
         # Iterate over all detected boxes
-        for box in yolo_results.boxes:
+        for box in results.boxes:
             cls_id = int(box.cls)
             conf = box.conf.item()
 

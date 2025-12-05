@@ -4,6 +4,7 @@ import cv2
 from torchvision import transforms
 from torchvision.transforms import ToTensor
 import torch
+import random
 
 try:
     from torchvision.transforms import InterpolationMode
@@ -46,6 +47,42 @@ def resize_pwd(img: np.ndarray, output_size: int = 224, color_padding: tuple = (
 
     return square_img
 
+def pad_to_square(image, n=10, randomize=True):
+    if image.mode != 'RGB':
+        image = image.convert('RGB')
+
+    w, h = image.size
+    rotation_angle = random.randint(-n, n) if randomize else 0
+
+    # Xoay ảnh với nền trắng luôn
+    rotated_image = image.rotate(
+        rotation_angle,
+        expand=True,
+        resample=Image.BICUBIC,
+        fillcolor=(255, 255, 255)  # Không còn cần (0,0,0,0)
+    )
+
+    rotated_w, rotated_h = rotated_image.size
+    size = max(rotated_w, rotated_h)
+
+    # Tạo nền trắng vuông
+    background = Image.new('RGB', (size, size), (255, 255, 255))
+
+    x_offset = (size - rotated_w) // 2
+    y_offset = (size - rotated_h) // 2
+
+    if randomize:
+        max_x_shift = max(0, size // 6 - rotated_w // 6)
+        max_y_shift = max(0, size // 6 - rotated_h // 6)
+        x_offset += random.randint(-max_x_shift, max_x_shift)
+        y_offset += random.randint(-max_y_shift, max_y_shift)
+        x_offset = max(0, min(x_offset, size - rotated_w))
+        y_offset = max(0, min(y_offset, size - rotated_h))
+
+    background.paste(rotated_image, (x_offset, y_offset))
+    return background
+
+
 def resize_224(image: Image.Image) -> Image.Image:
     """
     Resize the input Image.Image to 224x224.
@@ -55,6 +92,7 @@ def resize_224(image: Image.Image) -> Image.Image:
     image = image.resize((new_w, new_h), Image.LANCZOS)
 
     return image
+
 
 def remove_white_padding(image: np.ndarray, threshold: int = 250) -> np.ndarray:
     """
@@ -89,6 +127,7 @@ def remove_white_padding(image: np.ndarray, threshold: int = 250) -> np.ndarray:
     
     # Crop the image to remove white padding
     return image[top:bottom, left:right]
+
 
 def padding_crop_yolo(image: np.ndarray, position: list[int], p: int = 0, rotate_180: bool = False, remove_padding: bool = False) -> np.ndarray:
     """
@@ -136,6 +175,7 @@ def padding_crop_yolo(image: np.ndarray, position: list[int], p: int = 0, rotate
     if rotate_180:
         cropped_img = cv2.rotate(cropped_img, cv2.ROTATE_180)
     return cropped_img
+    
 
 class AdaptiveResize(object):
     """Resize the input PIL Image to the given size adaptively.

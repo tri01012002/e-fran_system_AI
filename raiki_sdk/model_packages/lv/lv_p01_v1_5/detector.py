@@ -4,7 +4,7 @@ YOLO Detector for Louis Vuitton P01
 Handles object detection logic using YOLO model.
 """
 
-from raiki_sdk import YoloBase, YoloResult, YoloValidation
+from raiki_sdk import DetectorBase, YoloResult, YoloValidation
 from raiki_sdk import resize_pwd, padding_crop_yolo
 from ultralytics import YOLO
 from .config import YOLO_WEIGHTS, YOLO_CONF, YOLO_IMGSZ
@@ -17,7 +17,7 @@ import logging
 _logger = logging.getLogger(__name__)
 
 
-class LVP01Detector(YoloBase):
+class LVP01Detector(DetectorBase):
     """
     YOLO detector for Louis Vuitton P01 part detection
     """
@@ -29,7 +29,7 @@ class LVP01Detector(YoloBase):
         self.rotate_180 = False
         self.img_rsed_square = None
 
-    def yolo_detect(self, image) -> YoloResult:
+    def detect(self, image) -> YoloResult:
         """
         Detect Louis Vuitton P01 parts in the image
 
@@ -48,7 +48,7 @@ class LVP01Detector(YoloBase):
                                         imgsz=self.yolo_imgsz)
         return results[0]
 
-    def validate(self, yolo_results: YoloResult) -> YoloValidation:
+    def validate(self, results: YoloResult) -> YoloValidation:
         """
         Validate detection results
 
@@ -63,13 +63,13 @@ class LVP01Detector(YoloBase):
 
         self.rotate_180 = False
         
-        boxes = yolo_results.boxes
+        boxes = results.boxes
         if boxes is None:
             return YoloValidation(is_valid=False, position=None, class_id=None)
         
-        boxesn = boxes.xyxyn.cpu().numpy() 
-        classes = boxes.cls.cpu().int().numpy()  
-        confs = boxes.conf.cpu().numpy()
+        boxesn = results.xyxyn.cpu().numpy() 
+        classes = results.cls.cpu().int().numpy()  
+        confs = results.conf.cpu().numpy()
         
         # Check if no detections found
         if len(classes) == 0:

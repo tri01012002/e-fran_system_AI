@@ -6,7 +6,7 @@ from pathlib import Path
 from raiki_sdk.core import _normalize_version_str, _normalize_category_str, _normalize_part_str
 import logging
 from pydantic import BaseModel
-from raiki_sdk.base import AuthenticateBase, YoloBase, ClassificatorBase
+from raiki_sdk.base import AuthenticateBase, DetectorBase, ClassificatorBase
 # from raiki_sdk.base.classificator_base import 
 
 _logger = logging.getLogger(__name__)
@@ -31,7 +31,7 @@ class AuthFeature:
     part: str          # "P01", "P02", etc.
     version: str       # "v1", "v2", etc.  
     authenticator: Optional[AuthenticateBase] = None
-    detector: Optional[YoloBase] = None
+    detector: Optional[DetectorBase] = None
 
 @dataclass
 class ClassificationFeature:
@@ -39,7 +39,7 @@ class ClassificationFeature:
     part: str          # "P00"
     version: str       # "v1", "v2", etc.  
     classifier: Optional[ClassificatorBase] = None
-    detector: Optional[YoloBase] = None
+    detector: Optional[DetectorBase] = None
 
 class ModelRegistry:
     def __init__(self):

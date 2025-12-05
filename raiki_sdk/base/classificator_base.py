@@ -1,14 +1,15 @@
 from abc import ABC, abstractmethod
 from PIL import Image
-from .schemas import ClassificationResultProb, ClassificationResultModel
+from .schemas import ClassificationResultProb
+from typing import Any
 
 class ClassificatorBase(ABC):
     @abstractmethod
-    def forward(self, image: Image.Image, topk: int = 3) -> ClassificationResultModel:
+    def forward(self, image: Image.Image, topk: int = 3) -> Any:
         pass
 
     @abstractmethod
-    def get_prob(self, result_model: ClassificationResultModel = None, topk: int = 3) -> ClassificationResultProb:
+    def get_topk(self, result_model: Any, topk: int = 3) -> ClassificationResultProb:
         pass
 
     @abstractmethod

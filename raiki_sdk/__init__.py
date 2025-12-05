@@ -8,7 +8,7 @@ __version__ = "0.1.3"
 
 from raiki_sdk.base import (
     AuthenticateBase,
-    YoloBase,
+    DetectorBase,
     AuthResult,
     ClassificationResultModel,
     ClassificationResultProb,
@@ -28,6 +28,7 @@ from raiki_sdk.preprocessing import (
     CLAHE,
     LoGFilter,
     AdjustBrightnessContrast,
+    pad_to_square,
 )
 
 from raiki_sdk.core import registry
@@ -98,7 +99,7 @@ __all__ = [
     # Base classes
     "AuthenticateBase",
     "FOLDER_CACHE_MODEL_HF",
-    "YoloBase",
+    "DetectorBase",
     "ClassificatorBase",
     "IqaBase",
     # Schemas
@@ -114,6 +115,7 @@ __all__ = [
     "padding_crop_yolo",
     "remove_white_padding",
     "pil_to_tensor",
+    "pad_to_square",
     "CLAHE",
     "LoGFilter",
     "AdjustBrightnessContrast",

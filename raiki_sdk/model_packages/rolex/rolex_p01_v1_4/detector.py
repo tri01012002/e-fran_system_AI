@@ -4,7 +4,7 @@ YOLO Detector for Rolex P01
 Handles object detection logic using YOLO model.
 """
 
-from raiki_sdk.base import YoloBase, YoloResult, YoloValidation
+from raiki_sdk.base import DetectorBase, YoloResult, YoloValidation
 from raiki_sdk.preprocessing import padding_crop_yolo
 from ultralytics import YOLO
 from .config import YOLO_WEIGHTS, YOLO_CONF, YOLO_IMGSZ
@@ -12,7 +12,7 @@ from PIL import Image
 import cv2
 
 
-class RolexP01Detector(YoloBase):
+class RolexP01Detector(DetectorBase):
     """
     YOLO detector for Rolex P01 part detection
     """
@@ -22,7 +22,7 @@ class RolexP01Detector(YoloBase):
         self.yolo_conf = YOLO_CONF
         self.yolo_imgsz = YOLO_IMGSZ
     
-    def yolo_detect(self, image) -> YoloResult:
+    def detect(self, image) -> YoloResult:
         """
         Detect Rolex P01 parts in the image
         - Convert the image to grayscale for YOLO detection.
@@ -42,7 +42,7 @@ class RolexP01Detector(YoloBase):
                                         imgsz=self.yolo_imgsz)
         return results[0]
 
-    def validate(self, yolo_result: YoloResult) -> YoloValidation:
+    def validate(self, results: YoloResult) -> YoloValidation:
         """
         Validate detection results
         
@@ -55,8 +55,8 @@ class RolexP01Detector(YoloBase):
             class_id: The class id of the detection
         """
         # Extract boxes and classes
-        boxesn = yolo_result.boxes.xyxyn.cpu().numpy()  # Bounding boxesn
-        classes = yolo_result.boxes.cls.cpu().tolist()  # Class IDs
+        boxesn = results.boxes.xyxyn.cpu().numpy()  # Bounding boxesn
+        classes = results.boxes.cls.cpu().tolist()  # Class IDs
 
         # check validate
         valid = False
@@ -84,7 +84,7 @@ class RolexP01Detector(YoloBase):
 
         if len(p01_boxesn) > 0:
             valid = True
-            image_h, image_w = yolo_result.boxes.orig_shape
+            image_h, image_w = results.boxes.orig_shape
             x1n, y1n, x2n, y2n = p01_boxesn[0]
             x1, y1, x2, y2 = int(x1n * image_w), int(y1n * image_h), int(x2n * image_w), int(y2n * image_h)
             position = [x1, y1, x2, y2]

@@ -187,7 +187,7 @@ See full release details
 - Initial release of Raiki SDK
 - Abstract base classes:
   - `AuthenticateBase` for authentication systems
-  - `YoloBase` for YOLO-based detection systems
+  - `DetectorBase` for YOLO-based detection systems
 - Pydantic schemas for type-safe data validation:
   - `AuthResult` for authentication results
   - `YoloResult` for detection results

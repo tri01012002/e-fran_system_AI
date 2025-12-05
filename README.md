@@ -317,8 +317,8 @@ Abstract base class for authentication systems.
 **Methods:**
 - `authenticate(image_path: str) -> AuthResult`: Implement your authentication logic
 
-#### `YoloBase`
-Abstract base class for YOLO-based detection systems.
+#### `DetectorBase`
+Abstract base class for model-based detection systems.
 
 **Methods:**
 - `detect(image_path: str) -> YoloResult`: Detect objects in image
@@ -435,7 +435,7 @@ pip install -e .
 
 ```bash
 # Test imports
-python -c "from raiki_sdk import AuthenticateBase, YoloBase; print('✅ Success!')"
+python -c "from raiki_sdk import AuthenticateBase, DetectorBase; print('✅ Success!')"
 
 # Check version
 python -c "import raiki_sdk; print(f'Version: {raiki_sdk.__version__}')"

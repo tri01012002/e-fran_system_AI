@@ -1,13 +1,13 @@
-from raiki_sdk import YoloBase, YoloResult, YoloValidation
+from raiki_sdk import DetectorBase, YoloResult, YoloValidation
 from raiki_sdk import resize_pwd, padding_crop_yolo
 from ultralytics import YOLO
 from .config import YOLO_WEIGHTS, YOLO_CONF, YOLO_IMGSZ, PADD_CROP, TARGET_SIZE
 from PIL import Image
 import cv2
 
-class LVP00Detector(YoloBase):
+class LVP00Detector(DetectorBase):
     """
-    LVP00Detector: A custom YOLO-based object detector that extends YoloBase.
+    LVP00Detector: A custom YOLO-based object detector that extends DetectorBase.
     Handles detection, validation, and cropping of detected regions.
     """
 
@@ -22,7 +22,7 @@ class LVP00Detector(YoloBase):
         self.yolo_conf = YOLO_CONF
         self.yolo_imgsz = YOLO_IMGSZ
 
-    def yolo_detect(self, image) -> YoloResult:
+    def detect(self, image) -> YoloResult:
         """
         Perform object detection using YOLO model.
         
@@ -44,7 +44,7 @@ class LVP00Detector(YoloBase):
         )
         return results[0]
 
-    def validate(self, yolo_results) -> YoloValidation:
+    def validate(self, results) -> YoloValidation:
         """
         Validate detection results and select the most confident box.
         
@@ -56,7 +56,7 @@ class LVP00Detector(YoloBase):
                             detected position, and class ID.
         """
         # Return invalid if no detections are found
-        if len(yolo_results) == 0 or len(yolo_results[0].boxes) == 0:
+        if len(results) == 0 or len(results[0].boxes) == 0:
             return YoloValidation(is_valid=False, position=[], class_id=None)
 
         best_box = None
@@ -64,7 +64,7 @@ class LVP00Detector(YoloBase):
         valid = False
 
         # Iterate over all detected boxes
-        for box in yolo_results[0].boxes:
+        for box in results[0].boxes:
             cls_id = int(box.cls)           # Class ID
             conf = box.conf.item()          # Confidence score
 

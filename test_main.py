@@ -10,8 +10,7 @@ import uvicorn
 
 
 # Import routers
-from test_raiki_sdk import check_part_test
-from test_raiki_sdk import router as check_router
+from test_raiki_sdk import check_router, classify_router
 
 # Import registry to check registered models
 from raiki_sdk import list_models  
@@ -106,6 +105,12 @@ app.include_router(
     check_router,
     prefix="/api/v1/check",
     tags=["Authentication"]
+)
+
+app.include_router(
+    classify_router,
+    prefix="/api/v1/classify",
+    tags=["Classification"]
 )
 
 

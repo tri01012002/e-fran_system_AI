@@ -1,4 +1,4 @@
-from raiki_sdk.base import YoloBase, YoloResult, YoloValidation
+from raiki_sdk.base import DetectorBase, YoloResult, YoloValidation
 from raiki_sdk.preprocessing import padding_crop_yolo, resize_pwd
 from ultralytics import YOLO
 from .config import YOLO_WEIGHTS, YOLO_CONF, YOLO_IMGSZ, TARGET_SIZE, COLOR_PADDING
@@ -6,7 +6,7 @@ from PIL import Image
 import cv2
 
 
-class RolexP05Detector(YoloBase):
+class RolexP05Detector(DetectorBase):
 
     def __init__(self, device: str):
         self.model = YOLO(YOLO_WEIGHTS).to(device)
@@ -17,7 +17,7 @@ class RolexP05Detector(YoloBase):
         self.output_size = TARGET_SIZE
         self.color_padding = COLOR_PADDING
 
-    def yolo_detect(self, image) -> YoloResult:
+    def detect(self, image) -> YoloResult:
         img_input_yolo_cv2 = image
         img_input_yolo_pil = Image.fromarray(cv2.cvtColor(img_input_yolo_cv2, cv2.COLOR_BGR2GRAY))
 
@@ -27,12 +27,12 @@ class RolexP05Detector(YoloBase):
 
         return results[0]
 
-    def validate(self, yolo_results: YoloResult) -> YoloValidation:
-        p05_boxesn = list(yolo_results.boxes)
+    def validate(self, results: YoloResult) -> YoloValidation:
+        boxes = list(results.boxes)
 
         max_confidence = 0
         best_result = None
-        for box in p05_boxesn:
+        for box in boxes:
             conf = box.conf.item() if hasattr(box.conf, "item") else float(box.conf)
             if conf > max_confidence:
                 max_confidence = conf

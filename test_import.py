@@ -6,7 +6,7 @@ def test_imports():
     try:
         from raiki_sdk import (
             AuthenticateBase,
-            YoloBase,
+            DetectorBase,
             AuthResult,
             YoloResult,
             YoloValidation,
