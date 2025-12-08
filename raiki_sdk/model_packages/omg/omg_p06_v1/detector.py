@@ -24,6 +24,7 @@ class OMGP06Detector(DetectorBase):
         self.color_padding = COLOR_PADDING
         self.rotation_config = ROTATION_CONFIG
         self.img_rsed_square = None
+        self.last_class_id = None  # Lưu class_id từ validate()
 
     def detect(self, image) -> YoloResult:
         """
@@ -87,6 +88,9 @@ class OMGP06Detector(DetectorBase):
         best_box = boxesn[best_idx]
         best_class = int(classes[best_idx])
         
+        # Lưu class_id vào instance variable
+        self.last_class_id = best_class
+        
         # Convert normalized coords to pixel coords
         image_h, image_w = map(int, boxes.orig_shape)
         x1n, y1n, x2n, y2n = best_box
@@ -112,6 +116,10 @@ class OMGP06Detector(DetectorBase):
         Returns:
             PIL Image cropped, rotated to bottom orientation
         """
+        # Nếu class_id không được truyền, dùng class_id từ validate()
+        if class_id is None:
+            class_id = self.last_class_id
+        
         x1, y1, x2, y2 = position
         box_w = x2 - x1
         box_h = y2 - y1
@@ -143,11 +151,10 @@ class OMGP06Detector(DetectorBase):
             self.img_rsed_square, 
             new_position
         )
-        
-        # Rotate to normalize orientation (if class_id provided)
+
         if class_id is not None:
             cropped_image = self.normalize_orientation(cropped_image, class_id)
-        
+
         return Image.fromarray(cv2.cvtColor(cropped_image, cv2.COLOR_BGR2RGB))
     
     def normalize_orientation(self, image: np.ndarray, class_id: int) -> np.ndarray:
@@ -165,11 +172,19 @@ class OMGP06Detector(DetectorBase):
             return image
         
         config = self.rotation_config.get(class_id)
-        if not config or config["rotate"] is None:
+        if not config or config.get("rotate") is None:
             return image
         
-        return cv2.rotate(image, config["rotate"])
+        rotated = cv2.rotate(image, config["rotate"])
+        return rotated
 
     def run_pipeline(self, image, is_crop: bool = True) -> YoloValidation:
         """Run full detection pipeline"""
-        return super().run_pipeline(image, is_crop)
+        results = self.detect(image)
+        validation = self.validate(results)
+
+
+        if is_crop and validation.is_valid:
+            cropped_image = self.crop(image, validation.position, validation.class_id)
+            validation.image_crop = cropped_image
+        return validation

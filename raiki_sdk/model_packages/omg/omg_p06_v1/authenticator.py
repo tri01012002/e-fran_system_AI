@@ -77,7 +77,7 @@ class OMGP06Authenticator(AuthenticateBase):
             confidence = max(0.6, prob_value)
         else:
             confidence = prob_value
-        return confidence, f"{prob_value:.4f}-{label}"
+        return confidence, f"{confidence:.4f}-{label}"
         
     
     def generate_heatmap(self) -> Image.Image:
