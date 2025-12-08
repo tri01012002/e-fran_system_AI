@@ -1,4 +1,4 @@
-from raiki_sdk.base import YoloBase, YoloResult, YoloValidation
+from raiki_sdk.base import DetectorBase, YoloResult, YoloValidation
 from raiki_sdk.preprocessing import padding_crop_yolo, resize_pwd
 from ultralytics import YOLO
 from .config import (
@@ -10,7 +10,7 @@ import cv2
 import numpy as np
 
 
-class OMGP06Detector(YoloBase):
+class OMGP06Detector(DetectorBase):
     """
     YOLO detector for Omega P06 back cover detection
     Detects 4 orientations and normalizes to bottom orientation
@@ -25,9 +25,9 @@ class OMGP06Detector(YoloBase):
         self.rotation_config = ROTATION_CONFIG
         self.img_rsed_square = None
 
-    def yolo_detect(self, image) -> YoloResult:
+    def detect(self, image) -> YoloResult:
         """
-        Detect back cover in image using YOLO
+        Detect back cover in image
         
         Args:
             image: np.ndarray (cv2) BGR image
@@ -60,18 +60,18 @@ class OMGP06Detector(YoloBase):
         
         return results[0]
 
-    def validate(self, yolo_results: YoloResult) -> YoloValidation:
+    def validate(self, results: YoloResult) -> YoloValidation:
         """
         Validate detection results and select best detection
         
         Args:
-            yolo_results: YOLO detection results
+            results: detection results
             
         Returns:
             YoloValidation with is_valid, position, class_id
         """
         
-        boxes = yolo_results.boxes
+        boxes = results.boxes
         if boxes is None or len(boxes) == 0:
             return YoloValidation(is_valid=False, position=None, class_id=None)
         

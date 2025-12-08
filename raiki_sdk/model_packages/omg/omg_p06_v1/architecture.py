@@ -26,7 +26,8 @@ class Maxvit(nn.Module):
         )
 
         if checkpoint is not None:
-            state_dict = torch.load(checkpoint, map_location=device)
+            map_location = torch.device(device) if isinstance(device, str) else device
+            state_dict = torch.load(checkpoint, map_location=map_location, weights_only=False)
             self.load_state_dict(state_dict)
 
     def forward(self, x):

@@ -1,4 +1,4 @@
-from raiki_sdk.base import YoloBase, YoloResult, YoloValidation
+from raiki_sdk.base import DetectorBase, YoloResult, YoloValidation
 from raiki_sdk.preprocessing import padding_crop_yolo, resize_pwd
 from ultralytics import YOLO
 from .config import (
@@ -10,7 +10,7 @@ import cv2
 import numpy as np
 
 
-class OMGP01Detector(YoloBase):
+class OMGP01Detector(DetectorBase):
     """
     YOLO detector for Omega P01
     Classes: 0=omega, 1=seamaster, 2=speedmaster
@@ -25,10 +25,9 @@ class OMGP01Detector(YoloBase):
         self.img_rsed_square = None
         self.class_names = self.model.names
 
-    def yolo_detect(self, image) -> YoloResult:
+    def detect(self, image) -> YoloResult:
         """
         Detect objects trong ảnh
-        Logic từ crop.py
         """
         max_hw = max(image.shape[:2])
         self.img_rsed_square = resize_pwd(
@@ -79,12 +78,11 @@ class OMGP01Detector(YoloBase):
         
         return boxes_by_class
 
-    def validate(self, yolo_results: YoloResult) -> YoloValidation:
+    def validate(self, results: YoloResult) -> YoloValidation:
         """
-        Validate và tạo combined box nếu cần
-        Logic từ crop.py - trả về 1 box duy nhất
+        Validate 
         """
-        boxes = yolo_results.boxes
+        boxes = results.boxes
         
         if boxes is None or len(boxes) == 0:
             return YoloValidation(is_valid=False, position=None, class_id=None)
