@@ -1,0 +1,76 @@
+from raiki_sdk import DetectorBase, YoloValidation
+from raiki_sdk import resize_pwd, padding_crop_yolo
+from PIL import Image
+import cv2
+import numpy as np
+from abc import ABC, abstractmethod
+from .config import DETECTOR_WEIGHTS, COLOR_PADDING
+from rfdetr import RFDETRBase
+import supervision as sv
+from typing import Union, List
+
+
+class OMGP02Detector(DetectorBase):
+    """
+    RFDETR detector for Omega P02 part detection
+    """
+
+    def __init__(self, device: str):
+        self.model = RFDETRBase(num_classes=3, pretrain_weights=DETECTOR_WEIGHTS)
+
+    def detect(self, image) -> Union[sv.Detections, List[sv.Detections]]:
+        """
+        Detect Omg P02 parts in the image
+
+        Args:
+            image: np.ndarray (cv2) BGR image
+
+        Returns:
+            Union[sv.Detections, List[sv.Detections]]: Detection results
+        """
+        max_hw = max(image.shape[:2])
+        self.resized_image = resize_pwd(image, output_size=max_hw, color_padding=COLOR_PADDING)
+        pil_image = Image.fromarray(cv2.cvtColor(self.resized_image, cv2.COLOR_BGR2RGB))
+        results = self.model.predict(pil_image)
+        return results
+
+    def validate(self, results: Union[sv.Detections, List[sv.Detections]]) -> YoloValidation:
+
+        # Select the object with the highest probability.
+        max_confidence = 0
+        best_result = None
+        best_class_id = None
+
+        for i in range(len(results.confidence)):
+            if results.confidence[i] > max_confidence:
+                max_confidence = results.confidence[i]
+                best_class_id = results.class_id[i]
+                best_result = results.xyxy[i]
+
+        # check validate
+        valid = False
+        position = None
+        print(best_result)
+        if best_result is not None:
+            valid = True
+            position = [int(value) for value in best_result]
+
+        return YoloValidation(is_valid=valid, position=position, class_id=best_class_id)
+
+
+    def crop(self, image, position) -> Image.Image:
+        """
+        Crop the image based on the position
+
+        Args:
+            image: np.ndarray (cv2) BGR image
+            position: The position of the detection
+
+        Returns:
+            image: Image.Image (PIL) cropped image
+        """
+        cropped_image = padding_crop_yolo(self.resized_image, position)
+        return Image.fromarray(cv2.cvtColor(cropped_image, cv2.COLOR_BGR2RGB))
+
+    def run_pipeline(self, image: np.ndarray, is_crop: bool = True) -> YoloValidation:
+        return super().run_pipeline(image, is_crop)
