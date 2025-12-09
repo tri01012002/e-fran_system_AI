@@ -19,6 +19,35 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Add unit tests
 - Add CI/CD pipeline
 
+## [0.1.4] - 2025-12-09
+
+### ✨ New Features
+
+- **Expanded Omega Model Package Support**:
+  - **Omega (OMG)**: OMG_P01, OMG_P02, OMG_P03, OMG_P05, and OMG_P06.
+
+- **Replace YoloBase to DetectorBase**:
+
+### 📦 Model Package Version
+
+| Part | Package Version |
+|------|-------------|
+| OMG_P01 | v1.0 |
+| OMG_P02 | v1.1 |
+| OMG_P03 | v1.2 |
+| OMG_P05 | v1.0 |
+| OMG_P06 | v1.0 |
+
+### 🎯 Breaking Changes
+
+None - This is a purely additive release.
+
+### 📖 Documentation
+
+- Updated README with comprehensive Omega model package inventory
+- Added supported omega brands
+- Changed `YoloBase()` to `DetectorBase()`
+
 ## [0.1.3] - 2025-10-24
 
 ### ✨ New Features

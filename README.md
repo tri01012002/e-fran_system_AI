@@ -24,55 +24,21 @@
 
 > **Note:** This is a public repository with some restricted permissions.
 
-### Basic Installation (Public Access)
-
-```bash
-# Latest version from main branch
-pip install git+https://gitlab.com/dat.tram/raiki-sdk.git
-
-# Or with uv (recommended)
-uv pip install git+https://gitlab.com/dat.tram/raiki-sdk.git
-```
-
-### Install Specific Version
-
-```bash
-# Install version 0.1.0
-pip install git+https://gitlab.com/dat.tram/raiki-sdk.git@v0.1.0
-
-# Or with uv
-uv pip install git+https://gitlab.com/dat.tram/raiki-sdk.git@v0.1.0
-```
-
-### Add to requirements.txt
-
-```txt
-# Latest version
-raiki-sdk @ git+https://gitlab.com/dat.tram/raiki-sdk.git
-
-# Specific version
-raiki-sdk @ git+https://gitlab.com/dat.tram/raiki-sdk.git@v0.1.0
-```
-
-### Add to pyproject.toml
-
-```toml
-[project]
-dependencies = [
-    "raiki-sdk @ git+https://gitlab.com/dat.tram/raiki-sdk.git@v0.1.0",
-]
-```
-
-### Alternative: Using SSH
-
-If you have SSH key configured with GitLab:
+### Basic Installation (Private Access - Using SSH)
 
 ```bash
 # Latest version
-pip install git+ssh://git@gitlab.com/dat.tram/raiki-sdk.git
+uv pip install git+ssh://git@gitlab.com/dat.tram/raiki-sdk.git
 
 # Specific version
-pip install git+ssh://git@gitlab.com/dat.tram/raiki-sdk.git@v0.1.0
+uv pip install git+ssh://git@gitlab.com/dat.tram/raiki-sdk.git@v0.1.0
+```
+
+#### Note
+After installing the raiki-sdk, run the following command:
+
+```bash
+uv pip install "transformers>=4.56,<5" "peft==0.18.0"
 ```
 
 ### Authentication (For Restricted Operations)
@@ -104,58 +70,16 @@ pip install git+https://oauth2:${GITLAB_TOKEN}@gitlab.com/dat.tram/raiki-sdk.git
 
 The SDK supports counterfeit detection for multiple luxury brands with multiple parts per brand:
 
-#### Louis Vuitton (LV)
+#### Simplified API
 
-```
-from raiki_sdk import get_auth_feature
-
-# Load Louis Vuitton model packages
-lv_p01 = get_auth_feature("lv", "P01", "v1_1", device="cuda")
-detector_p01 = lv_p01.detector
-authenticator_p01 = lv_p01.authenticator
-```
-
-# Supported LV parts: P01, P02, P03, P04, P04case4, P05| Part | Purpose |
-|------|---------|
-| LV_P01 | Primary part authentication |
-| LV_P02 | Secondary part authentication |
-| LV_P03 | Tertiary part authentication |
-| LV_P04 | Quaternary part authentication |
-| LV_P04case4 | Special variant of P04 |
-| LV_P05 | Additional part authentication |
-
-#### Rolex
-
-```
-from raiki_sdk import get_auth_feature
-
-# Load Rolex model packages
-rolex_p01 = get_auth_feature("rolex", "P01", "v1_3", device="cuda")
-detector_p01 = rolex_p01.detector
-authenticator_p01 = rolex_p01.authenticator
-```
-
-# Supported Rolex parts: P01, P02, P03, P04, P05, P08, P09, P10| Part | Purpose |
-|------|---------|
-| Rolex_P01 | Primary part authentication |
-| Rolex_P02 | Secondary part authentication |
-| Rolex_P03 | Tertiary part authentication |
-| Rolex_P04 | Quaternary part authentication |
-| Rolex_P05 | Quinary part authentication |
-| Rolex_P08 | Octary part authentication |
-| Rolex_P09 | Nonary part authentication |
-| Rolex_P10 | Denary part authentication |
-
-#### Using get_auth_feature() - Simplified API
-
-For AI Engineers, the `get_auth_feature()` function provides a simplified interface for loading authentication models:
+##### `get_auth_feature()` function provides a simplified interface for loading authentication models:
 
 from raiki_sdk import get_auth_feature
 
 ```
 # Simple one-liner to load any model package
 model_package = get_auth_feature(
-    category="rolex",    # Brand: "rolex", "lv", etc.
+    category="rolex",    # Brand: "rolex", "bag-lv", "omg", etc.
     part="P01",          # Part identifier: "P01", "P02", etc.
     model_version="v1_3",  # Model version: "v1_3", "v1_4", etc.
     device="cuda"        # Device: "cuda", "mps", "cpu"
