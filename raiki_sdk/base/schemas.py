@@ -49,4 +49,5 @@ class RedFrameResult(BaseModel):
         "out_of_frame_error", 
         "no_frame_error",
         "detect_error",
+        "close_error"
     ] | str | None = None
