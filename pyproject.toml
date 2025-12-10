@@ -1,6 +1,6 @@
 [project]
 name = "raiki-sdk"
-version = "0.1.3"
+version = "0.1.4"
 description = "Raiki SDK - Base interfaces and utilities for classification and counterfeit detection systems"
 readme = "README.md"
 requires-python = ">=3.10"

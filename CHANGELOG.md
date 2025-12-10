@@ -8,16 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Planned
-- Add Classify Base
-- Add Red Frame service
-- Add unit tests
-- Add CI/CD pipeline
-
-## [Unreleased]
-
-### Planned
-- Add unit tests
-- Add CI/CD pipeline
+- Add Omega classify package
 
 ## [0.1.4] - 2025-12-09
 
@@ -229,6 +220,7 @@ See full release details
 - Dependencies: numpy, pillow, pydantic, ultralytics
 
 [Unreleased]: https://gitlab.com/dat.tram/raiki-sdk/-/compare/v0.1.3...HEAD
+[0.1.4]: https://gitlab.com/dat.tram/raiki-sdk/-/compare/v0.1.3...v0.1.4
 [0.1.3]: https://gitlab.com/dat.tram/raiki-sdk/-/compare/v0.1.2...v0.1.3
 [0.1.2]: https://gitlab.com/dat.tram/raiki-sdk/-/compare/v0.1.1...v0.1.2
 [0.1.1]: https://gitlab.com/dat.tram/raiki-sdk/-/compare/v0.1.0...v0.1.1

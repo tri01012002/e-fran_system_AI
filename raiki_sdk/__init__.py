@@ -4,7 +4,7 @@ Raiki SDK - LuxAuthen Toolkit
 A Python SDK providing base interfaces and utilities for counterfeit detection and product classification systems.
 """
 
-__version__ = "0.1.3"
+__version__ = "0.1.4"
 
 from raiki_sdk.base import (
     AuthenticateBase,
