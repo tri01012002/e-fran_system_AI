@@ -228,3 +228,39 @@ def pil_to_tensor(img: Image.Image, device: str = 'cpu') -> torch.Tensor:
     img = ToTensor()(img).to(device=device)
     img = img.unsqueeze(0)
     return img
+
+
+def normalize_position_to_square(position: list[int]) -> list[int]:
+    """
+    Normalize a YOLO position [x1, y1, x2, y2] so that the crop becomes a square.
+
+    Logic:
+        - Compute width and height.
+        - Take the larger side minus the smaller side.
+        - Add that difference to the smaller side (keep the top-left corner fixed).
+
+    Args:
+        position (list|tuple): [x1, y1, x2, y2]
+
+    Returns:
+        list: Normalized position [x1, y1, x2, y2] forming a square.
+    """
+    if not position or len(position) != 4:
+        return position
+
+    x1, y1, x2, y2 = position
+    width = x2 - x1
+    height = y2 - y1
+
+    # Already square
+    if width == height:
+        return [x1, y1, x2, y2]
+
+    if width > height:
+        diff = width - height
+        y2 = y2 + diff
+    else:
+        diff = height - width
+        x2 = x2 + diff
+
+    return [int(x1), int(y1), int(x2), int(y2)]

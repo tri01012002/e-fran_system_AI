@@ -4,7 +4,7 @@ Configuration for Omega P06 v1 Model
 from raiki_sdk.utils.hf_lib import download_file_from_hf
 import cv2
 # Model version
-AUTH_MODEL_VERSION = "v1" 
+AUTH_MODEL_VERSION = "v1.1" 
 YOLO_MODEL_VERSION = "v1"
 
 
@@ -15,8 +15,8 @@ YOLO_WEIGHTS = download_file_from_hf(
 )
 
 AUTH_WEIGHTS = download_file_from_hf(
-    repo_id="rikai-ai/omg_p06_auth_v1-1_maxvit-small-512",
-    filename="omg_p06_auth_v1-1_maxvit_small_20251124_20251124.pth"
+    repo_id="rikai-ai/omg_p06_auth_v1-1",
+    filename="omg_p06_auth_v1.1_maxvit_small_512_20251210_20251210.pth"
 )
 
 # AUTH parameters

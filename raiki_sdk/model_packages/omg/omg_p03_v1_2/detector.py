@@ -1,5 +1,5 @@
 from raiki_sdk import DetectorBase, YoloResult, YoloValidation
-from raiki_sdk import resize_pwd, padding_crop_yolo
+from raiki_sdk import resize_pwd, padding_crop_yolo, normalize_position_to_square
 from ultralytics import YOLO
 from PIL import Image
 import cv2
@@ -54,8 +54,9 @@ class OMGP03Detector(DetectorBase):
             valid = True
             x1, y1, x2, y2 = best_result.xyxy[0].cpu().to(torch.int)
             position = [x1, y1, x2, y2]
+        square_position = normalize_position_to_square(position)
 
-        return YoloValidation(is_valid=valid, position=position, class_id=None)
+        return YoloValidation(is_valid=valid, position=square_position, class_id=None)
 
 
 

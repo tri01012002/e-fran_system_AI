@@ -29,6 +29,7 @@ from raiki_sdk.preprocessing import (
     LoGFilter,
     AdjustBrightnessContrast,
     pad_to_square,
+    normalize_position_to_square,
 )
 
 from raiki_sdk.core import registry
@@ -119,6 +120,7 @@ __all__ = [
     "CLAHE",
     "LoGFilter",
     "AdjustBrightnessContrast",
+    "normalize_position_to_square",
     # Model Management
     "get_auth_model",
     "get_classifier_model",

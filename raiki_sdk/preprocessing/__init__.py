@@ -6,6 +6,7 @@ from .processors import (
     remove_white_padding,
     pil_to_tensor,
     pad_to_square,
+    normalize_position_to_square,
 )
 
 from .filters import (
@@ -27,6 +28,7 @@ __all__ = [
     "remove_white_padding",
     "pil_to_tensor",
     "pad_to_square",
+    "normalize_position_to_square",
     # Filters
     "CLAHE",
     "UnsharpMask",

@@ -1,5 +1,5 @@
 from raiki_sdk import DetectorBase, YoloValidation
-from raiki_sdk import resize_pwd, padding_crop_yolo
+from raiki_sdk import resize_pwd, padding_crop_yolo, normalize_position_to_square
 from PIL import Image
 import cv2
 import numpy as np
@@ -54,8 +54,13 @@ class OMGP02Detector(DetectorBase):
         if best_result is not None:
             valid = True
             position = [int(value) for value in best_result]
+        
+        square_position = normalize_position_to_square(position)
+        x0, y0, x1, y1 = square_position
+        x0_p, y0_p, x1_p, y1_p = x0 - 200, y0 - 200, x1 + 200, y1 + 200
+        square_position_padded = [x0_p, y0_p, x1_p, y1_p]
 
-        return YoloValidation(is_valid=valid, position=position, class_id=best_class_id)
+        return YoloValidation(is_valid=valid, position=square_position_padded, class_id=best_class_id)
 
 
     def crop(self, image, position) -> Image.Image:
