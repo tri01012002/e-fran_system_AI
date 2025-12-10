@@ -59,23 +59,22 @@ def get_auth_feature(category: str, part: str, model_version: str, device: str) 
     """
     return registry.get_auth_feature(category, part, model_version, device)
 
-def get_classification_feature(category: str, part: str, model_version: str, device: str) -> ClassificationFeature:
+def get_classification_feature(category: str, model_version: str, device: str) -> ClassificationFeature:
     """
     Load specific classifier model version on-demand.    
     
     Args:
         category: Brand category ("rolex", "lv", etc.)
-        part: Part identifier ("P00" for classifier)
         model_version: Version identifier ("v1_1", "v1_2", etc.)
     
     Returns:
         ClassificationFeature: Classifier model feature
     
     Example:
-        >>> model = get_classifier_model("rolex", "P00", "v1_1", "cuda")
+        >>> model = get_classifier_model("rolex", "v1_1", "cuda")
         >>> classifier = model.classifier
     """
-    return registry.get_classification_feature(category, part, model_version, device)
+    return registry.get_classification_feature(category = category, part = "P00", model_version = model_version, device = device)
 
 
 def list_models() -> dict:
