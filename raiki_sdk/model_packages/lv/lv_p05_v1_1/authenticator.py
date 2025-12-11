@@ -65,10 +65,11 @@ class LVP05Authenticator(AuthenticateBase):
         index = torch.argmax(probs, -1)
         label = AUTH_CLASS_LABELS[index]
 
-        if index in [0,2]:  # fake - must be C
-            return min(0.5, 1.0 - probs[index].item()), f"{probs[index]}-{label}"
-        elif index in [1,3]:  # real - can be B or C
-            return max(0.6, probs[index].item()), f"{probs[index]}-{label}"
+        simple_label = "fake" if "fake" in label else "real"
+
+        if index == 0 or index == 2:
+            return min(0.5, 1.0 - probs[0].item()), simple_label
+        return max(0.65, probs[index].item()), simple_label
 
     def generate_heatmap(self) -> Image.Image:
         pass

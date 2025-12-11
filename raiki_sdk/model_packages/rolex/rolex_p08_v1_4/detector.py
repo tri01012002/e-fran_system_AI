@@ -4,9 +4,10 @@ from ultralytics import YOLO
 from .config import YOLO_WEIGHTS, YOLO_CONF, YOLO_IMGSZ, TARGET_SIZE, COLOR_PADDING
 from PIL import Image
 import cv2
+import torch
 
 
-class RolexP05Detector(DetectorBase):
+class RolexP08Detector(DetectorBase):
 
     def __init__(self, device: str):
         self.model = YOLO(YOLO_WEIGHTS).to(device)
@@ -19,7 +20,7 @@ class RolexP05Detector(DetectorBase):
 
     def detect(self, image) -> YoloResult:
         img_input_yolo_cv2 = image
-        img_input_yolo_pil = Image.fromarray(cv2.cvtColor(img_input_yolo_cv2, cv2.COLOR_BGR2GRAY))
+        img_input_yolo_pil = Image.fromarray(cv2.cvtColor(img_input_yolo_cv2, cv2.COLOR_BGR2RGB))
 
         results = self.model.predict(source=img_input_yolo_pil, verbose=False, show=False, save=False,
                                      save_crop=False, conf=self.yolo_conf, line_width=0,
@@ -28,32 +29,28 @@ class RolexP05Detector(DetectorBase):
         return results[0]
 
     def validate(self, results: YoloResult) -> YoloValidation:
-        boxes = list(results.boxes)
+        p08_boxesn = [box for box in results.boxes]
 
+        # Select the object with the highest probability.
         max_confidence = 0
         best_result = None
-        for box in boxes:
-            conf = box.conf.item() if hasattr(box.conf, "item") else float(box.conf)
-            if conf > max_confidence:
-                max_confidence = conf
+        for box in p08_boxesn:
+            if box.conf > max_confidence:
+                max_confidence = box.conf
                 best_result = box
-
-        # ✅ Validation
-        valid = best_result is not None
+        # check validate
+        valid = False
         position = {}
-
-        if valid:
-            position = best_result.xyxy.cpu().numpy()[0].astype(int)
+        if best_result:
+            valid = True
+            x1, y1, x2, y2 = best_result.xyxy[0].cpu().to(torch.int)
+            position = [x1, y1, x2, y2]
 
         return YoloValidation(is_valid=valid, position=position, class_id=None)
 
     def crop(self, image, position) -> Image.Image:
         cropped_image = padding_crop_yolo(image, position)
-        self.image_detect = resize_pwd(
-            cropped_image,
-            output_size=self.output_size,
-            color_padding=self.color_padding
-        )
+        self.image_detect = resize_pwd(cropped_image, output_size=self.output_size, color_padding=self.color_padding)
         return Image.fromarray(cv2.cvtColor(self.image_detect, cv2.COLOR_BGR2RGB))
 
     def run_pipeline(self, image: any, is_crop: bool = True) -> YoloValidation:

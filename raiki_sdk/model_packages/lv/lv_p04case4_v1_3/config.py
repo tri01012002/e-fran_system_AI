@@ -1,5 +1,5 @@
 """
-Configuration for Louis Vuitton P04 Case 4 Models Version 1.4
+Configuration for Louis Vuitton P04 Case 4 Models Version 1.3
 """
 from raiki_sdk.utils import download_file_from_hf
 
@@ -27,10 +27,10 @@ AUTH_CLASS_LABELS = ['fake','real']
 
 # Metadata
 CATEGORY = "bag-lv"
-PART = "P04_case4"
+PART = "LV_P04case4"
 
 # Package name
-PACKAGE_NAME = "lv_p04_case4_v1_4"
+PACKAGE_NAME = "lv_p04case4_v1_3"
 
 # YOLO parameters
 YOLO_CONF = 0.35

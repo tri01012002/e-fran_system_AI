@@ -33,7 +33,7 @@ CATEGORY = "rolex"
 PART = "P03"
 
 # Package name
-PACKAGE_NAME = "rolex_p03_v1_3"
+PACKAGE_NAME = "rolex_p03_v1_4"
 
 # YOLO parameters
 YOLO_CONF = 0.25

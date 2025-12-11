@@ -1,7 +1,7 @@
 """
-Rolex P05 V1.4 Model Package
+Rolex P05 V1.3 Model Package
 
-This package provides detector and authenticator for Rolex P05 models version 1.4.
+This package provides detector and authenticator for Rolex P05 models version 1.3.
 """
 
 def get_detector(device: str):
