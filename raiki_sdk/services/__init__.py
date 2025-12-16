@@ -2,13 +2,17 @@
 
 from .redframe_service import RedFrameService
 from .iqa_service import LIQEServices
+from .brand_detection import BrandDetectionService, DetectionResult
 import logging
-from typing import Dict
+from typing import Dict, Optional
 
 _logger = logging.getLogger(__name__)
 
 # Global cache for RedFrameService instances
 _redframe_service_cache: Dict[str, RedFrameService] = {}
+
+# Global cache for BrandDetectionService
+_brand_detection_cache: Optional[BrandDetectionService] = None
 
 def get_redframe_service(
     category: str, 
@@ -44,8 +48,6 @@ def get_redframe_service(
     """
     if class_labels is None:
         class_labels = ["good", "wide", "angle", "close"]
-    
-    # Create cache key based on configuration parameters
     cache_key = f"{category.lower()}_{part.lower()}_{advanced_mode}_{device}"
     
     if cache_key not in _redframe_service_cache:
@@ -63,5 +65,37 @@ def get_redframe_service(
     
     return _redframe_service_cache[cache_key]
 
-__all__ = ["get_redframe_service", "LIQEServices"]
 
+def get_brand_detection_service(
+    device: str = "cuda"
+) -> BrandDetectionService:
+    """
+    Get cached BrandDetectionService instance.
+    
+    Args:
+        device: "cuda", "mps", or "cpu"
+    
+    Returns:
+        BrandDetectionService: Cached service instance
+    
+    Example:
+        >>> from raiki_sdk import get_brand_detection_service
+        >>> service = get_brand_detection_service(device="cuda")
+        >>> result = service.detect(image)
+        >>> if result:
+        ...     print(f"Detected: {result.category}")
+    """
+    global _brand_detection_cache
+    if _brand_detection_cache is None:
+        _logger.info(f"Creating new BrandDetectionService on {device}")
+        _brand_detection_cache = BrandDetectionService(device=device)
+    return _brand_detection_cache
+
+
+__all__ = [
+    "get_redframe_service", 
+    "LIQEServices",
+    "get_brand_detection_service",
+    "BrandDetectionService",
+    "DetectionResult",
+]

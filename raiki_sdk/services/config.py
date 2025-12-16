@@ -46,3 +46,28 @@ def get_redframe_model_path(category: str, part: str) -> str:
     if model_path is None:
         print(f"[INFO] Model không tồn tại cho {category} - {part}, skipping")
     return MODEL_REGISTRY[key]
+
+
+
+# ============ BRAND DETECTION CONFIG ============
+WATCH_DETECTOR_WEIGHTS = download_file_from_hf(
+    repo_id="rikai-ai/brand_detector_yolo",
+    filename="brand_detector_yolov11l_16122025.pt"  
+)
+
+WATCH_DETECTOR_IMGSZ = 640
+WATCH_DETECTOR_CONFIDENCE = 0.5
+WATCH_CLASS_MAP = {
+    0: "watch",
+    1: "omega_logo",
+    2: "rolex_logo",
+    3: "lv",
+}
+
+WATCH_BRAND_RULES = {
+    "omega_logo": "omg",
+    "rolex_logo": "rolex",
+    "lv": "bag-lv",
+}
+
+LV_DEFAULT_MODEL_VERSION = "v1_1"
