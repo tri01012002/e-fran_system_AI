@@ -10,7 +10,8 @@ import uvicorn
 
 
 # Import routers
-from test_raiki_sdk import check_router, classify_router
+from test_raiki_sdk import check_router, classify_router, brand_detect_router  
+
 
 # Import registry to check registered models
 from raiki_sdk import list_models  
@@ -113,7 +114,11 @@ app.include_router(
     tags=["Classification"]
 )
 
-
+app.include_router(
+    brand_detect_router,
+    prefix="/api/v1/brand-detect",
+    tags=["Brand Detection"]
+)
 # Run with uvicorn
 if __name__ == "__main__":
     uvicorn.run(
