@@ -8,6 +8,8 @@ from .schemas import (
     ClassificationResultProb,
     IqaResult,
     RedFrameResult,
+    DetectionResult,
+    WatchBrandClassifyResult
 )
 from .authenticate_base import AuthenticateBase
 from .detector_base import DetectorBase
@@ -26,6 +28,8 @@ __all__ = [
     "IqaResult",
     "RedFrameValidation",
     "RedFrameResult",
-    "AuthResult"
+    "AuthResult",
+    "DetectionResult",
+    "WatchBrandClassifyResult"
 ]
 

@@ -1,7 +1,9 @@
 from pydantic import BaseModel, ConfigDict, Field
 from typing import Any, Optional, Literal
+from dataclasses import dataclass    
 from PIL import Image
 from ultralytics.engine.results import Results as YoloResult
+
 
 class AuthResult(BaseModel):
     probability: float
@@ -51,3 +53,14 @@ class RedFrameResult(BaseModel):
         "detect_error",
         "close_error"
     ] | str | None = None
+    
+@dataclass
+class DetectionResult:
+    category: str
+    confidence: float
+    cropped_image: Optional[Image.Image] = None
+    bbox: Optional[tuple[int, int, int, int]] = None
+@dataclass
+class WatchBrandClassifyResult:
+    category: str
+    confidence: float

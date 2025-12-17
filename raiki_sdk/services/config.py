@@ -56,7 +56,7 @@ WATCH_DETECTOR_WEIGHTS = download_file_from_hf(
 )
 
 WATCH_DETECTOR_IMGSZ = 640
-WATCH_DETECTOR_CONFIDENCE = 0.3
+WATCH_DETECTOR_CONFIDENCE = 0.4
 WATCH_CLASS_MAP = {
     0: "watch",
     1: "omega_logo",

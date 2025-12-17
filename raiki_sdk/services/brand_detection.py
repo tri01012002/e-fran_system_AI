@@ -6,6 +6,7 @@ import logging
 from PIL import Image
 from ultralytics import YOLO
 from raiki_sdk.preprocessing import resize_pwd
+from raiki_sdk.base import DetectionResult
 from .config import (
     WATCH_DETECTOR_WEIGHTS,
     WATCH_DETECTOR_IMGSZ,
@@ -13,25 +14,9 @@ from .config import (
     WATCH_CLASS_MAP,
     WATCH_BRAND_RULES,
 )
+from raiki_sdk.services.classify_brand import get_main_model as get_watch_brand_classifier
 
 _logger = logging.getLogger(__name__)
-
-@dataclass
-class DetectionResult:
-    """
-    Standardized result from brand detection.
-    
-    Attributes:
-        category: Detected brand category ("rolex", "omg", "bag-lv", "unknown_watch")
-        confidence: Detection confidence score (0.0 - 1.0)
-        cropped_image: PIL Image cropped from original image (RGB format)
-        bbox: Bounding box coordinates (x1, y1, x2, y2) in original image space
-    """
-    category: str
-    confidence: float
-    cropped_image: Optional[Image.Image] = None
-    bbox: Optional[Tuple[int, int, int, int]] = None
-
 
 # ============================================================================
 # BRAND DETECTOR
@@ -88,6 +73,7 @@ class BrandDetector:
         self.confidence = confidence or WATCH_DETECTOR_CONFIDENCE
         self.device = device
         self._model = None
+        self._watch_brand_classifier = get_watch_brand_classifier(device=self.device)
     
     @property
     def model(self):
@@ -133,7 +119,7 @@ class BrandDetector:
     
     def _parse_detections(self, results) -> Tuple[Dict[str, float], Optional[np.ndarray], Optional[str]]:
         """
-        Parse YOLO results into detected classes and best bounding box.
+        Parse YOLO results into detected classes and best bounding .
         
         Args:
             results: YOLO inference results
@@ -229,7 +215,8 @@ class BrandDetector:
     def _determine_category(
         self,
         detected: Dict[str, float],
-        best_box_class: Optional[str]
+        best_box_class: Optional[str],
+        cropped_watch: Optional[Image.Image] = None
     ) -> Tuple[Optional[str], float]:
         """
         Determine final category based on detected classes.
@@ -247,23 +234,43 @@ class BrandDetector:
         Returns:
             Tuple of (category, confidence) or (None, 0.0)
         """
+        print(detected)
         # Priority 1: LV bag
         if "lv" in detected:
             return self.brand_rules.get("lv", "bag-lv"), detected["lv"]
         
         # Priority 2: Watch with brand
         if "watch" in detected:
-            # Check for brand logos (exclude "lv" from watch brand rules)
             for logo_class, category in self.brand_rules.items():
                 if logo_class == "lv":
                     continue
                 if logo_class in detected:
                     return category, detected[logo_class]
-            
-            # Watch detected but no recognizable brand
-            _logger.warning("Watch detected but no brand logo found")
+
+            print("cropped_watch is not None:", cropped_watch is not None)
+            print("_watch_brand_classifier is not None:", self._watch_brand_classifier is not None)
+            if cropped_watch is not None and self._watch_brand_classifier is not None:
+                try:
+                    label, prob = self._watch_brand_classifier.forward(cropped_watch)
+                    if prob >= 0.4:
+                        _logger.info(
+                            "Watch brand classified by classifier: %s (%.3f)",
+                            label, prob
+                        )
+                        print(f"detected['watch'] : {detected['watch']},  prob: {prob}")
+                        combined_conf = min(detected["watch"],  prob)
+                        return label, combined_conf
+                    else:
+                        _logger.warning(
+                            "Watch brand classifier low confidence: %.3f, keep unknown_watch",
+                            prob,
+                        )
+                except Exception as e:
+                    _logger.exception("Error when running watch brand classifier: %s", e)
+
+            _logger.warning("Watch detected but brand could not be determined")
             return "unknown_watch", detected["watch"]
-        
+
         return None, 0.0
     
     def detect(self, image: np.ndarray) -> Optional[DetectionResult]:
@@ -284,35 +291,36 @@ class BrandDetector:
         
         # Parse detections
         detected, best_box, best_box_class = self._parse_detections(results)
-        
         if not detected:
             _logger.debug("No objects detected")
             return None
-        
+
         _logger.debug(f"Detected classes: {detected}")
-        
-        # Determine category
-        category, confidence = self._determine_category(detected, best_box_class)
-        
-        if category is None:
-            return None
-        
-        # Prepare cropped image if we have a bounding box
+
         cropped_pil: Optional[Image.Image] = None
         bbox_tuple: Optional[Tuple[int, int, int, int]] = None
-        
+
         if best_box is not None:
             orig_h, orig_w = image.shape[:2]
             bbox_tuple = self._scale_bbox_to_original(best_box, orig_h, orig_w)
             cropped_pil = self._crop_and_convert(image, bbox_tuple)
-        
+
+        # truyền thêm cropped_watch
+        category, confidence = self._determine_category(
+            detected=detected,
+            best_box_class=best_box_class,
+            cropped_watch=cropped_pil if best_box_class == "watch" else None,
+        )
+
+        if category is None:
+            return None
+
         return DetectionResult(
             category=category,
             confidence=confidence,
             cropped_image=cropped_pil,
             bbox=bbox_tuple
         )
-
 
 # ============================================================================
 # SERVICE
