@@ -49,6 +49,25 @@ class LVP00Classificator(ClassificatorBase):
         vector = vector.squeeze(0)
         return F.normalize(vector, p=2, dim=0)
     
+    def convert_code_lv(self, code):
+        convert_code_lv = {
+            # REVUE_AI-394: DATA OCT
+            "M59162":"M41142",
+            "M92216":"M92314",
+            # REVUE_AI-411: DATA NOV
+            "M60008":"N60008",
+            "M40932":"M40959",
+            "N51182":"N51282",
+            "M41138":"M41139",
+            "M61857":"M60072",
+            "M42244":"M42243",
+        }
+        if code in convert_code_lv:
+            return convert_code_lv[code]
+        return code
+
+
+
     def normalize_output(self, results: list, topk: int) -> ClassificationResultProb:
         topk_probs = []
         set_label = set()
@@ -57,6 +76,8 @@ class LVP00Classificator(ClassificatorBase):
         for name, sim in results:
             # Merge multi version
             name =  name.split("_")[0]
+            name = self.convert_code_lv(name)
+                       
             if name not in set_label:
                 topk_probs.append({
                     "name": name,
