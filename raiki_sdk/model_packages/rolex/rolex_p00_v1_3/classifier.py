@@ -74,6 +74,10 @@ class RolexP00Classificator(ClassificatorBase):
             if item["name"] == "16800":
                 item["name"] = '16800/168000'
 
+            # REVUE_AI-410    
+            if item["name"] == "268621":
+                item["name"] = '169623'            
+
         return ClassificationResultProb(topk_probs=topks_nor, metadata=self.metadata)
 
     def generate_heatmap(self) -> Image.Image:
