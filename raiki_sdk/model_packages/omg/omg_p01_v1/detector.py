@@ -100,7 +100,8 @@ class OMGP01Detector(DetectorBase):
         # Case 1: Single box
         if len(boxes_by_class) == 1:
             class_id = list(boxes_by_class.keys())[0]
-            position = boxes_by_class[class_id]['box']
+            x1, y1, x2, y2 = boxes_by_class[class_id]['box']
+            position = [x1, y1, x2, y2]
             return YoloValidation(is_valid=True, position=position, class_id=class_id)
         
         # Case 2: Multi boxes - tạo combined box (logic từ crop.py)

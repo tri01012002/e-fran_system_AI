@@ -28,6 +28,9 @@ class RolexP04Detector(DetectorBase):
         return results[0]
 
     def validate(self, results: YoloResult) -> YoloValidation:
+        if len(results.boxes) == 0:
+            return YoloValidation(is_valid=False, position=None, class_id=None)
+        
         p04_boxesn = [box for box in results.boxes]
 
         # Select the object with the highest probability.

@@ -54,6 +54,9 @@ class LVP02Detector(DetectorBase):
             position: The position of the detection
             class_id: The class id of the detection
         """
+        if len(results.boxes) == 0:
+            return YoloValidation(is_valid=False, position=None, class_id=None)
+        
         # Extract boxes and classes
         best_conf = 0.0
         position = None

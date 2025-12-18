@@ -36,6 +36,9 @@ class OMGP02Detector(DetectorBase):
 
     def validate(self, results: Union[sv.Detections, List[sv.Detections]]) -> YoloValidation:
 
+        if len(results.confidence) == 0:
+            return YoloValidation(is_valid=False, position=None, class_id=None)
+        
         # Select the object with the highest probability.
         max_confidence = 0
         best_result = None
@@ -50,7 +53,6 @@ class OMGP02Detector(DetectorBase):
         # check validate
         valid = False
         position = None
-        print(best_result)
         if best_result is not None:
             valid = True
             position = [int(value) for value in best_result]

@@ -4,6 +4,7 @@ from ultralytics import YOLO
 from .config import YOLO_WEIGHTS, YOLO_CONF, YOLO_IMGSZ, TARGET_SIZE, COLOR_PADDING
 from PIL import Image
 import cv2
+import torch
 
 
 class LVP05Detector(DetectorBase):
@@ -30,6 +31,9 @@ class LVP05Detector(DetectorBase):
         return results[0]
 
     def validate(self, results: YoloResult) -> YoloValidation:
+        if len(results.boxes) == 0:
+            return YoloValidation(is_valid=False, position=None, class_id=None)
+        
         boxes = list(results.boxes)
 
         max_confidence = 0
@@ -42,10 +46,11 @@ class LVP05Detector(DetectorBase):
 
         # ✅ Validation
         valid = best_result is not None
-        position = {}
+        position = None
 
         if valid:
-            position = best_result.xyxy.cpu().numpy()[0].astype(int)
+            x1, y1, x2, y2 = best_result.xyxy[0].cpu().to(torch.int)
+            position = [x1, y1, x2, y2]
 
         return YoloValidation(is_valid=valid, position=position, class_id=None)
 

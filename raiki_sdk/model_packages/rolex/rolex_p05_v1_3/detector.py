@@ -28,6 +28,9 @@ class RolexP05Detector(DetectorBase):
         return results[0]
 
     def validate(self, results: YoloResult) -> YoloValidation:
+        if len(results.boxes) == 0:
+            return YoloValidation(is_valid=False, position=None, class_id=None)
+        
         boxes = list(results.boxes)
 
         max_confidence = 0

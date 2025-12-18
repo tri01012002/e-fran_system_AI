@@ -38,8 +38,10 @@ class OMGP03Detector(DetectorBase):
         return results[0]
 
     def validate(self, yolo_results: YoloResult) -> YoloValidation:
-        boxesn = [box for box in yolo_results.boxes]
+        if len(yolo_results.boxes) == 0:
+            return YoloValidation(is_valid=False, position=None, class_id=None)
 
+        boxesn = [box for box in yolo_results.boxes]
         # Select the object with the highest probability.
         max_confidence = 0
         best_result = None
@@ -49,7 +51,7 @@ class OMGP03Detector(DetectorBase):
                 best_result = box
         # check validate
         valid = False
-        position = [0, 0, 0, 0]
+        position = None
         if best_result:
             valid = True
             x1, y1, x2, y2 = best_result.xyxy[0].cpu().to(torch.int)

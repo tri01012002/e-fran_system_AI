@@ -44,7 +44,7 @@ class RolexP10Detector(DetectorBase):
                 best_result = box
         # check validate
         valid = False
-        position = {}
+        position = None
         if best_result:
             valid = True
             x1, y1, x2, y2 = best_result.xyxy[0].cpu().to(torch.int)

@@ -14,7 +14,7 @@ class RolexP03Detector(DetectorBase):
         self.model = YOLO(YOLO_WEIGHTS).to(device)
         self.yolo_conf = YOLO_CONF
         self.yolo_imgsz = YOLO_IMGSZ
-        self.position = {}
+        self.position = None
         self.image_detect = None
         self.iqa_image = None
         self.output_size = 224
@@ -36,7 +36,7 @@ class RolexP03Detector(DetectorBase):
 
         for i in range(len(classes)):
             if (classes[i] == 1 and results.boxes[i].conf < 0.55):
-                return False, {}
+                return YoloValidation(is_valid=False, position=None, class_id=None)
 
         bbox_class_inner = [boxesn[i] for i in range(len(classes)) if classes[i] == 0]
         bbox_class_outer = [boxesn[i] for i in range(len(classes)) if classes[i] == 1]
