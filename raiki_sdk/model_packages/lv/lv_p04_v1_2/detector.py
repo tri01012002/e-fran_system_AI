@@ -44,11 +44,7 @@ class LVP04Detector(DetectorBase):
         detect_results = self.model.predict(
             source=pil_image_gray, verbose=False, show=False, save=False, 
             save_crop=False, conf=self.yolo_conf, line_width=0, 
-            show_labels=False, show_conf=False, imgsz=self.yolo_imgsz)
-        # check boxes > 0 
-        if len(detect_results[0].boxes) == 0:
-            _logger.info("No detect results")
-            return False       
+            show_labels=False, show_conf=False, imgsz=self.yolo_imgsz) 
 
         results = self.model_v2.predict(
             source=pil_image_gray, verbose=False, show=False, 
