@@ -8,7 +8,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Planned
-- Add Omega classify package
+- Fix some bugs and improve performance
+
+
+## [0.1.5] - 2025-12-22
+
+### ✨ Improvements
+- Support OMG_P00 v1.1 - omega classification model
+
+### 🔧 Fixes
+- Fix `position = {}` errors
 
 ## [0.1.4] - 2025-12-09
 
@@ -219,7 +228,8 @@ See full release details
 - Package structure with proper `__init__.py` exports
 - Dependencies: numpy, pillow, pydantic, ultralytics
 
-[Unreleased]: https://gitlab.com/dat.tram/raiki-sdk/-/compare/v0.1.3...HEAD
+[Unreleased]: https://gitlab.com/dat.tram/raiki-sdk/-/compare/v0.1.6...HEAD
+[0.1.5]: https://gitlab.com/dat.tram/raiki-sdk/-/compare/v0.1.4...v0.1.5
 [0.1.4]: https://gitlab.com/dat.tram/raiki-sdk/-/compare/v0.1.3...v0.1.4
 [0.1.3]: https://gitlab.com/dat.tram/raiki-sdk/-/compare/v0.1.2...v0.1.3
 [0.1.2]: https://gitlab.com/dat.tram/raiki-sdk/-/compare/v0.1.1...v0.1.2
