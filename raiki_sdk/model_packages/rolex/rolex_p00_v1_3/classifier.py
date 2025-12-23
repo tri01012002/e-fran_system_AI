@@ -58,14 +58,16 @@ class RolexP00Classificator(ClassificatorBase):
             for name, sim in result_model:
                 name = name.replace("_rotate", "").replace("_gray","")
                 name =  name.split("-")[0]
+
+                if name in set_label:
+                    continue
+                set_label.add(name)
+
                 if "_" in name:
-                    set_label.add(name.split("_")[0])
-                    set_label.add(name.split("_")[1])
                     topks_nor.append({"name": name.split("_")[0], "prob": sim})
                     topks_nor.append({"name": name.split("_")[1], "prob": sim})
                 else: 
                     topks_nor.append({"name": name, "prob": sim})
-                    set_label.add(name)
 
         topks_nor = topks_nor[:min(len(topks_nor),topk)]
         
