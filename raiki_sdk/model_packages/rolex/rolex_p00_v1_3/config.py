@@ -20,7 +20,7 @@ CLASSIFIER_WEIGHTS = download_file_from_hf(
 
 EMBEDDING_STORAGE_PKL = download_file_from_hf(
     repo_id="rikai-ai/rolex_p00_classify_v1-3",
-    filename="rolex_p00_classify_1.3_dinov3-arceface-vector-withgray-storage_20251223_20251204_v2.pkl"
+    filename="rolex_p00_classify_1.3_dinov3-arceface-vector-withgray-storage_20251223_20251204_v3.pkl"
 )
 
 # Classifier model parameters
