@@ -56,7 +56,6 @@ class OMGP02Detector(DetectorBase):
     def needle_aligner(self, img):
         try:
             results = self.model_needle_aligner.predict(img, conf=YOLO_NEEDLE_ALIGNER_CONF, verbose=False)
-            
             # Check if results are empty
             if not results or len(results) == 0:
                 return img
@@ -96,7 +95,7 @@ class OMGP02Detector(DetectorBase):
             return self.rotate_image(img, angle_to_rotate)
         
         except (IndexError, AttributeError, RuntimeError) as e:
-            logger.warning(f"⚠️ Needle aligner error: {str(e)}, returning original image")
+            logger.warning(f"Needle aligner error: {str(e)}, returning original image")
             return img
 
     def detect(self, image) -> Union[sv.Detections, List[sv.Detections]]:
@@ -109,7 +108,6 @@ class OMGP02Detector(DetectorBase):
         
         self.resized_image = resize_pwd(aligned_image, output_size=max_hw, color_padding=COLOR_PADDING)
         pil_image = Image.fromarray(cv2.cvtColor(self.resized_image, cv2.COLOR_BGR2RGB))
-        pil_image.save("debug_resized_image.jpg")
         results = self.model.predict(pil_image)
         return results
 
