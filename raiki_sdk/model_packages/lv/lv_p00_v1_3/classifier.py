@@ -75,7 +75,7 @@ class LVP00Classificator(ClassificatorBase):
         # Hard code: M41418 +<->+ M41428 
         for name, sim in results:
             # Merge multi version
-            name =  name.split("_")[0]
+            name =  name.split("_")[0].split("-")[0]
             name = self.convert_code_lv(name)
                        
             if name not in set_label:
@@ -106,7 +106,7 @@ class LVP00Classificator(ClassificatorBase):
 
 
     def get_topk(self, result_model: Any, topk: int =3) -> ClassificationResultProb:
-        results = self.vector_storage_manager.search_vector(result_model, topk)
+        results = self.vector_storage_manager.search_vector(result_model, return_all_scores=True)
         return self.normalize_output(results, topk=topk)
 
     def generate_heatmap(self) -> Image.Image:
