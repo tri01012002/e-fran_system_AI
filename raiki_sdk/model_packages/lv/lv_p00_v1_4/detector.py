@@ -68,6 +68,7 @@ class LVP00Detector(DetectorBase):
             cls_id = int(box.cls)           # Class ID
             conf = box.conf.item()          # Confidence score
             # Model
+            # Validate box has index of bag
             if cls_id == YOLO_INDEX:
                 valid = True
                 x_min, y_min, x_max, y_max = box.xyxy[0].cpu().numpy()
