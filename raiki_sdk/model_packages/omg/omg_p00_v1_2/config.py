@@ -20,7 +20,7 @@ CLASSIFIER_WEIGHTS = download_file_from_hf(
 
 EMBEDDING_STORAGE_PKL = download_file_from_hf(
     repo_id="rikai-ai/om_p00_classify_v1-2",
-    filename="om_p00_classify_v1.2_dinov3-arcface_vector-storage_20260112_20260112_v1.pkl"
+    filename="om_p00_classify_v1.2_dinov3-arcface_vector-storage_20260119_20260119_v2.pkl"
 )
 
 # Classifier model parameters
