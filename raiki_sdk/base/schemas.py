@@ -29,9 +29,9 @@ class ClassificationResultProb(BaseModel):
 class YoloValidation(BaseModel):
     model_config = ConfigDict(arbitrary_types_allowed=True)
     is_valid: bool
-    position: list[int] | None = None
+    position: list[int] | dict | None = None 
     class_id: int | None = None
-    image_crop: Optional[Image.Image] = None
+    image_crop: Optional[Image.Image | dict] = None
 
 class IqaResult(BaseModel):
     iqa_score: float
