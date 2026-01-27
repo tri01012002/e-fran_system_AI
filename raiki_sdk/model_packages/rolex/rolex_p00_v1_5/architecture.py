@@ -73,7 +73,7 @@ class MViTArcFaceModel(nn.Module):
 
 
 # ==================== Rolex P00 Classifier Model ====================
-class FaceRecognizerBagLV:
+class FaceRecognizerBrand:
     """Singleton Face Recognition class with mechanism to save multiple vectors / person and Top-K Recognition"""
 
     _instance = None  # Keep only one instance
@@ -85,7 +85,7 @@ class FaceRecognizerBagLV:
             return cls._instance
 
         # If not, create new instance
-        instance = super(FaceRecognizerBagLV, cls).__new__(cls)
+        instance = super(FaceRecognizerBrand, cls).__new__(cls)
         cls._instance = instance  # Save singleton
         return instance
 
@@ -100,9 +100,9 @@ class FaceRecognizerBagLV:
         self.device = device
 
         # Load embeddings only once
-        if FaceRecognizerBagLV._embeddings_db is None:
-            FaceRecognizerBagLV._embeddings_db = _load_database(vector_db_file,device)
-        self.embeddings_db = FaceRecognizerBagLV._embeddings_db
+        if FaceRecognizerBrand._embeddings_db is None:
+            FaceRecognizerBrand._embeddings_db = _load_database(vector_db_file,device)
+        self.embeddings_db = FaceRecognizerBrand._embeddings_db
         self.idx_to_class = {}
 
         self._initialized = True  # Mark as initialized

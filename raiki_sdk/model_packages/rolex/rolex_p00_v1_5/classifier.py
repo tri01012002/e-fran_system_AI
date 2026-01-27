@@ -7,7 +7,7 @@ from .preprocessor import get_transform
 import torch
 from PIL import Image
 from ._load_model import _load_weights, _load_database
-from .architecture import FaceRecognizerBagLV
+from .architecture import FaceRecognizerBrand
 from typing import Any
 
 class RolexP00Classificator(ClassificatorBase):
@@ -23,16 +23,13 @@ class RolexP00Classificator(ClassificatorBase):
             device=self.device
         )
         self.transform = get_transform()
-        self.vector_storage_manager = _load_database(
-            load_path=EMBEDDING_STORAGE_PKL,
-            device=self.device
-        )
+        
         self.metadata = {
             "auth_model_name": CLASSIFIER_MODEL_NAME,
             "auth_model_version": CLASSIFIER_MODEL_VERSION,
             "yolo_model_version": YOLO_MODEL_VERSION
         }
-        self.faceRecognizer = FaceRecognizerBagLV(
+        self.faceRecognizer = FaceRecognizerBrand(
             model=self.model,
             transform=self.transform,
             vector_db_file=EMBEDDING_STORAGE_PKL,
