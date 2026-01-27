@@ -18,7 +18,7 @@ class RolexP00Detector(DetectorBase):
         Args:
             device (str): Device to run the model on ('cpu' or 'cuda').
         """
-        self.model = get_brand_detection_service(device="cpu")
+        self.model = get_brand_detection_service(device=device)
         self.yolo_conf = YOLO_CONF
         self.yolo_imgsz = YOLO_IMGSZ
         self.padd_crop = PADD_CROP
