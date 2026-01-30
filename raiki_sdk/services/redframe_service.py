@@ -82,11 +82,11 @@ class RedFrameService:
     def _validate_inputs(self, frame: Optional[str], position: Optional[list]):
         """Ensure inputs are valid and in the correct format."""
         if frame is None or position is None:
-            raise ValueError("Frame and position are required")
+            raise ValueError(f"Frame and position are required frame {frame} position {position}")
         if not isinstance(frame, str) or not isinstance(position, list):
-            raise ValueError("Frame must be a string and position must be a list")
+            raise ValueError(f"Frame must be a string and position must be a list frame {frame} position {position}")
         if len(position) != 4:
-            raise ValueError("Position must contain exactly 4 elements")
+            raise ValueError(f"Position must contain exactly 4 elements position {position}")
 
     def _is_position_inside_frame(
         self, image: np.ndarray, frame: str, position: list
