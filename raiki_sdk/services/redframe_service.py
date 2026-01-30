@@ -155,6 +155,10 @@ class RedFrameService:
         """
         Perform RedFrame detection and (optionally) IQA quality validation.
         """
+        # Step 1: Check frame inclusion
+        self._validate_inputs(frame, position)
+        if not self._is_position_inside_frame(image, frame, position):
+            return RedFrameResult(result=False, iqa_result=None, error_type=None)
 
         # Mode 1: Simple IQA-only
         if not self.advanced_mode:
@@ -166,10 +170,6 @@ class RedFrameService:
             )
 
         # Mode 2: Full redframe + IQA
-        # Step 1: Check frame inclusion
-        self._validate_inputs(frame, position)
-        if not self._is_position_inside_frame(image, frame, position):
-            return RedFrameResult(result=False, iqa_result=None, error_type=None)
 
 
         # Step 2: Redframe model prediction
