@@ -14,15 +14,15 @@ YOLO_WEIGHTS = download_file_from_hf(
 )
 
 AUTH_WEIGHTS = download_file_from_hf(
-    repo_id="rikai-ai/lv_p02_auth_v1-5",
-    filename="lv_p02_auth_v1-5_cmal_250907_251017.pth"
+    repo_id="rikai-ai/lv_p06_auth_v1_1",
+    filename="lv_p06_auth_v1.1_cmal_368_20260129_20260129.pth"
 )
 
 # AUTH parameters
-TARGET_SIZE = 421
+TARGET_SIZE = 368
 AUTH_MODEL_NAME = "CMAL"
-AUTH_NUM_CLASSES = 8
-AUTH_CLASS_LABELS = ["convex", "convex_fake", "flat_rivet", "flat_rivet_fake", "socket", "socket_fake", "stud", "stud_fake"]
+AUTH_NUM_CLASSES = 2
+AUTH_CLASS_LABELS = ["stud", "stud_fake"]
 
 
 # Metadata
