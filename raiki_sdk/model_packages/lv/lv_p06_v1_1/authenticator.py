@@ -148,7 +148,7 @@ class LVP06Authenticator(AuthenticateBase):
             # Calculate average confidence
             average_conf = sum(pred[1] for pred in new_pred_list) / len(new_pred_list)
             
-            if int(pred_main) in [1,3,5,7]:
+            if int(pred_main) == 1:
                 return AuthResult(probability=1-average_conf, label=AUTH_CLASS_LABELS[int(pred_main)], metadata=metadata)
             return AuthResult(probability=average_conf, label=AUTH_CLASS_LABELS[int(pred_main)], metadata=metadata)
 

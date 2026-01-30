@@ -65,9 +65,12 @@ class LVP06Detector(DetectorBase):
         for box in results.boxes:
             cls_id = int(box.cls)
             conf = box.conf.item()
+            print(f"cls_id: {cls_id}")
+            print(f"conf: {conf}")
 
             # Filter for valid classes and confidence
-            if cls_id in [0, 2, 3]:
+            #  {0: 'convex_rivet', 1: 'fitting', 2: 'flat_rivet', 3: 'socket'}
+            if cls_id in [0, 2]:
                 valid = True
                 x_min, y_min, x_max, y_max = box.xyxy[0].cpu().numpy()
                 x_min, y_min, x_max, y_max = int(x_min), int(y_min), int(x_max), int(y_max)

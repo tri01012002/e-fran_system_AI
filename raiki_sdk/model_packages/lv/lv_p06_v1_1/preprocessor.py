@@ -17,7 +17,7 @@ def get_transform():
     """
     return transforms.Compose([
         transforms.Resize((TARGET_SIZE, TARGET_SIZE)),
-        transforms.CenterCrop(368),
+        # transforms.CenterCrop(368), 
         transforms.ToTensor(),
         transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5)),
     ])
