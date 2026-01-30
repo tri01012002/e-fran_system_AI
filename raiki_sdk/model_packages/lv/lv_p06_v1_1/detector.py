@@ -65,8 +65,6 @@ class LVP06Detector(DetectorBase):
         for box in results.boxes:
             cls_id = int(box.cls)
             conf = box.conf.item()
-            print(f"cls_id: {cls_id}")
-            print(f"conf: {conf}")
 
             # Filter for valid classes and confidence
             #  {0: 'convex_rivet', 1: 'fitting', 2: 'flat_rivet', 3: 'socket'}
