@@ -50,8 +50,8 @@ class RedFrameService:
         x1, y1, x2, y2 = frame.split(",")
 
         # If already in pixel coordinates
-        if x1 > 1 or y1 > 1 or x2 > 1 or y2 > 1:
-            return (int(x1), int(y1), int(x2), int(y2))
+        # if x1 > 1 or y1 > 1 or x2 > 1 or y2 > 1:
+        #     return (int(x1), int(y1), int(x2), int(y2))
         h, w = image.shape[0:2]
         return (
             int(float(x1) * w),
