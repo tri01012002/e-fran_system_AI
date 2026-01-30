@@ -82,12 +82,15 @@ class RedFrameService:
     def _validate_inputs(self, frame: Optional[str], position: Optional[list]):
         """Ensure inputs are valid and in the correct format."""
         if frame is None or position is None:
-            raise ValueError(f"Frame and position are required frame {frame} position {position}")
+            print(f"Frame and position are required frame {frame} position {position}")
+            return False
         if not isinstance(frame, str) or not isinstance(position, list):
-            raise ValueError(f"Frame must be a string and position must be a list frame {frame} position {position}")
+            print(f"Frame must be a string and position must be a list frame {frame} position {position}")
+            return False
         if len(position) != 4:
-            raise ValueError(f"Position must contain exactly 4 elements position {position}")
-
+            print(f"Position must contain exactly 4 elements position {position}")
+            return False
+        return True
     def _is_position_inside_frame(
         self, image: np.ndarray, frame: str, position: list
     ) -> bool:
@@ -156,9 +159,10 @@ class RedFrameService:
         Perform RedFrame detection and (optionally) IQA quality validation.
         """
         # Step 1: Check frame inclusion
-        self._validate_inputs(frame, position)
-        if not self._is_position_inside_frame(image, frame, position):
-            return RedFrameResult(result=False, iqa_result=None, error_type=None)
+        is_valid_fr_position = self._validate_inputs(frame, position)
+        if is_valid_fr_position:
+            if not self._is_position_inside_frame(image, frame, position):
+                return RedFrameResult(result=False, iqa_result=None, error_type=None)
 
         # Mode 1: Simple IQA-only
         if not self.advanced_mode:
