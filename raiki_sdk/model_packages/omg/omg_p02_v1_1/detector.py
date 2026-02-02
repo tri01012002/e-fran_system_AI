@@ -28,9 +28,14 @@ class OMGP02Detector(DetectorBase):
         Returns:
             Union[sv.Detections, List[sv.Detections]]: Detection results
         """
-        max_hw = max(image.shape[:2])
-        self.resized_image = resize_pwd(image, output_size=max_hw, color_padding=COLOR_PADDING)
-        pil_image = Image.fromarray(cv2.cvtColor(self.resized_image, cv2.COLOR_BGR2RGB))
+        # max_hw = max(image.shape[:2])
+        # self.img_rsed_square = resize_pwd(
+        #     image,
+        #     output_size=max_hw,
+        #     color_padding=COLOR_PADDING
+        # )
+        self.img_rsed_square = image
+        pil_image = Image.fromarray(cv2.cvtColor(self.img_rsed_square, cv2.COLOR_BGR2RGB))
         results = self.model.predict(pil_image)
         return results
 
@@ -76,7 +81,7 @@ class OMGP02Detector(DetectorBase):
         Returns:
             image: Image.Image (PIL) cropped image
         """
-        cropped_image = padding_crop_yolo(self.resized_image, position)
+        cropped_image = padding_crop_yolo(self.img_rsed_square, position)
         return Image.fromarray(cv2.cvtColor(cropped_image, cv2.COLOR_BGR2RGB))
 
     def run_pipeline(self, image: np.ndarray, is_crop: bool = True) -> YoloValidation:

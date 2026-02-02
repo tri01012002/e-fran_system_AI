@@ -32,7 +32,7 @@ class OMGP01Detector(DetectorBase):
         self.yolo_conf = YOLO_CONF
         self.yolo_imgsz = YOLO_IMGSZ
         self.output_size = TARGET_SIZE
-        self.img_rsed_square = None
+        self.img_preparing_yolo = None
         self.class_names = self.model.names
 
     def detect(self, image: np.ndarray) -> YoloResult:
@@ -45,14 +45,15 @@ class OMGP01Detector(DetectorBase):
         Returns:
             YoloResult: Detection results
         """
-        max_hw = max(image.shape[:2])
-        self.img_rsed_square = resize_pwd(
-            image,
-            output_size=max_hw,
-            color_padding=COLOR_PADDING
-        )
+        # max_hw = max(image.shape[:2])
+        # self.img_preparing_yolo = resize_pwd(
+        #     image,
+        #     output_size=max_hw,
+        #     color_padding=COLOR_PADDING
+        # )
+        self.img_preparing_yolo = image
         pil_image = Image.fromarray(
-            cv2.cvtColor(self.img_rsed_square, cv2.COLOR_BGR2RGB)
+            cv2.cvtColor(self.img_preparing_yolo, cv2.COLOR_BGR2RGB)
         )
 
         results = self.model.predict(
@@ -181,7 +182,7 @@ class OMGP01Detector(DetectorBase):
     def _crop_single_box(self, x1: int, y1: int, x2: int, y2: int) -> Image.Image:
         """Crop a single box and pad to square"""
         position = [x1, y1, x2, y2]
-        cropped = padding_crop_yolo(self.img_rsed_square, position)
+        cropped = padding_crop_yolo(self.img_preparing_yolo, position)
         max_hw = max(cropped.shape[:2])
         image_pwd = resize_pwd(cropped, output_size=max_hw, color_padding=COLOR_PADDING)
         return Image.fromarray(cv2.cvtColor(image_pwd, cv2.COLOR_BGR2RGB))
