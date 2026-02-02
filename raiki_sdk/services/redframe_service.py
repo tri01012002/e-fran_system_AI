@@ -162,7 +162,7 @@ class RedFrameService:
         is_valid_fr_position = self._validate_inputs(frame, position)
         if is_valid_fr_position:
             if not self._is_position_inside_frame(image, frame, position):
-                return RedFrameResult(result=False, iqa_result=None, error_type=None)
+                return RedFrameResult(result=False, iqa_result=None, error_type="out_of_frame_error")
 
         # Mode 1: Simple IQA-only
         if not self.advanced_mode:
