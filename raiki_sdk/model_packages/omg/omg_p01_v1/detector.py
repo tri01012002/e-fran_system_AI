@@ -22,21 +22,23 @@ class OMGP01Detector(DetectorBase):
         self.yolo_conf = YOLO_CONF
         self.yolo_imgsz = YOLO_IMGSZ
         self.output_size = TARGET_SIZE
-        self.img_rsed_square = None
+        self.img_preparing_yolo = None
         self.class_names = self.model.names
 
     def detect(self, image) -> YoloResult:
         """
         Detect objects trong ảnh
         """
-        max_hw = max(image.shape[:2])
-        self.img_rsed_square = resize_pwd(
-            image, 
-            output_size=max_hw, 
-            color_padding=COLOR_PADDING
-        )
+        # max_hw = max(image.shape[:2])
+        # self.img_preparing_yolo = resize_pwd(
+        #     image, 
+        #     output_size=max_hw, 
+        #     color_padding=COLOR_PADDING
+        # )
+        self.img_preparing_yolo = image
+
         pil_image = Image.fromarray(
-            cv2.cvtColor(self.img_rsed_square, cv2.COLOR_BGR2RGB)
+            cv2.cvtColor(self.img_preparing_yolo, cv2.COLOR_BGR2RGB)
         )
         
         results = self.model.predict(
@@ -134,7 +136,7 @@ class OMGP01Detector(DetectorBase):
         3. Crop box vuông từ ảnh đã padding
         
         Args:
-            image: np.ndarray (not used, uses self.img_rsed_square)
+            image: np.ndarray (not used, uses self.img_preparing_yolo)
             position: [x1, y1, x2, y2]
             class_id: Detection class ID
             
@@ -146,7 +148,7 @@ class OMGP01Detector(DetectorBase):
         box_h = y2 - y1
         
         # BƯỚC 1: Crop box GỐC trước (chữ nhật)
-        cropped_original = self.img_rsed_square[y1:y2, x1:x2]
+        cropped_original = self.img_preparing_yolo[y1:y2, x1:x2]
         
         # BƯỚC 2: Tính padding cần thiết để thành vuông
         size = max(box_w, box_h)

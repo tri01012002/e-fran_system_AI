@@ -23,7 +23,7 @@ class OMGP05Detector(DetectorBase):
         self.output_size = TARGET_SIZE
         self.color_padding = COLOR_PADDING
         self.rotation_config = ROTATION_CONFIG
-        self.img_rsed_square = None
+        self.img_preparing_yolo = None
         self.last_class_id = None
 
     def detect(self, image) -> YoloResult:
@@ -36,14 +36,15 @@ class OMGP05Detector(DetectorBase):
         Returns:
             YoloResult: Detection results
         """
-        max_hw = max(image.shape[:2])
-        self.img_rsed_square = resize_pwd(
-            image, 
-            output_size=max_hw, 
-            color_padding=self.color_padding
-        )
+        # max_hw = max(image.shape[:2])
+        # self.img_preparing_yolo = resize_pwd(
+        #     image, 
+        #     output_size=max_hw, 
+        #     color_padding=self.color_padding
+        # )
+        self.img_preparing_yolo = image
         pil_image = Image.fromarray(
-            cv2.cvtColor(self.img_rsed_square, cv2.COLOR_BGR2RGB)
+            cv2.cvtColor(self.img_preparing_yolo, cv2.COLOR_BGR2RGB)
         )
         
         results = self.model.predict(
@@ -108,14 +109,14 @@ class OMGP05Detector(DetectorBase):
         Crop and normalize image to square, then rotate to bottom orientation
         
         Args:
-            image: np.ndarray (cv2) BGR image (not used, uses self.img_rsed_square)
+            image: np.ndarray (cv2) BGR image (not used, uses self.img_preparing_yolo)
             position: [x1, y1, x2, y2]
             class_id: Detection class ID for rotation (optional)
         Returns:
             PIL Image cropped, rotated to bottom orientation
         """
-        if self.img_rsed_square is None:
-            raise ValueError("self.img_rsed_square is None. Call detect() before crop()")
+        if self.img_preparing_yolo is None:
+            raise ValueError("self.img_preparing_yolo is None. Call detect() before crop()")
         
         # Nếu class_id không được truyền, dùng class_id từ validate()
         if class_id is None:
@@ -139,7 +140,7 @@ class OMGP05Detector(DetectorBase):
         new_y2 = new_y1 + size
         
         # Ensure box stays within image bounds
-        h, w = self.img_rsed_square.shape[:2]
+        h, w = self.img_preparing_yolo.shape[:2]
         new_x1 = max(0, new_x1)
         new_y1 = max(0, new_y1)
         new_x2 = min(w, new_x2)
@@ -149,7 +150,7 @@ class OMGP05Detector(DetectorBase):
         
         # Crop with padding if needed
         cropped_image = padding_crop_yolo(
-            self.img_rsed_square, 
+            self.img_preparing_yolo, 
             new_position
         )
         

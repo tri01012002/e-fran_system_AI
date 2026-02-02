@@ -16,7 +16,7 @@ class OMGP03Detector(DetectorBase):
         self.model = YOLO(DETECTOR_WEIGHTS).to(device)
         self.yolo_conf = YOLO_CONF
         self.yolo_imgsz = YOLO_IMGSZ
-        self.img_rsed_square = None
+        self.img_preparing_yolo = None
         self.color_padding = COLOR_PADDING
 
     def detect(self, image) -> YoloResult:
@@ -29,9 +29,10 @@ class OMGP03Detector(DetectorBase):
         Returns:
             YoloResult: Detection results
         """
-        max_hw = max(image.shape[:2])
-        self.img_rsed_square = resize_pwd(image, output_size=max_hw, color_padding=self.color_padding)
-        pil_image = Image.fromarray(cv2.cvtColor(self.img_rsed_square, cv2.COLOR_BGR2RGB))
+        # max_hw = max(image.shape[:2])
+        # self.img_preparing_yolo = resize_pwd(image, output_size=max_hw, color_padding=self.color_padding)
+        self.img_preparing_yolo = image
+        pil_image = Image.fromarray(cv2.cvtColor(self.img_preparing_yolo, cv2.COLOR_BGR2RGB))
         results = self.model.predict(source= pil_image, verbose=False, show=False, save=False, save_crop=False,
                                         conf=self.yolo_conf, line_width=0, show_labels=False, show_conf=False,
                                         imgsz=self.yolo_imgsz)
@@ -73,7 +74,7 @@ class OMGP03Detector(DetectorBase):
         Returns:
             image: Image.Image (PIL) cropped image
         """
-        cropped_image = padding_crop_yolo(self.img_rsed_square, position)
+        cropped_image = padding_crop_yolo(self.img_preparing_yolo, position)
         return Image.fromarray(cv2.cvtColor(cropped_image, cv2.COLOR_BGR2RGB))
 
     def run_pipeline(self, image: np.ndarray, is_crop: bool = True) -> YoloValidation:
