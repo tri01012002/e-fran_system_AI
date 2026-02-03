@@ -47,18 +47,17 @@ class RedFrameService:
     # ----------------------------------------------------------------------
     def _parse_frame_coordinates(self, image: np.ndarray, frame: str) -> tuple[int, int, int, int]:
         """Convert frame string (normalized) to pixel coordinates."""
-        x1, y1, x2, y2 = frame.split(",")
-
-        # If already in pixel coordinates
-        # if x1 > 1 or y1 > 1 or x2 > 1 or y2 > 1:
-        #     return (int(x1), int(y1), int(x2), int(y2))
-        h, w = image.shape[0:2]
-        return (
-            int(float(x1) * w),
-            int(float(y1) * h),
-            int(float(x2) * w),
-            int(float(y2) * h),
-        )
+        try:
+            x1, y1, x2, y2 = frame.split(",")
+            h, w = image.shape[0:2]
+            return (
+                int(float(x1) * w),
+                int(float(y1) * h),
+                int(float(x2) * w),
+                int(float(y2) * h),
+            )
+        except ValueError:
+            return (0, 0, 1, 1)
 
     def _calculate_area(self, image: np.ndarray, frame) -> float:
         """Calculate the pixel area of a frame."""
