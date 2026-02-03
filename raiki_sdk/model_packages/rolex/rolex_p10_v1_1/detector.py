@@ -21,8 +21,8 @@ class RolexP10Detector(DetectorBase):
 
     def detect(self, image) -> YoloResult:
         max_hw = max(image.shape[:2])
-        self.img_rsed_square = resize_pwd(image, output_size=max_hw, color_padding=(255, 255, 255))
-
+        # self.img_rsed_square = resize_pwd(image, output_size=max_hw, color_padding=(255, 255, 255))
+        self.img_rsed_square = image
         pil_img_rsed_square = Image.fromarray(cv2.cvtColor(self.img_rsed_square, cv2.COLOR_BGR2RGB))
 
         results = self.model.predict(source=pil_img_rsed_square, verbose=False, show=False, save=False,

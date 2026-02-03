@@ -57,7 +57,7 @@ class RedFrameService:
                 int(float(y2) * h),
             )
         except ValueError:
-            return (0.0, 0.0, w, h)
+            return (0.0, 0.0, max(w,h), max(w,h))
 
     def _calculate_area(self, image: np.ndarray, frame) -> float:
         """Calculate the pixel area of a frame."""
