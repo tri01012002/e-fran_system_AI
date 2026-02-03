@@ -49,6 +49,8 @@ class RolexP00Classificator(ClassificatorBase):
             return self.probs
 
     def _add_detail_name(self, result: list):
+        set_label = set()
+        result_new = []
         for item in result:
             name = item['name']
             base_name = name.split("-")[0]
@@ -59,12 +61,22 @@ class RolexP00Classificator(ClassificatorBase):
             elif base_name in ROLEX_CODE_NAME_MAP:
                 item['detail_name'] = ROLEX_CODE_NAME_MAP[base_name]
                 item['name'] = base_name
+            if 'detail_name' not in item:
+                continue
 
-        return result
+            key = item['name'] + "-" + item['detail_name']
+
+            if key in set_label:
+                continue
+
+            set_label.add(key)
+            result_new.append(item)
+
+        return result_new
 
     def get_topk(self, result_model: Any, topk: int) -> ClassificationResultProb:
         topks_nor = []
-        set_label = set()
+        # set_label = set()
 
         with torch.no_grad():
             for name, sim in result_model:
@@ -72,9 +84,9 @@ class RolexP00Classificator(ClassificatorBase):
                 # name =  name.split("-")[0]
                 
 
-                if name in set_label:
-                    continue
-                set_label.add(name)
+                # if name in set_label:
+                #     continue
+                # set_label.add(name)
 
                 if "_" in name:
                     topks_nor.append({"name": name.split("_")[0], "prob": sim})
