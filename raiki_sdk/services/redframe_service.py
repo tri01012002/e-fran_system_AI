@@ -47,9 +47,9 @@ class RedFrameService:
     # ----------------------------------------------------------------------
     def _parse_frame_coordinates(self, image: np.ndarray, frame: str) -> tuple[int, int, int, int]:
         """Convert frame string (normalized) to pixel coordinates."""
+        h, w = image.shape[0:2]
         try:
             x1, y1, x2, y2 = frame.split(",")
-            h, w = image.shape[0:2]
             return (
                 int(float(x1) * w),
                 int(float(y1) * h),
