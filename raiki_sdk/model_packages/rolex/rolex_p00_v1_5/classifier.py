@@ -94,8 +94,8 @@ class RolexP00Classificator(ClassificatorBase):
                 else: 
                     topks_nor.append({"name": name, "prob": sim})
 
-        topks_nor = topks_nor[:min(len(topks_nor),topk)]
         topks_nor = self._add_detail_name(topks_nor)
+        topks_nor = topks_nor[:min(len(topks_nor),topk)]
         for item in topks_nor:
             if item["name"] == "16800":
                 item["name"] = '16800/168000'
