@@ -9,6 +9,7 @@ from PIL import Image
 from ._load_model import _load_weights, _load_database
 from .architecture import FaceRecognizerBrand
 from typing import Any
+from .labels import ROLEX_CODE_NAME_MAP
 
 class RolexP00Classificator(ClassificatorBase):
     def __init__(self, device: str):
@@ -47,6 +48,20 @@ class RolexP00Classificator(ClassificatorBase):
             self.probs = self.faceRecognizer.recognize_pil_double(image, top_k=10, N_closest = 3)
             return self.probs
 
+    def _add_detail_name(self, result: list):
+        for item in result:
+            name = item['name']
+            base_name = name.split("-")[0]
+
+            if name in ROLEX_CODE_NAME_MAP:
+                item['detail_name'] = ROLEX_CODE_NAME_MAP[name]
+                item['name'] = base_name
+            elif base_name in ROLEX_CODE_NAME_MAP:
+                item['detail_name'] = ROLEX_CODE_NAME_MAP[base_name]
+                item['name'] = base_name
+
+        return result
+
     def get_topk(self, result_model: Any, topk: int) -> ClassificationResultProb:
         topks_nor = []
         set_label = set()
@@ -54,7 +69,8 @@ class RolexP00Classificator(ClassificatorBase):
         with torch.no_grad():
             for name, sim in result_model:
                 name = name.replace("_rotate", "").replace("_gray","")
-                name =  name.split("-")[0]
+                # name =  name.split("-")[0]
+                
 
                 if name in set_label:
                     continue
@@ -67,8 +83,7 @@ class RolexP00Classificator(ClassificatorBase):
                     topks_nor.append({"name": name, "prob": sim})
 
         topks_nor = topks_nor[:min(len(topks_nor),topk)]
-        
-
+        topks_nor = self._add_detail_name(topks_nor)
         for item in topks_nor:
             if item["name"] == "16800":
                 item["name"] = '16800/168000'
