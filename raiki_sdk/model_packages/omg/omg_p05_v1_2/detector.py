@@ -172,7 +172,7 @@ class OMGP05Detector(DetectorBase):
         config = self.rotation_config.get(class_id)
         if not config or config.get("rotate") is None:
             return image
-        
+        print("Rotate OMG P05: ",config)
         return cv2.rotate(image, config["rotate"])
 
     def run_pipeline(self, image, is_crop: bool = True) -> YoloValidation:

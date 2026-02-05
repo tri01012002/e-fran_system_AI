@@ -6,12 +6,12 @@ import cv2
 
 # Model version
 AUTH_MODEL_VERSION = "v1-2"
-YOLO_MODEL_VERSION = "v1-2"
+YOLO_MODEL_VERSION = "v1-3"
 
 # Model weights paths (relative to package root or absolute)
 YOLO_WEIGHTS = download_file_from_hf(
-    repo_id="rikai-ai/omg_p05_detector_v1-2",
-    filename="omg_p05_detector_v1-2_20251229_20251209.pt"
+    repo_id="rikai-ai/omg_p05_detector_v1-3",
+    filename="omg_p05_detector_v1-3_20260205_20260205.pt"
 )
 AUTH_WEIGHTS = download_file_from_hf(
     repo_id="rikai-ai/omg_p05_auth_v1-2",
