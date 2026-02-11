@@ -8,7 +8,7 @@ from raiki_sdk.base import RedFrameResult
 from .iqa_service import LIQEServices
 from typing import Callable, Optional
 from PIL import Image
-
+import cv2
 
 class RedFrameService:
     def __init__(
@@ -157,7 +157,12 @@ class RedFrameService:
         y1 = max(0, y1 - py)
         x2 = min(w, x2 + px)
         y2 = min(h, y2 + py)
-        return Image.fromarray(image[y1:y2, x1:x2])    
+        cropped = image[y1:y2, x1:x2]
+
+        # Convert BGR -> RGB
+        cropped = cv2.cvtColor(cropped, cv2.COLOR_BGR2RGB)
+
+        return Image.fromarray(cropped)
 
     def forward(
         self,
@@ -184,7 +189,7 @@ class RedFrameService:
             return RedFrameResult(
                 result=iqa_result.image_quality_validate,
                 iqa_result=iqa_result,
-                error_type=None,
+                error_type=f"iqa_fail-{iqa_result.iqa_score}-{iqa_result.iqa_threshold}",
             )
 
         # Mode 2: Full redframe + IQA
