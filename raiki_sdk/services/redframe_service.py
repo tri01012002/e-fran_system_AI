@@ -147,6 +147,18 @@ class RedFrameService:
     # ----------------------------------------------------------------------
     # Main Inference Flow
     # ----------------------------------------------------------------------
+    def crop_method_default(self, image: np.ndarray, position: list) -> Image.Image:
+        """Default crop method for RedFrameService."""
+        x1, y1, x2, y2 = position
+        # Padding
+        w, h = image.shape[1], image.shape[0] 
+        px, py =  int((x2 - x1) * 0.1), int((y2 - y1) * 0.1)
+        x1 = max(0, x1 - px)
+        y1 = max(0, y1 - py)
+        x2 = min(w, x2 + px)
+        y2 = min(h, y2 + py)
+        return Image.fromarray(image[y1:y2, x1:x2])    
+
     def forward(
         self,
         image: np.ndarray,
@@ -165,6 +177,9 @@ class RedFrameService:
 
         # Mode 1: Simple IQA-only
         if not self.advanced_mode:
+            # image_iqa = crop_method_default(image, position)
+            if crop_method:
+                image = crop_method(image, position)
             iqa_result = self.iqa_service.iqa_detect(image)
             return RedFrameResult(
                 result=iqa_result.image_quality_validate,
