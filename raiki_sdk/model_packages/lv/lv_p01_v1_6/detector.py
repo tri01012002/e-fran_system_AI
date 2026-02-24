@@ -7,7 +7,7 @@ Handles object detection logic using YOLO model.
 from raiki_sdk import DetectorBase, YoloResult, YoloValidation
 from raiki_sdk import resize_pwd, padding_crop_yolo
 from ultralytics import YOLO
-from .config import YOLO_WEIGHTS, YOLO_CONF, YOLO_IMGSZ
+from .config import YOLO_WEIGHTS, YOLO_CONF, YOLO_IMGSZ, AREA_RATIO_VALID
 from PIL import Image
 import cv2
 import torch
@@ -26,6 +26,7 @@ class LVP01Detector(DetectorBase):
         self.model = YOLO(YOLO_WEIGHTS).to(device)
         self.yolo_conf = YOLO_CONF
         self.yolo_imgsz = YOLO_IMGSZ
+        self.area_ratio_valid = AREA_RATIO_VALID
         self.rotate_180 = False
         self.img_rsed_square = None
 
@@ -40,13 +41,29 @@ class LVP01Detector(DetectorBase):
             YoloResult: Detection results
         """
         max_hw = max(image.shape[:2])
-        self.img_rsed_square = resize_pwd(image, output_size=max_hw, color_padding=(255, 255, 255))
+        # self.img_rsed_square = resize_pwd(image, output_size=max_hw, color_padding=(255, 255, 255))
+        self.img_rsed_square = image
         pil_image = Image.fromarray(cv2.cvtColor(self.img_rsed_square, cv2.COLOR_BGR2RGB))
         pil_image_gray = pil_image.convert("L")
         results = self.model.predict(source=pil_image_gray, verbose=False, show=False, save=False, save_crop=False,
                                         conf=self.yolo_conf, line_width=0, show_labels=False, show_conf=False,
                                         imgsz=self.yolo_imgsz)
         return results[0]
+
+    def _is_area_box_valid(self, position, image_width, image_height, area_ratio_valid=0.25):
+        """
+        Check if the area of the box is large enough compared to the image area
+        """
+        x1, y1, x2, y2 = position
+        box_area = (x2 - x1) * (y2 - y1)
+        image_area = image_width * image_height
+        _logger.info(f"Box area: {box_area}, Image area: {image_area}, Ratio: {box_area / image_area}")
+        if image_area == 0:
+            return False
+            
+        ratio = box_area / image_area
+        return ratio >= area_ratio_valid
+
 
     def validate(self, results: YoloResult) -> YoloValidation:
         """
@@ -102,6 +119,11 @@ class LVP01Detector(DetectorBase):
         x1, y1, x2, y2 = int(x1n * image_w), int(y1n * image_h), int(x2n * image_w), int(y2n * image_h)
         
         position = [x1, y1, x2, y2]
+
+        is_valid = self._is_area_box_valid(position, image_w, image_h, self.area_ratio_valid)
+        if not is_valid:
+            _logger.warning(f"Detection ignored: box area ratio too small (must be > {self.area_ratio_valid})")
+            return YoloValidation(is_valid=False, position=None, class_id=None)
 
         print(f"Rotate 180: {self.rotate_180}")
         
