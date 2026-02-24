@@ -51,8 +51,8 @@ def get_redframe_model_path(category: str, part: str) -> str:
 
 # ============ BRAND DETECTION CONFIG ============
 WATCH_DETECTOR_WEIGHTS = download_file_from_hf(
-    repo_id="rikai-ai/brand_detector_yolo",
-    filename="brand_detector_yolo26_sizeL_20260123.pt"  
+    repo_id="rikai-ai/brand_detector_v1.5",
+    filename="brand_detector_rolex_omg_ctr_lv_yolo26_sizeL_20260224_v1.5.pt"  
 )
 
 WATCH_DETECTOR_IMGSZ = 640
