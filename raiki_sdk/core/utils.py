@@ -6,6 +6,25 @@ from pathlib import Path
 
 _logger = logging.getLogger(__name__)
 
+CATEGORY_BRAND = {
+        "bag-lv": {
+            "version_name": "lv",
+            "full_name": "Louis Vuitton",
+        },
+        "rolex": {
+            "version_name": "rolex",
+            "full_name": "Rolex",
+        },
+        "omg": {
+            "version_name": "omg",
+            "full_name": "Omega",
+        },
+        "ctr": {
+            "version_name": "ctr",
+            "full_name": "Cartier",
+        }
+    }
+
 def _normalize_version_str(version: str) -> str:
     """Ensure version normalization
     # e.g. - "v1.3" => "v1_3"
@@ -39,14 +58,17 @@ def _normalize_category_str(category: str) -> str:
     "bag-lv" => "lv"
     "rolex" => "rolex"
     """
-    try:
-        if "bag-" in category.lower():
-            return category.replace("bag-", "")
-        elif "rolex" in category.lower():
-            return "rolex"
-        elif "omg" in category.lower():
-            return "omg"
-        else:
-            raise ValueError(f"Error normalizing category '{category}'")
-    except Exception as e:
-        raise ValueError(f"Error normalizing category '{category}': {e}")
+    if category.lower() in CATEGORY_BRAND:
+        return CATEGORY_BRAND[category.lower()]["version_name"]
+    raise ValueError(f"Error normalizing category '{category}': {e}")
+
+    # try:
+    #     if "bag-" in category.lower():
+    #         return category.replace("bag-", "")
+    #     elif "rolex" in category.lower():
+    #         return "rolex"
+    #     elif "omg" in category.lower():
+    #         return "omg"
+    #     else:
+    #         raise ValueError(f"Error normalizing category '{category}'")
+    # except Exception as e:
