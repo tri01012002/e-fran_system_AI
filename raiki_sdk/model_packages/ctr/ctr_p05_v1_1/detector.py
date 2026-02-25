@@ -3,7 +3,7 @@ from raiki_sdk.preprocessing import padding_crop_yolo, resize_pwd
 from ultralytics import YOLO
 from .config import (
     YOLO_WEIGHTS, YOLO_CONF, YOLO_IMGSZ, 
-    TARGET_SIZE,COLOR_PADDING
+    TARGET_SIZE, COLOR_PADDING, PADD_CROP
 )
 from PIL import Image
 import cv2
@@ -22,6 +22,7 @@ class CTRP05Detector(DetectorBase):
         self.model = YOLO(YOLO_WEIGHTS).to(device)
         self.yolo_conf = YOLO_CONF
         self.yolo_imgsz = YOLO_IMGSZ
+        self.padd_crop = PADD_CROP
         self.output_size = TARGET_SIZE
         self.img_preparing_yolo = None
         self.class_names = self.model.names
@@ -124,7 +125,7 @@ class CTRP05Detector(DetectorBase):
 
     def crop(self, image, position, class_id=None) -> Image.Image:
         """
-        Crop box from image
+        Crop box from image with padding
         
         Args:
             image: np.ndarray (not used, uses self.img_preparing_yolo)
@@ -132,13 +133,12 @@ class CTRP05Detector(DetectorBase):
             class_id: Detection class ID
             
         Returns:
-            PIL Image - raw cropped image
+            PIL Image - padded cropped image
         """
-        x1, y1, x2, y2 = position
-        cropped_original = self.img_preparing_yolo[y1:y2, x1:x2]
+        cropped_image = padding_crop_yolo(self.img_preparing_yolo, position, p=self.padd_crop)
         
         # Convert to PIL
-        return Image.fromarray(cv2.cvtColor(cropped_original, cv2.COLOR_BGR2RGB))
+        return Image.fromarray(cv2.cvtColor(cropped_image, cv2.COLOR_BGR2RGB))
 
 
     def run_pipeline(self, image, is_crop: bool = True) -> YoloValidation:

@@ -1,5 +1,5 @@
 """
-Configuration for Omega P04 Models Version 1_1
+Configuration for CTR P05 Models Version 1.1
 """
 from raiki_sdk.utils import download_file_from_hf
 import cv2
@@ -37,6 +37,9 @@ PACKAGE_NAME = "ctr_p05_v1_1"
 # YOLO parameters
 YOLO_CONF = 0.65 
 YOLO_IMGSZ = 640
+
+# PADDING
+PADD_CROP = 0.05
 
 # Resize parameters
 COLOR_PADDING = (255, 255, 255)
