@@ -9,7 +9,7 @@ from .config import (
     AUTH_WEIGHTS, AUTH_CLASS_LABELS,
     AUTH_MODEL_NAME, AUTH_MODEL_VERSION,
     YOLO_MODEL_VERSION, AUTH_NUM_CLASSES)
-from .architecture import MaxvitTiny
+from .architecture import MaxvitSmall
 from .preprocessor import get_transform
 import torch
 import numpy as np
@@ -31,7 +31,7 @@ class LVP04Case4Authenticator(AuthenticateBase):
             device: Device to run model on (cuda/cpu)
         """
         self.device = device
-        self.model = MaxvitTiny(num_classes=AUTH_NUM_CLASSES, model_name=AUTH_MODEL_NAME, pretrained=True).to(self.device).eval()
+        self.model = MaxvitSmall(num_classes=AUTH_NUM_CLASSES,checkpoint=AUTH_WEIGHTS, device=device).to(self.device).eval()
 
         self.transform = get_transform()
 
@@ -44,7 +44,7 @@ class LVP04Case4Authenticator(AuthenticateBase):
 
     def forward(self, image: Image.Image) -> AuthResult:
         """
-        Authenticate Louis Vuitton P04 Case 4 V1.4 part
+        Authenticate Louis Vuitton P04 Case 4 V1.5 part
 
         Args:
             image: Image.Image
@@ -52,7 +52,7 @@ class LVP04Case4Authenticator(AuthenticateBase):
         Returns:
             AuthResult: probabilities, label, metadata
         """
-        # ensure metadata stays up-to-date
+
         with torch.no_grad():
             tensor_image = self.transform(image).unsqueeze(0).to(self.device)
             logits = self.model(tensor_image)
@@ -64,26 +64,12 @@ class LVP04Case4Authenticator(AuthenticateBase):
 
     def get_prob(self, probs: torch.Tensor) -> Tuple[float, str]:
         index = torch.argmax(probs, -1)
-
         return 1 - probs[0].item(), AUTH_CLASS_LABELS[index]
 
     def generate_heatmap(self) -> Image.Image:
         pass
 
 
-if __name__ == "__main__":
-    import argparse
-    from raiki_sdk import load_image
-    
-    parser = argparse.ArgumentParser(description="Test MaxvitTiny authenticator on a single image")
-    parser.add_argument("--image", required=True, help="Path to input image file")
-    parser.add_argument("--device", default="cpu", help="Device to run on (cpu or cuda)")
-    args = parser.parse_args()
-    
-    auth = LVP04Case4Authenticator(device=args.device)
-    img = load_image(r"\\192.168.10.19\DataHandle\PERSONAL_DATA\QUANG\LV\LV_P04\lv_p04_case4_data\lv_p04_case4_data-padding\data\data-training\real\LV_P04_real_material_case4_1771632707092_2025-02-07_train_frames")
-    result = auth.forward(img)
-    print("AuthResult:", result)
 
 
         

@@ -1,5 +1,5 @@
 """
-Image Preprocessing for Louis Vuitton P04 Case 4 V1.4
+Image Preprocessing for Louis Vuitton P04 Case 4 V1.5
 
 Handles image transformations and preprocessing.
 Uses raiki-sdk preprocessing utilities.
@@ -11,7 +11,7 @@ from .config import TARGET_SIZE
 
 def get_transform():
     """
-    Get image transformation pipeline for Louis Vuitton P04 Case 4 V1.4
+    Get image transformation pipeline for Louis Vuitton P04 Case 4 V1.5
 
     Returns:
         Transform pipeline

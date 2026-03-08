@@ -15,7 +15,7 @@ YOLO_WEIGHTS = download_file_from_hf(
 
 AUTH_WEIGHTS = download_file_from_hf(
     repo_id="rikai-ai/lv_p04_auth_v1-5",
-    filename="lv_p04_auth_v1_5_maxvitsmall_260304_260304.pth"
+    filename="lv_p04_auth_v1_5_maxvitsmall_260304_260308.pth"
 )
 
 # AUTH parameters
@@ -37,4 +37,4 @@ YOLO_CONF = 0.35
 YOLO_IMGSZ = 640
 
 # Resize parameters
-COLOR_PADDING = (255, 255, 255)
+COLOR_PADDING = (127, 127, 127)

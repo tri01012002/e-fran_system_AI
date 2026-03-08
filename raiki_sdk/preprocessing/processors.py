@@ -264,3 +264,22 @@ def normalize_position_to_square(position: list[int]) -> list[int]:
         x2 = x2 + diff
 
     return [int(x1), int(y1), int(x2), int(y2)]
+
+def crop_center(image: Image.Image) -> Image.Image:
+    """
+    Crop the center of the input image to produce a square image.
+    The crop size is determined by the smaller dimension (width or height),
+    and the crop is centered along both axes.
+    Args:
+        image (Image.Image): Input PIL image.
+    Returns:
+        Image.Image: Center-cropped square image.
+    """
+
+    width, height = image.size
+    center_size = min(width, height)
+    left = (width - center_size) // 2
+    top = (height - center_size) // 2
+    right = left + center_size
+    bottom = top + center_size
+    return image.crop((left, top, right, bottom))
