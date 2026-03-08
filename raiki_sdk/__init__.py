@@ -30,6 +30,7 @@ from raiki_sdk.preprocessing import (
     AdjustBrightnessContrast,
     pad_to_square,
     normalize_position_to_square,
+    crop_center,
 )
 
 from raiki_sdk.core import registry
