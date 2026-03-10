@@ -75,7 +75,7 @@ class RolexP05Authenticator(AuthenticateBase):
 
         if index == 0:  # fake
             # Xac suat fake cao → confidence giả thấp → đầu ra thấp
-            return max(0.5, 1.0 - probs[index].item()), f"{probs[index].item():.4f}-{label}"
+            return max(0.3, 1.0 - probs[index].item()), f"{probs[index].item():.4f}-{label}"
         elif index == 1:  # real (genuine, moi)
             # Xac suat real cao → confidence cao
             return max(0.7, probs[index].item()), f"{probs[index].item():.4f}-{label}"
@@ -84,7 +84,7 @@ class RolexP05Authenticator(AuthenticateBase):
             return max(0.6, probs[index].item()), f"{probs[index].item():.4f}-{label}"
         else:  # new (genuine, moi nhat)
             # Genuine, tin tuong cao
-            return max(0.7, probs[index].item()), f"{probs[index].item():.4f}-{label}"
+            return max(0.75, probs[index].item()), f"{probs[index].item():.4f}-{label}"
 
     def generate_heatmap(self) -> Image.Image:
         pass
