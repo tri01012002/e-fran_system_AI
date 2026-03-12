@@ -78,7 +78,7 @@ async def check_part_test(
 
         # 5. Crop detector region
         cropped_image = detector.crop(image, position)
-        cropped_image.save("cropped_image.jpg")
+        # cropped_image.save("cropped_image.jpg")
         print(f"[/check/ {category} - {part}] - Cropped image ok")
 
         # 6. Authenticate
@@ -157,7 +157,7 @@ async def classify(
             }
         )
     image_region = detector.crop(image, validation.position)
-    image_region.save("image_region.jpg")
+    # image_region.save("image_region.jpg")
     print(f"[/classify/ {category} - {part}] - Validation ok")
 
     #4. Classify
@@ -291,7 +291,7 @@ async def test_brand_detection(
         print(f"[Classification] Using full image")
     
     # Save cropped for debugging
-    pil_img.save("brand_detect_cropped.jpg")
+    # pil_img.save("brand_detect_cropped.jpg")
     
     # 5. Classification
     try:
@@ -356,8 +356,8 @@ async def test_detection_only(
         )
     
     # Save cropped image
-    if detection_result.cropped_image:
-        detection_result.cropped_image.save("detected_crop.jpg")
+    # if detection_result.cropped_image:
+        # detection_result.cropped_image.save("detected_crop.jpg")
     
     return JSONResponse(
         content={

@@ -15,6 +15,8 @@ import torch
 from typing import Tuple
 from PIL import Image
 import numpy as np
+import torch.nn.functional as F
+import cv2
 
 class OMGP02Authenticator(AuthenticateBase):
     """
@@ -58,9 +60,14 @@ class OMGP02Authenticator(AuthenticateBase):
             logits = self.model(tensor_image)
             probs = torch.softmax(logits, -1).squeeze(0)
             probs, label = self.get_prob(probs)
-            metadata = self.metadata
+        
+        # Grad-CAM
+        heatmap = self.generate_heatmap(image)
+        heatmap.save("heatmap.png")
 
-            return AuthResult(probability=probs, label=label, metadata=metadata)
+        metadata = self.metadata
+
+        return AuthResult(probability=probs, label=label, metadata=metadata)
 
     def get_prob(self, probs: torch.Tensor) -> Tuple[float, str]:
         index = torch.argmax(probs, -1)
@@ -73,5 +80,79 @@ class OMGP02Authenticator(AuthenticateBase):
         label = "real"
         return max(0.65, probs[index].item()), label
 
-    def generate_heatmap(self) -> Image.Image:
-        pass
+    def generate_heatmap(self, image: Image.Image, bbox=None) -> Image.Image:
+        """
+        Generate Grad-CAM heatmap (crop object first to remove background)
+
+        Args:
+            image: PIL Image
+            bbox: (x1, y1, x2, y2)
+
+        Returns:
+            Image.Image
+        """
+
+        original = np.array(image)
+
+        # -------------------------
+        # 1. Crop object
+        # -------------------------
+        if bbox is not None:
+            x1, y1, x2, y2 = map(int, bbox)
+            image_crop = image.crop((x1, y1, x2, y2))
+        else:
+            image_crop = image
+            x1, y1 = 0, 0
+
+        tensor_image = self.transform(image_crop).unsqueeze(0).to(self.device)
+
+        features = []
+        gradients = []
+
+        def forward_hook(module, input, output):
+            features.append(output.detach())
+
+        def backward_hook(module, grad_input, grad_output):
+            gradients.append(grad_output[0].detach())
+
+        target_layer = self.model.backbone.stages[-1].blocks[-1].conv
+
+        handle_f = target_layer.register_forward_hook(forward_hook)
+        handle_b = target_layer.register_full_backward_hook(backward_hook)
+
+        logits = self.model(tensor_image)
+        pred_class = logits.argmax(dim=1)
+
+        self.model.zero_grad()
+        logits[:, pred_class].backward()
+
+        feature_map = features[0]
+        gradient = gradients[0]
+
+        weights = gradient.mean(dim=(2, 3), keepdim=True)
+        cam = (weights * feature_map).sum(dim=1, keepdim=True)
+
+        cam = F.relu(cam)
+        cam = cam.squeeze().cpu().numpy()
+
+        cam = cv2.resize(cam, (image_crop.size[0], image_crop.size[1]))
+        cam = (cam - cam.min()) / (cam.max() - cam.min() + 1e-8)
+
+        cam = 1 - cam  # Invert heatmap to highlight important regions
+
+        heatmap = cv2.applyColorMap(np.uint8(255 * cam), cv2.COLORMAP_TURBO)
+
+        crop_np = np.array(image_crop)
+        overlay_crop = cv2.addWeighted(crop_np, 0.6, heatmap, 0.4, 0)
+
+        # -------------------------
+        # 2. Paste back to original
+        # -------------------------
+        overlay = original.copy()
+        overlay[y1:y1 + overlay_crop.shape[0], x1:x1 + overlay_crop.shape[1]] = overlay_crop
+
+        handle_f.remove()
+        handle_b.remove()
+
+        return Image.fromarray(overlay)
+
