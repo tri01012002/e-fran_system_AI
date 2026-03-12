@@ -106,9 +106,8 @@ class RolexP01Detector(DetectorBase):
         }
         return YoloValidation(
             is_valid=True,
-            position=combined_position,       
+            position=boxes_dict,       
             class_id=MULTI_BOX_CLASS_ID,
-            image_crop=boxes_dict             
         )
 
     def crop(self, image: np.ndarray, position, class_id: int = None) -> Image.Image:
