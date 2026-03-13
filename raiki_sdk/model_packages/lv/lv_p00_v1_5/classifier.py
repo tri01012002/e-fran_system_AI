@@ -61,6 +61,9 @@ class LVP00Classificator(ClassificatorBase):
             "M41138":"M41139",
             "M61857":"M60072",
             "M42244":"M42243",
+            # REVUE_AI-479
+            "N41534":"N40608",
+            "N41531":"N41575",
         }
         if code in convert_code_lv:
             return convert_code_lv[code]
