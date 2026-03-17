@@ -10,7 +10,7 @@ YOLO_MODEL_VERSION = "v1"
 # convnextv2_base 384
 AUTH_WEIGHTS = download_file_from_hf(
     repo_id="rikai-ai/omg_p02_auth_v1-4",
-    filename="omg_p02_auth_v1.4_convnextv2-base-384_best_model.pth"
+    filename="omg_p02_auth_v1.4_convnextv2-base-384_20260313_20260316.pth"
 )
 NEEDLE_ALIGNER_WEIGHTS = download_file_from_hf(
     repo_id="rikai-ai/omg_p02_needle_aligner_v1",
