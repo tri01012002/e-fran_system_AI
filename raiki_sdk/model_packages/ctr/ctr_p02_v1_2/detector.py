@@ -1,5 +1,5 @@
 """
-YOLO Detector for Rolex P04
+YOLO Detector for Catier P02
 
 Handles object detection logic using YOLO model.
 """

@@ -1,5 +1,5 @@
 """
-Configuration for CTR P02 Models Version 1_1
+Configuration for CTR P02 Models Version 1_2
 """
 
 from raiki_sdk.utils import download_file_from_hf
