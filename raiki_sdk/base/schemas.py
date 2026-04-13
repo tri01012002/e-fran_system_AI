@@ -1,5 +1,5 @@
 from pydantic import BaseModel, ConfigDict, Field
-from typing import Any, Optional, Literal
+from typing import Any, Optional, Literal, Tuple
 from dataclasses import dataclass    
 from PIL import Image
 from ultralytics.engine.results import Results as YoloResult
@@ -42,9 +42,7 @@ class IqaResult(BaseModel):
 class RedFrameResult(BaseModel):
     result: bool
     iqa_result: Optional[IqaResult] = None
-    # image_quality_validate: Literal["pass", "fail"] | None = None
-    # iqa_score: float | None = None
-    # distortion_type: str | None = None
+    red_frame_bbox: Optional[Tuple[int, int, int, int]] = None # (x1, y1, x2, y2)
     error_type: Literal[
         "angle_error", 
         "wide_error", 
