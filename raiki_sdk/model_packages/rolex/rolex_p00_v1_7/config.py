@@ -8,10 +8,10 @@ CLASSIFIER_MODEL_VERSION = "v1_7"
 YOLO_MODEL_VERSION = "v1_3"
 
 # Model weights paths (relative to package root or absolute)
-# YOLO_WEIGHTS = download_file_from_hf(
-#     repo_id="rikai-ai/rolex_p00_detector_v1-3",
-#     filename="rolex_p00_detector_v1-3_yolov11_20250529_20250530.pt"
-# )
+YOLO_WEIGHTS = download_file_from_hf(
+    repo_id="rikai-ai/rolex_p00_detector_v1-3",
+    filename="rolex_p00_detector_v1-3_yolov11_20250529_20250530.pt"
+)
 
 CLASSIFIER_WEIGHTS = download_file_from_hf(
     repo_id="rikai-ai/rolex_p00_classify_v1_7",
@@ -20,7 +20,7 @@ CLASSIFIER_WEIGHTS = download_file_from_hf(
 
 EMBEDDING_STORAGE_PKL = download_file_from_hf(
     repo_id="rikai-ai/rolex_p00_classify_v1_7",
-    filename="rolex_p00_classify_1.7_292classes_dinov3-arceface-vector-withgray-storage_20260413_20260413.pkl"
+    filename="rolex_p00_classify_1.7_292classes_dinov3-arceface-vector-withgray-storage_20260413_20260415.pkl"
 )
 
 # Classifier model parameters
