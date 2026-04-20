@@ -18,7 +18,7 @@ class RolexP02Detector(DetectorBase):
         self.model = YOLO(YOLO_WEIGHTS).to(device)
         self.yolo_conf = YOLO_CONF
         self.yolo_imgsz = YOLO_IMGSZ
-        self.img_rsed_square = None  # lưu ảnh resized
+        self.img_rsed_square = None
 
     def detect(self, image) -> YoloResult:
         """
@@ -74,8 +74,6 @@ class RolexP02Detector(DetectorBase):
         if best_box is None:
             return YoloValidation(is_valid=False, position=None, class_id=None)
 
-        print(f"✅ Best box: {best_box}, conf={best_conf:.4f}")
-
         return YoloValidation(
             is_valid=True,
             position=best_box,
@@ -88,7 +86,6 @@ class RolexP02Detector(DetectorBase):
         """
 
         if position is None:
-            print("❌ No position to crop")
             return None
 
         x_min, y_min, x_max, y_max = position
