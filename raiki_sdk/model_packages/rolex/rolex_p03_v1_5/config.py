@@ -23,8 +23,8 @@ TARGET_SIZE = 224
 AUTH_MODEL_NAME = "EfficientNet_V2_S_Weights.IMAGENET1K_V1"
 AUTH_NUM_CLASSES = 2
 AUTH_CLASS_LABELS = [
-    'fake',
     'real',
+    'fake',
 ]
 
 # Metadata

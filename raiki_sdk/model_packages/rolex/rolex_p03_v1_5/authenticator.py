@@ -67,23 +67,23 @@ class RolexP03Authenticator(AuthenticateBase):
         Derive a single real_prob score and a label from the 2-class softmax output.
 
         Class mapping:
-            index 0 -> fake   (real_prob = prob[1], capped at 0.5)
-            index 1 -> real   (real_prob = prob[1])
+            index 0 -> real   (real_prob = prob[0])
+            index 1 -> fake   (real_prob = prob[0], capped at 0.5)
 
         Args:
-            probs: Tensor of shape [2] — softmax probabilities [fake, real]
+            probs: Tensor of shape [2] — softmax probabilities [real, fake]
 
         Returns:
             (real_prob, label)  where label in {'fake', 'real'}
         """
         index = torch.argmax(probs, dim=-1).item()
-        label = AUTH_CLASS_LABELS[index]           # 'fake' or 'real'
+        label = AUTH_CLASS_LABELS[index]           # 'real' or 'fake'
 
-        if index == 0:   # predicted fake
+        if index == 0:   # predicted real
+            real_prob = probs[0].item()
+        else:            # index == 1, predicted fake
             # Real probability is low; cap at 0.5 to avoid misleading high scores
-            real_prob = min(0.5, probs[1].item())
-        else:            # index == 1, predicted real
-            real_prob = probs[1].item()
+            real_prob = min(0.5, probs[0].item())
 
         return real_prob, label
 
