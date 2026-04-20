@@ -51,19 +51,15 @@ class RolexP02Detector(DetectorBase):
         """
 
         if results.boxes is None or len(results.boxes) == 0:
-            print("❌ No boxes detected")
             return YoloValidation(is_valid=False, position=None, class_id=None)
 
         best_box = None
         best_conf = -1
         best_cls = None
 
-        print("🔍 Debug YOLO output:")
         for box in results.boxes:
             cls_id = int(box.cls)
             conf = float(box.conf.item())
-
-            print(f"cls={cls_id}, conf={conf:.4f}")
 
             # lọc class + conf
             if cls_id in [0, 1] and conf >= self.yolo_conf:
@@ -76,7 +72,6 @@ class RolexP02Detector(DetectorBase):
                     best_cls = cls_id
 
         if best_box is None:
-            print("❌ No valid box after filtering")
             return YoloValidation(is_valid=False, position=None, class_id=None)
 
         print(f"✅ Best box: {best_box}, conf={best_conf:.4f}")
@@ -98,7 +93,6 @@ class RolexP02Detector(DetectorBase):
 
         x_min, y_min, x_max, y_max = position
 
-        # dùng resized image (CHUẨN)
         h, w = self.img_rsed_square.shape[:2]
 
         # clamp
@@ -108,13 +102,11 @@ class RolexP02Detector(DetectorBase):
         y_max = min(h, int(y_max))
 
         if x_max <= x_min or y_max <= y_min:
-            print("❌ Invalid bbox after clamp")
             return None
 
         cropped = self.img_rsed_square[y_min:y_max, x_min:x_max]
 
         if cropped is None or cropped.size == 0:
-            print("❌ Empty crop")
             return None
 
         cropped_pil = Image.fromarray(
