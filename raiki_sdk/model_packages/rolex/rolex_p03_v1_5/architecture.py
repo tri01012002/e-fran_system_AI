@@ -51,7 +51,18 @@ def create_rolex_model(num_classes=2, pretrained=False, checkpoint=None, device=
     )
 
     if checkpoint is not None:
-        model.load_state_dict(torch.load(checkpoint, map_location=device))
+        ckpt = torch.load(checkpoint, map_location=device)
+        # Handle full training checkpoints (e.g. PyTorch Lightning / manual saves)
+        # that wrap the state_dict inside a top-level key.
+        if isinstance(ckpt, dict) and "state_dict" in ckpt:
+            state_dict = ckpt["state_dict"]
+        else:
+            state_dict = ckpt
+        # Strip "model." prefix when the EfficientNet was stored as a sub-module
+        # (e.g. self.model = efficientnet_v2_s(...) inside a LightningModule).
+        if all(k.startswith("model.") for k in state_dict.keys()):
+            state_dict = {k[len("model."):]: v for k, v in state_dict.items()}
+        model.load_state_dict(state_dict, strict=False)
 
     return model
 
