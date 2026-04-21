@@ -261,7 +261,7 @@ ROLEX_CODE_NAME_MAP = {
     "1005":"Oyster Perpetual",
     "1024":"Oyster Perpetual",
     "116655":"Yacht-Master",
-    "116688":"Yacht-Master",
+    "116688":"Yacht-Master II",
     "118138":"Day-Date",
     "126283RBR":"Datejust",
     "1550":"Oyster Perpetual Date",
