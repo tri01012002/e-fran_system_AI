@@ -16,12 +16,12 @@ YOLO_WEIGHTS = download_file_from_hf(
 )
 AUTH_WEIGHTS = download_file_from_hf(
     repo_id="rikai-ai/ctr_p02_auth_v1-3",
-    filename="ctr_p02_auth_v1-3_dinov3_260421_260422.pth"
+    filename="ctr_p02_auth_v1-3_convnext_260426_260429.pth"
 )
         
 # AUTH parameters
 TARGET_SIZE = 512
-AUTH_MODEL_NAME = "vit_base_patch16_dinov3.lvd1689m"
+AUTH_MODEL_NAME = "convnextv2_base.fcmae_ft_in22k_in1k"
 AUTH_NUM_CLASSES = 2
 AUTH_CLASS_LABELS = ['fake', 'real']
 
