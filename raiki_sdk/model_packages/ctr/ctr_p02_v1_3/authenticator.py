@@ -1,9 +1,11 @@
+from ast import Mult
+
 from raiki_sdk.base import AuthenticateBase, AuthResult
 from .config import (
     AUTH_WEIGHTS, AUTH_CLASS_LABELS,
     AUTH_MODEL_NAME, AUTH_MODEL_VERSION,
     YOLO_MODEL_VERSION, AUTH_NUM_CLASSES)
-from .architecture import MultiStageDINO
+from .architecture import Convnextv2
 from .preprocessor import get_transform
 import torch
 import numpy as np
@@ -25,7 +27,7 @@ class CTRP02Authenticator(AuthenticateBase):
             device: Device to run model on (cuda/cpu)
         """
         self.device = device
-        self.model = MultiStageDINO(num_classes=AUTH_NUM_CLASSES,checkpoint=AUTH_WEIGHTS, device=device, model_name=AUTH_MODEL_NAME).to(self.device).eval()
+        self.model = Convnextv2(num_classes=AUTH_NUM_CLASSES,checkpoint=AUTH_WEIGHTS, device=device, model_name=AUTH_MODEL_NAME).to(self.device).eval()
         self.transform = get_transform()
 
         self.metadata = {
