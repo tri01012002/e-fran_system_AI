@@ -3,7 +3,7 @@ import timm
 import torch.nn as nn
 from .config import (AUTH_MODEL_NAME, AUTH_NUM_CLASSES, AUTH_WEIGHTS)
 
-class MultiStageDINO(nn.Module):
+class Convnextv2(nn.Module):
     def __init__(self, num_classes, checkpoint=None, model_name=AUTH_MODEL_NAME, device='cpu'):
         super().__init__()
         self.backbone = timm.create_model(model_name, pretrained=(checkpoint is None), num_classes=0)
@@ -18,7 +18,16 @@ class MultiStageDINO(nn.Module):
             nn.Linear(512, num_classes)
         )
         if checkpoint is not None:
-            self.load_state_dict(torch.load(checkpoint, map_location=device))
+            state_dict = torch.load(checkpoint, map_location=device)
+
+            # chỉ lấy backbone
+            backbone_dict = {
+                k.replace("backbone.", ""): v
+                for k, v in state_dict.items()
+                if k.startswith("backbone.")
+            }
+
+        self.backbone.load_state_dict(backbone_dict, strict=False)
 
     def forward(self, x):
         feat = self.backbone(x)
