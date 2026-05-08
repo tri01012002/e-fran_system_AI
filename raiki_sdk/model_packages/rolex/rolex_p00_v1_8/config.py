@@ -15,18 +15,18 @@ YOLO_MODEL_VERSION = "v1_3"
 
 CLASSIFIER_WEIGHTS = download_file_from_hf(
     repo_id="rikai-ai/rolex_p00_classify_v1-8",
-    filename="rolex_p00_classify_v1.7_292classes_dinov3-arceface-vector-50gray_20260413_20260413.pth"
+    filename="rolex_p00_classify_v1.8_312classes_dinov3-arceface-vector-50gray_20260504_20260508.pth"
 )
 
 EMBEDDING_STORAGE_PKL = download_file_from_hf(
     repo_id="rikai-ai/rolex_p00_classify_v1-8",
-    filename="rolex_p00_classify_1.7_292classes_dinov3-arceface-vector-withgray-storage_20260413_20260415.pkl"
+    filename="rolex_p00_classify_v1.8_312classes_dinov3-arceface-vector-withgray-storage_20260504_20260508.pkl"
 )
 
 # Classifier model parameters
 TARGET_SIZE = 256
 CLASSIFIER_MODEL_NAME = "vit_base_patch16_dinov3.lvd1689m"
-CLASSIFIER_NUM_CLASSES = 292
+CLASSIFIER_NUM_CLASSES = 312
 CLASSIFIER_EMBEDDING_SIZE = 512
 
 
