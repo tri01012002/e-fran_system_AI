@@ -297,5 +297,25 @@ ROLEX_CODE_NAME_MAP = {
     "336935":"Sky-Dweller",
     "6427":"Precision",
     "115210":"Oyster Perpetual Date",
-    "279161G":"Datejust"
+    "279161G":"Datejust",
+    "126515LN":"Daytona",
+    "116528G":"Daytona",
+    "116509":"Daytona",
+    "126509":"Daytona",
+    "116505":"Daytona",
+    "126505":"Daytona",
+    "116519LN":"Daytona",
+    "126519LN":"Daytona",
+    "116518":"Daytona",
+    "128236A":"Day-Date"
+    "128239G":"Day-Date",
+    "326139":"Sky-Dweller",
+    "326235":"Sky-Dweller",
+    "126619LB":"Submariner Date",
+    "69159G":"Datejust",
+    "69136G":"Datejust",
+    "279175G":"Datejust",
+    "278383RBR":"Datejust",
+    "6924":"Oyster Perpetual Date",
+    "116619LB":"Submariner Date"
 }
