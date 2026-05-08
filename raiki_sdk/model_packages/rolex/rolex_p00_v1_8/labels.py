@@ -307,7 +307,7 @@ ROLEX_CODE_NAME_MAP = {
     "116519LN":"Daytona",
     "126519LN":"Daytona",
     "116518":"Daytona",
-    "128236A":"Day-Date"
+    "128236A":"Day-Date",
     "128239G":"Day-Date",
     "326139":"Sky-Dweller",
     "326235":"Sky-Dweller",
