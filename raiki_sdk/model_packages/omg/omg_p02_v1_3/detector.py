@@ -102,9 +102,9 @@ class OMGP02Detector(DetectorBase):
         # self.resized_image = resize_pwd(aligned_image, output_size=max_hw, color_padding=COLOR_PADDING)
         self.resized_image = aligned_image
         pil_image = Image.fromarray(cv2.cvtColor(self.resized_image, cv2.COLOR_BGR2RGB))
-        results = self.model.predict(pil_image)
+        results = self.model.predict(pil_image, threshold=0.3)
         return results
-
+    
     def validate(self, results: Union[sv.Detections, List[sv.Detections]]) -> YoloValidation:
 
         if len(results.confidence) == 0:
