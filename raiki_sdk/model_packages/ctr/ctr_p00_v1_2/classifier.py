@@ -52,17 +52,19 @@ class CTRP00Classificator(ClassificatorBase):
 
         with torch.no_grad():
             for name, sim in result_model:
-                name = name.replace("_rotate", "").replace("_gray","")
+                name = name.replace("_rotate", "").replace("_gray", "")
                 if "_" in name:
-                    set_label.add(name.split("_")[0])
-                    set_label.add(name.split("_")[1])
-                    topks_nor.append({"name": name.split("_")[0], "prob": sim})
-                    topks_nor.append({"name": name.split("_")[1], "prob": sim})
-                else: 
-                    topks_nor.append({"name": name, "prob": sim})
-                    set_label.add(name)
+                    parts = name.split("_")
+                    for part in parts:
+                        if part != "brightness":  # Lọc bỏ brightness
+                            set_label.add(part)
+                            topks_nor.append({"name": part, "prob": sim})
+                else:
+                    if name != "brightness":  # Lọc bỏ brightness
+                        topks_nor.append({"name": name, "prob": sim})
+                        set_label.add(name)
 
-        topks_nor = topks_nor[:min(len(topks_nor),topk)]
+        topks_nor = topks_nor[:min(len(topks_nor), topk)]
 
         return ClassificationResultProb(topk_probs=topks_nor, metadata=self.metadata)
 
