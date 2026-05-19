@@ -29,7 +29,7 @@ __all__ = [
     "remove_white_padding",
     "pil_to_tensor",
     "pad_to_square",
-    "normalize_position_to_square",\
+    "normalize_position_to_square",
     "crop_center",
     # Filters
     "CLAHE",
