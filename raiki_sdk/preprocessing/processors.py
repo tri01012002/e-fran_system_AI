@@ -1,3 +1,4 @@
+import logging
 import numpy as np
 from PIL import Image
 import cv2
@@ -5,6 +6,9 @@ from torchvision import transforms
 from torchvision.transforms import ToTensor
 import torch
 import random
+from typing import Optional, Union
+
+LOGGER = logging.getLogger(__name__)
 
 try:
     from torchvision.transforms import InterpolationMode
@@ -170,10 +174,65 @@ def padding_crop_yolo(image: np.ndarray, position: list[int], p: int = 0, rotate
         raise ValueError(f"Invalid crop coordinates after padding: x1={x1}, y1={y1}, x2={x2}, y2={y2}")
     
     cropped_img = image[y1:y2, x1:x2]
+    if cropped_img.size == 0:
+        raise ValueError(f"Invalid crop region produced empty image: x1={x1}, y1={y1}, x2={x2}, y2={y2}")
+
     if remove_padding:
-        cropped_img = remove_white_padding(cropped_img)
+        cropped_img_no_pad = remove_white_padding(cropped_img)
+        if cropped_img_no_pad.size == 0:
+            LOGGER.warning("remove_white_padding removed all pixels, using padded crop instead for position=%s", position)
+        else:
+            cropped_img = cropped_img_no_pad
+
+    if cropped_img.size == 0:
+        raise ValueError("Crop result is empty after remove_padding fallback")
+
     if rotate_180:
         cropped_img = cv2.rotate(cropped_img, cv2.ROTATE_180)
+    return cropped_img
+
+
+def crop_center(image: Union[np.ndarray, Image.Image], position: Optional[Union[list[int], tuple[int, int, int, int], int]] = None, p: int = 0) -> np.ndarray:
+    """Crop a centered region around the given position.
+
+    Compatibility notes:
+      - `crop_center(image, position)` is the normal form.
+      - `crop_center(image, p=2)` or `crop_center(image, 2)` is accepted for older callers.
+      - `crop_center(image)` falls back to using the full image region.
+    """
+    if isinstance(image, Image.Image):
+        image = np.array(image.convert("RGB"))
+
+    if isinstance(position, int):
+        p = position
+        position = None
+
+    if position is None:
+        height, width = image.shape[:2]
+        position = [0, 0, width, height]
+
+    if len(position) != 4:
+        raise ValueError("position must have 4 elements [x1, y1, x2, y2]")
+
+    x1, y1, x2, y2 = position
+    if x1 >= x2 or y1 >= y2:
+        raise ValueError("Invalid coordinates: x1 < x2 and y1 < y2 required")
+
+    if p < 1:
+        px = int((x2 - x1) * p)
+        py = int((y2 - y1) * p)
+    else:
+        px = py = int(p)
+
+    x1 = max(0, x1 - px)
+    y1 = max(0, y1 - py)
+    x2 = min(image.shape[1], x2 + px)
+    y2 = min(image.shape[0], y2 + py)
+
+    cropped_img = image[y1:y2, x1:x2]
+    if cropped_img.size == 0:
+        raise ValueError(f"Invalid crop_center region produced empty image: {position} with padding={p}")
+
     return cropped_img
     
 
@@ -264,22 +323,3 @@ def normalize_position_to_square(position: list[int]) -> list[int]:
         x2 = x2 + diff
 
     return [int(x1), int(y1), int(x2), int(y2)]
-
-def crop_center(image: Image.Image) -> Image.Image:
-    """
-    Crop the center of the input image to produce a square image.
-    The crop size is determined by the smaller dimension (width or height),
-    and the crop is centered along both axes.
-    Args:
-        image (Image.Image): Input PIL image.
-    Returns:
-        Image.Image: Center-cropped square image.
-    """
-
-    width, height = image.size
-    center_size = min(width, height)
-    left = (width - center_size) // 2
-    top = (height - center_size) // 2
-    right = left + center_size
-    bottom = top + center_size
-    return image.crop((left, top, right, bottom))

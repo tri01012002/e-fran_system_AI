@@ -1,3 +1,4 @@
+import logging
 import joblib
 from .config import get_redframe_model_path
 import numpy as np
@@ -6,9 +7,11 @@ from xgboost.core import Booster
 import pandas as pd
 from raiki_sdk.base import RedFrameResult
 from .iqa_service import LIQEServices
-from typing import Callable, Optional
+from typing import Callable, Optional, Union
 from PIL import Image
 import cv2
+
+LOGGER = logging.getLogger(__name__)
 
 class RedFrameService:
     def __init__(
@@ -32,9 +35,6 @@ class RedFrameService:
         if self.model_path:
             self.model_redframe: Booster = joblib.load(self.model_path)
             
-        if advanced_mode and self.model_redframe is None:
-            raise RuntimeError("RedFrame model not loaded")
-        
         self.class_labels = class_labels
 
         if "good" not in self.class_labels:
@@ -48,11 +48,11 @@ class RedFrameService:
     # ----------------------------------------------------------------------
     # Geometry Utilities
     # ----------------------------------------------------------------------
-    def _parse_frame_coordinates(self, image: np.ndarray, frame: tuple) -> tuple[int, int, int, int]:
+    def _parse_frame_coordinates(self, image: np.ndarray, frame: str) -> tuple[int, int, int, int]:
         """Convert frame string (normalized) to pixel coordinates."""
         h, w = image.shape[0:2]
         try:
-            x1, y1, x2, y2 = frame
+            x1, y1, x2, y2 = frame.split(",")
             return (
                 int(float(x1) * w),
                 int(float(y1) * h),
@@ -62,27 +62,15 @@ class RedFrameService:
         except ValueError:
             return (0.0, 0.0, max(w,h), max(w,h))
 
-    def _get_center_frame(self, image: np.ndarray, scale: float = 0.6) -> tuple[int, int, int, int]:
-        h, w = image.shape[0:2]
-
-        frame_w, frame_h = int(w * scale), int(h * scale)
-        
-        x1 = (w - frame_w) // 2
-        y1 = (h - frame_h) // 2
-        x2 = x1 + frame_w    
-        y2 = y1 + frame_h
-
-        return (x1, y1, x2, y2)
-
     def _calculate_area(self, image: np.ndarray, frame) -> float:
         """Calculate the pixel area of a frame."""
-        if isinstance(frame, (list, tuple)):
+        if isinstance(frame, list):
             x1, y1, x2, y2 = frame
         else:
             x1, y1, x2, y2 = self._parse_frame_coordinates(image, frame)
         return abs((x2 - x1) * (y2 - y1))
 
-    def _calculate_area_ratio(self, image: np.ndarray, frame: tuple, position: list) -> float:
+    def _calculate_area_ratio(self, image: np.ndarray, frame: str, position: list) -> float:
         """Compute area ratio between position and frame."""
         area_frame = self._calculate_area(image, frame)
         if area_frame == 0:
@@ -93,24 +81,54 @@ class RedFrameService:
     # ----------------------------------------------------------------------
     # Validation Utilities
     # ----------------------------------------------------------------------
-    def _validate_inputs(self, frame: Optional[tuple], position: Optional[list]):
-        if not isinstance(position, (list, tuple)):
-            raise ValueError("Position must be list/tuple")
+    def _validate_inputs(self, frame: Optional[str], position: Optional[list]):
+        """Ensure inputs are valid and in the correct format."""
+        if frame is None or position is None:
+            print(f"Frame and position are required frame {frame} position {position}")
+            return False
+        if not isinstance(frame, str) or not isinstance(position, list):
+            print(f"Frame must be a string and position must be a list frame {frame} position {position}")
+            return False
         if len(position) != 4:
-            raise ValueError("Position must have 4 elements")
+            print(f"Position must contain exactly 4 elements position {position}")
+            return False
+        return True
     def _is_position_inside_frame(
-        self, frame: tuple, position: list
+        self, image: np.ndarray, frame: str, position: list
     ) -> bool:
         """Check whether position is fully within frame boundaries."""
-        x1_f, y1_f, x2_f, y2_f = frame
+        x1_f, y1_f, x2_f, y2_f = self._parse_frame_coordinates(image, frame)
         x1_p, y1_p, x2_p, y2_p = position
         return x1_p >= x1_f and y1_p >= y1_f and x2_p <= x2_f and y2_p <= y2_f
+
+    def _calculate_overflow_metrics(
+        self, image: np.ndarray, frame: str, position: list
+    ) -> dict:
+        """Calculate overflow ratios for each side (as percentage of frame dimension)."""
+        x1_f, y1_f, x2_f, y2_f = self._parse_frame_coordinates(image, frame)
+        x1_p, y1_p, x2_p, y2_p = position
+        
+        frame_width = x2_f - x1_f
+        frame_height = y2_f - y1_f
+        
+        overflow_left = max(0, x1_f - x1_p) / frame_width if frame_width > 0 else 0
+        overflow_top = max(0, y1_f - y1_p) / frame_height if frame_height > 0 else 0
+        overflow_right = max(0, x2_p - x2_f) / frame_width if frame_width > 0 else 0
+        overflow_bottom = max(0, y2_p - y2_f) / frame_height if frame_height > 0 else 0
+        
+        return {
+            "left": overflow_left,
+            "top": overflow_top,
+            "right": overflow_right,
+            "bottom": overflow_bottom,
+            "max": max(overflow_left, overflow_top, overflow_right, overflow_bottom)
+        }
 
     # ----------------------------------------------------------------------
     # Prediction Utilities
     # ----------------------------------------------------------------------
     def _prepare_features(
-        self, image: np.ndarray, frame: tuple, position: list
+        self, image: np.ndarray, frame: str, position: list
     ) -> pd.DataFrame:
         """Prepare model input feature DataFrame."""
         ratio = self._calculate_area_ratio(image, frame, position)
@@ -130,16 +148,64 @@ class RedFrameService:
         return self.class_labels[int(pred[0])]
 
     # ----------------------------------------------------------------------
+    # Crop Utilities
+    # ----------------------------------------------------------------------
+    def _safe_crop(self, image: Union[np.ndarray, Image.Image], position: list, crop_method: Optional[Callable]) -> Optional[Image.Image]:
+        """Safely crop an image and ensure a valid PIL image is returned."""
+        if isinstance(image, Image.Image):
+            image = cv2.cvtColor(np.array(image.convert("RGB")), cv2.COLOR_RGB2BGR)
+
+        def _validate_and_convert(cropped_image):
+            if cropped_image is None:
+                raise ValueError("crop_method returned None")
+
+            if isinstance(cropped_image, np.ndarray):
+                if cropped_image.size == 0:
+                    raise ValueError("crop_method returned an empty numpy array")
+                if cropped_image.ndim == 2:
+                    cropped_image = cv2.cvtColor(cropped_image, cv2.COLOR_GRAY2RGB)
+                else:
+                    cropped_image = cv2.cvtColor(cropped_image, cv2.COLOR_BGR2RGB)
+                cropped_image = Image.fromarray(cropped_image)
+
+            if not isinstance(cropped_image, Image.Image):
+                raise TypeError("crop_method must return a PIL.Image.Image or numpy.ndarray")
+
+            if cropped_image.width == 0 or cropped_image.height == 0:
+                raise ValueError("crop_method returned an empty image")
+
+            if cropped_image.mode != "RGB":
+                cropped_image = cropped_image.convert("RGB")
+
+            return cropped_image
+
+        try:
+            if crop_method:
+                cropped_image = crop_method(image, position)
+                return _validate_and_convert(cropped_image)
+            return _validate_and_convert(self.crop_method_default(image, position))
+        except Exception as exc:
+            LOGGER.warning("RedFrameService primary crop failed for position %s: %s", position, exc)
+            if crop_method:
+                try:
+                    fallback_image = self.crop_method_default(image, position)
+                    LOGGER.info("RedFrameService fallback crop applied for position %s", position)
+                    return _validate_and_convert(fallback_image)
+                except Exception as fallback_exc:
+                    LOGGER.warning("RedFrameService fallback crop also failed for position %s: %s", position, fallback_exc)
+            return None
+
+    # ----------------------------------------------------------------------
     # IQA Evaluation
     # ----------------------------------------------------------------------
-    def _evaluate_iqa(self, image: np.ndarray, position: list, crop_method: Callable, redframe: tuple) -> RedFrameResult:
+    def _evaluate_iqa(self, image: np.ndarray, position: list, crop_method: Callable) -> RedFrameResult:
         """Evaluate image quality on cropped region."""
         if not crop_method:
             raise ValueError("crop_method is required for IQA evaluation")
 
-        cropped_image = crop_method(image, position)
-        if not isinstance(cropped_image, Image.Image):
-            raise TypeError("crop_method must return a PIL.Image.Image object")
+        cropped_image = self._safe_crop(image, position, crop_method)
+        if cropped_image is None:
+            return RedFrameResult(result=False, iqa_result=None, error_type="crop_error")
 
         iqa_result = self.iqa_service.iqa_detect(cropped_image)
         error_type = (
@@ -149,7 +215,6 @@ class RedFrameService:
         return RedFrameResult(
             result=bool(iqa_result.image_quality_validate),
             iqa_result=iqa_result,
-            red_frame_bbox=redframe,
             error_type=error_type,
         )
 
@@ -159,14 +224,26 @@ class RedFrameService:
     def crop_method_default(self, image: np.ndarray, position: list) -> Image.Image:
         """Default crop method for RedFrameService."""
         x1, y1, x2, y2 = position
+        # Clamp coordinates
+        h, w = image.shape[:2]
+        x1 = max(0, min(x1, w))
+        y1 = max(0, min(y1, h))
+        x2 = max(0, min(x2, w))
+        y2 = max(0, min(y2, h))
+
         # Padding
-        w, h = image.shape[1], image.shape[0] 
-        px, py =  int((x2 - x1) * 0.1), int((y2 - y1) * 0.1)
+        px, py = int((x2 - x1) * 0.1), int((y2 - y1) * 0.1)
         x1 = max(0, x1 - px)
         y1 = max(0, y1 - py)
         x2 = min(w, x2 + px)
         y2 = min(h, y2 + py)
+
+        if x2 <= x1 or y2 <= y1:
+            raise ValueError(f"Invalid crop coordinates after clamping: {x1},{y1},{x2},{y2}")
+
         cropped = image[y1:y2, x1:x2]
+        if cropped.size == 0:
+            raise ValueError(f"Default crop produced empty image: {position}")
 
         # Convert BGR -> RGB
         cropped = cv2.cvtColor(cropped, cv2.COLOR_BGR2RGB)
@@ -176,71 +253,51 @@ class RedFrameService:
     def forward(
         self,
         image: np.ndarray,
+        frame: Optional[str] = None,
         position: Optional[list] = None,
         crop_method: Optional[Callable[[np.ndarray, list], Image.Image]] = None,
+        *args,
+        **kwargs,
     ) -> RedFrameResult:
         """
-        Perform RedFrame detection (center-based) and IQA validation.
+        Perform RedFrame detection and (optionally) IQA quality validation.
         """
+        if args and crop_method is None:
+            crop_method = args[0]
+        # Step 1: Check frame inclusion with graduated tolerance
+        is_valid_fr_position = self._validate_inputs(frame, position)
+        if is_valid_fr_position:
+            overflow_metrics = self._calculate_overflow_metrics(image, frame, position)
+            max_overflow = overflow_metrics["max"]
+            
+            if max_overflow > 0.15:  # Increased from 0.10 to 0.15 for more tolerance
+                return RedFrameResult(result=False, iqa_result=None, error_type="excessive_overflow_error")
+            elif max_overflow > 0.05:  # Increased from 0.02 to 0.05 for minor overflow
+                print(f"Warning: Minor overflow detected (max {max_overflow:.1%}), proceeding with quality checks")
+            # If overflow <= 2%, proceed normally
 
-        # Validate input
-        if position is None or len(position) != 4:
-            return RedFrameResult(
-                result=False,
-                red_frame_bbox=None,
-                error_type="detect_error"
-            )
-
-        # Step 1: get center red frame
-        redframe = self._get_center_frame(image)
-        # Step 2: check xem position và redframe có hợp lệ không
-        self._validate_inputs(redframe, position)
-        # Step 3: Check bbox có nằm trong red frame không   
-        if not self._is_position_inside_frame(redframe, position):
-            return RedFrameResult(
-                result=False,
-                red_frame_bbox=redframe,
-                error_type="out_of_frame_error"
-            )
-
-        # --------------------------------------------------
         # Mode 1: Simple IQA-only
-        # --------------------------------------------------
         if not self.advanced_mode:
             if crop_method:
-                image_crop = crop_method(image, position)
-            else:
-                image_crop = self.crop_method_default(image, position)
-
-            iqa_result = self.iqa_service.iqa_detect(image_crop)
-
+                image = self._safe_crop(image, position, crop_method)
+                if image is None:
+                    return RedFrameResult(result=False, iqa_result=None, error_type="crop_error")
+            iqa_result = self.iqa_service.iqa_detect(image)
             return RedFrameResult(
-                result=bool(iqa_result.image_quality_validate),
-                red_frame_bbox=redframe,
+                result=iqa_result.image_quality_validate,
                 iqa_result=iqa_result,
-                error_type=None if iqa_result.image_quality_validate else "iqa_error",
+                error_type=f"iqa_fail-{iqa_result.iqa_score}-{iqa_result.iqa_threshold}",
             )
 
-        # --------------------------------------------------
-        # Mode 2: Full redframe + XGBoost + IQA
-        # --------------------------------------------------
+        # Mode 2: Full redframe + IQA
 
-        # Step 4: Feature cho model (dùng redframe bbox)
-        features = self._prepare_features(image, redframe, position)
 
+        # Step 2: Redframe model prediction
+        features = self._prepare_features(image, frame, position)
         prediction_label = self._predict_redframe_result(features)
 
         if prediction_label != "good":
-            return RedFrameResult(
-                result=False,
-                red_frame_bbox=redframe,
-                error_type=f"{prediction_label}_error"
-            )
+            return RedFrameResult(result=False, iqa_result=None, error_type=f"{prediction_label}_error")
 
-        # Step 4: IQA
-        return self._evaluate_iqa(
-            image=image,
-            position=position,
-            crop_method=crop_method or self.crop_method_default,
-            redframe=redframe
-        )
+        # Step 3: IQA evaluation
+        return self._evaluate_iqa(image, position, crop_method)
