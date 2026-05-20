@@ -24,26 +24,6 @@ AUTH_MODEL_NAME = "maxvit_small_tf_512.in1k"
 AUTH_NUM_CLASSES = 2
 AUTH_CLASS_LABELS = ['fake','real']
 
-# Training hyperparameters (from retrain notebook)
-EPOCHS          = 60
-BATCH_SIZE      = 16
-LR_HEAD         = 1e-3
-LR_BACKBONE     = 1e-5
-WEIGHT_DECAY    = 1e-4
-LABEL_SMOOTHING = 0.1
-FOCAL_GAMMA     = 2.0
-WARMUP_EPOCHS   = 3
-UNFREEZE_EPOCH  = 5
-PATIENCE        = 10
-ES_DELTA        = 1e-4
-MONITOR_METRIC  = 'val_f1_macro'
-
-# Data split ratios
-TRAIN_RATIO  = 0.70
-VAL_RATIO    = 0.15
-RANDOM_SEED  = 42
-MIN_IMG_SIZE = 100
-
 # Metadata
 CATEGORY = "bag-lv"
 PART = "LV_P04case4"
