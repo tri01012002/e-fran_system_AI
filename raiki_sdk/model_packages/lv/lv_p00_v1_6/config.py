@@ -20,7 +20,7 @@ CLASSIFY_WEIGHTS = download_file_from_hf(
 
 VECTOR_STORAGE_PKL = download_file_from_hf(
     repo_id="rikai-ai/lv_p00_classify_v1-6",
-    filename="lv_p00_classify_v1-6_dinov3-arcface_vector-storage_20260515_20260520_v3.pkl"
+    filename="lv_p00_classify_1-6_230classes_dinov3-arceface-vector-withgray-storage_20260525_20260525_v2.pkl"
 )
 
 # AUTH parameters
