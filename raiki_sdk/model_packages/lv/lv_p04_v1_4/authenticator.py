@@ -66,8 +66,22 @@ class LVP04Authenticator(AuthenticateBase):
         # Create the network wrapper
         net = Network_Wrapper(net_layers, AUTH_NUM_CLASSES)
 
-        # Load the trained weights
-        net.load_state_dict(checkpoint['model'])
+        # Load the trained weights with robust key normalization to support environment variations
+        # (e.g., when the checkpoint was trained without the real 'inplace_abn' package, 
+        # but the active environment has it installed, causing key differences like '.bn.').
+        state_dict = checkpoint['model']
+        model_keys = list(net.state_dict().keys())
+        normalized_model_keys = {k.replace('.bn.', '.'): k for k in model_keys}
+        
+        new_state_dict = {}
+        for k, v in state_dict.items():
+            norm_k = k.replace('.bn.', '.')
+            if norm_k in normalized_model_keys:
+                new_state_dict[normalized_model_keys[norm_k]] = v
+            else:
+                new_state_dict[k] = v
+
+        net.load_state_dict(new_state_dict)
 
         # Move model to device and set to evaluation mode
         net.to(self.device)
