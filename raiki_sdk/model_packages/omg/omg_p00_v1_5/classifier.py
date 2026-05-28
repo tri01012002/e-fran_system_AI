@@ -51,8 +51,8 @@ class OMP00Classificator(ClassificatorBase):
             return self.probs
 
     def get_topk(self, result_model: Any, topk: int) -> ClassificationResultProb:
-        topks_nor = []
-        set_label = set()
+        topks_nor: list[dict[str, float | str]] = []
+        seen_labels: set[str] = set()
 
         with torch.no_grad():
             for name, sim in result_model:
@@ -60,15 +60,23 @@ class OMP00Classificator(ClassificatorBase):
                 if "_" in name:
                     parts = name.split("_")
                     for part in parts:
-                        if part != "brightness":  # Lọc bỏ brightness
-                            set_label.add(part)
-                            topks_nor.append({"name": part, "prob": sim})
+                        if part == "brightness":  # Lọc bỏ brightness
+                            continue
+                        if part in seen_labels:
+                            continue
+                        seen_labels.add(part)
+                        topks_nor.append({"name": part, "prob": sim})
+                        if len(topks_nor) >= topk:
+                            return ClassificationResultProb(topk_probs=topks_nor, metadata=self.metadata)
                 else:
-                    if name != "brightness":  # Lọc bỏ brightness
-                        topks_nor.append({"name": name, "prob": sim})
-                        set_label.add(name)
-
-        topks_nor = topks_nor[:min(len(topks_nor), topk)]
+                    if name == "brightness":  # Lọc bỏ brightness
+                        continue
+                    if name in seen_labels:
+                        continue
+                    seen_labels.add(name)
+                    topks_nor.append({"name": name, "prob": sim})
+                    if len(topks_nor) >= topk:
+                        return ClassificationResultProb(topk_probs=topks_nor, metadata=self.metadata)
 
         return ClassificationResultProb(topk_probs=topks_nor, metadata=self.metadata)
 
