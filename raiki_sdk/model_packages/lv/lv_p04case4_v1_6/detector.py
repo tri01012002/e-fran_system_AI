@@ -90,13 +90,13 @@ class LVP04Case4Detector(DetectorBase):
             image: Image.Image (PIL) cropped image
         """
 
-        # cropped_image = padding_crop_yolo(self.img_rsed_square, position)
+        if position is None:
+            image_detect = Image.fromarray(cv2.cvtColor(image, cv2.COLOR_BGR2RGB))
+            return crop_center(image_detect)
 
-        # image_detect = resize_pwd(cropped_image, output_size=412, color_padding=COLOR_PADDING)
-        image_detect = Image.fromarray(cv2.cvtColor(image, cv2.COLOR_BGR2RGB))
-        image_crop_center = crop_center(image_detect)
-
-        return image_crop_center
+        cropped_image = padding_crop_yolo(self.img_rsed_square, position)
+        image_detect = resize_pwd(cropped_image, output_size=512, color_padding=COLOR_PADDING)
+        return Image.fromarray(cv2.cvtColor(image_detect, cv2.COLOR_BGR2RGB))
 
     def run_pipeline(self, image:  any, is_crop: bool = True) -> YoloValidation:
         return super().run_pipeline(image, is_crop)

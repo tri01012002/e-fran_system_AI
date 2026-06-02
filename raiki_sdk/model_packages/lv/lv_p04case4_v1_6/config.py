@@ -15,7 +15,7 @@ YOLO_WEIGHTS = download_file_from_hf(
 
 AUTH_WEIGHTS = download_file_from_hf(
     repo_id="rikai-ai/lv_p04case4_auth_v1-6",
-    filename="lv_p04case4_auth_v1_6_maxvitsmall_260513_260513.pth"
+    filename="lv_p04case4_auth_v1_6_maxvitsmall_260531_260531.pth"
 )
 
 # AUTH parameters
