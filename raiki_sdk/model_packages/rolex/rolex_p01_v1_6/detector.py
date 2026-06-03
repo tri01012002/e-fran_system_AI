@@ -9,6 +9,7 @@ from raiki_sdk.preprocessing import resize_pwd, padding_crop_yolo
 from ultralytics import YOLO
 from .config import YOLO_WEIGHTS, YOLO_CONF, YOLO_IMGSZ, TARGET_SIZE, COLOR_PADDING
 from PIL import Image
+from typing import Union, Dict, Optional
 import cv2
 import numpy as np
 
@@ -110,7 +111,7 @@ class RolexP01Detector(DetectorBase):
             class_id=MULTI_BOX_CLASS_ID,
         )
 
-    def crop(self, image: np.ndarray, position, class_id: int = None) -> Image.Image:
+    def crop(self, image: np.ndarray, position, class_id: int = None) -> Union[Image.Image, Dict, None]:
         if position is None:
             return None
 
