@@ -1,15 +1,12 @@
-"""
-YOLO Detector for Catier P02
-
-Handles object detection logic using YOLO model.
-"""
-
-from raiki_sdk import DetectorBase, YoloResult, YoloValidation
-from raiki_sdk import resize_pwd, padding_crop_yolo, crop_center
-from ultralytics import YOLO
-from .config import YOLO_WEIGHTS, YOLO_CONF, YOLO_IMGSZ, COLOR_PADDING, TARGET_SIZE
+from raiki_sdk import DetectorBase, YoloValidation
+from raiki_sdk.preprocessing import padding_crop_yolo, normalize_position_to_square
+from rfdetr import RFDETRBase
+from .config import DETECTOR_WEIGHTS, TARGET_SIZE, YOLO_CONF
 from PIL import Image
 import cv2
+import numpy as np
+import supervision as sv
+from typing import Union, List
 
 class CTRP02Detector(DetectorBase):
     """
@@ -17,107 +14,67 @@ class CTRP02Detector(DetectorBase):
     """
 
     def __init__(self, device: str):
-        self.model = YOLO(YOLO_WEIGHTS).to(device)
+        self.model = RFDETRBase(num_classes=3, pretrain_weights=DETECTOR_WEIGHTS)
         self.yolo_conf = YOLO_CONF
-        self.yolo_imgsz = YOLO_IMGSZ
+        self.output_size = TARGET_SIZE
+        self.img_preparing = None
 
-    def detect(self, image) -> YoloResult:
+    def detect(self, image) -> sv.Detections:
         """
-        Detect Cartier P02 parts in the image
-
-        Args:
-            image: np.ndarray (cv2) BGR image
-
-        Returns:
-            YoloResult: Detection results
+        Detect parts in image using RFDETR
         """
-        self.img_rsed_square = resize_pwd(image, output_size=YOLO_IMGSZ, color_padding=COLOR_PADDING)
-        pil_img_rsed_square = Image.fromarray(
-            cv2.cvtColor(self.img_rsed_square, cv2.COLOR_BGR2RGB)
-        )
+        self.img_preparing = image
+        pil_image = Image.fromarray(cv2.cvtColor(image, cv2.COLOR_BGR2RGB))
+        results = self.model.predict(pil_image)
+        return results
 
-        results = self.model.predict(
-            source=pil_img_rsed_square,
-            verbose=False,
-            show=False,
-            save=False,
-            save_crop=False,
-            conf=self.yolo_conf,
-            line_width=0,
-            show_labels=False,
-            show_conf=False,
-            imgsz=self.yolo_imgsz
-        )
-
-        return results[0]
-
-    def validate(self, results: YoloResult) -> YoloValidation:
+    def validate(self, results: sv.Detections) -> YoloValidation:
         """
-        Validate detection results
-
-        Args:
-            yolo_results: YOLO detection results
-
-        Returns:
-            is_valid: True if the detection is valid, False otherwise
-            position: The position of the detection
-            class_id: The class id of the detection
+        Validate detection results and prepare crop box
         """
-        if len(results.boxes) == 0:
+        if results is None or len(results.confidence) == 0:
             return YoloValidation(is_valid=False, position=None, class_id=None)
 
-        best_box = None
-        best_conf = -1
-        valid = False
-        # Iterate over all detected boxes
-        for box in results.boxes:
-            cls_id = int(box.cls)
-            conf = box.conf.item()
-            valid = True
-            # Check if class is in the allowed list and confidence is above threshold
-            # 0: 'circle', 1: 'itt', 2: 'material'
-            if cls_id == 0 or cls_id == 1:
-                x_min, y_min, x_max, y_max = box.xyxy[0].cpu().numpy()
-                x_min, y_min, x_max, y_max = int(x_min), int(y_min), int(x_max), int(y_max)
+        # lấy bbox confidence cao nhất
+        best_idx = int(np.argmax(results.confidence))
+        
+        # Check if best confidence meets threshold
+        if results.confidence[best_idx] < self.yolo_conf:
+             return YoloValidation(is_valid=False, position=None, class_id=None)
 
-                # Keep the box with the highest confidence
-                if conf > best_conf:
-                    best_conf = conf
-                    best_box = [x_min, y_min, x_max, y_max]
+        best_box = results.xyxy[best_idx]
+        class_id = int(results.class_id[best_idx])
+        position = [int(v) for v in best_box]
 
-        return YoloValidation(is_valid=valid, position=best_box, class_id=None)
+        # normalize square + padding
+        square_pos = normalize_position_to_square(position)
 
-    def crop(self, image, position) -> Image.Image:
+        x0, y0, x1, y1 = square_pos
+        # apply padding_px=200 as per user requirement reference
+        padding_px = 200
+        padded_pos = [x0 - padding_px, y0 - padding_px,
+                       x1 + padding_px, y1 + padding_px]
+
+        return YoloValidation(is_valid=True, position=padded_pos, class_id=class_id)
+
+    def crop(self, image, position, class_id=None) -> Image.Image:
         """
-        Crop the image based on the position
-
-        Args:
-            image: np.ndarray (cv2) BGR image
-            position: The position of the detection
-
-        Returns:
-            image: Image.Image (PIL) cropped image
+        Crop box from image
         """
+        # image argument is not used here as we use self.img_preparing stored in detect
+        # but to be safe and follow interface, we use image if self.img_preparing is None
+        input_img = self.img_preparing if self.img_preparing is not None else image
+        
+        try:
+            crop_img = padding_crop_yolo(input_img, position)
+            if crop_img is None or crop_img.size == 0:
+                raise ValueError("Empty crop")
+            # Convert to PIL
+            return Image.fromarray(cv2.cvtColor(crop_img, cv2.COLOR_BGR2RGB))
+        except Exception as e:
+            # Fallback in case of invalid crop
+            return Image.fromarray(cv2.cvtColor(input_img, cv2.COLOR_BGR2RGB))
 
-        # cropped_image = padding_crop_yolo(self.img_rsed_square, position)
-
-        # image_detect = resize_pwd(cropped_image, output_size=412, color_padding=COLOR_PADDING)
-        h, w = image.shape[:2]
-
-        x_min, y_min, x_max, y_max = position
-
-        # Clamp để không bị out of bound
-        x_min = max(0, int(x_min))
-        y_min = max(0, int(y_min))
-        x_max = min(w, int(x_max))
-        y_max = min(h, int(y_max))
-
-        # Crop
-        cropped = self.img_rsed_square[y_min:y_max, x_min:x_max]
-
-        # Convert sang PIL (RGB)
-        cropped_pil = Image.fromarray(cv2.cvtColor(cropped, cv2.COLOR_BGR2RGB))
-
-        return cropped_pil
-    def run_pipeline(self, image:  any, is_crop: bool = True) -> YoloValidation:
+    def run_pipeline(self, image, is_crop: bool = True) -> YoloValidation:
+        """Run full detection pipeline"""
         return super().run_pipeline(image, is_crop)
