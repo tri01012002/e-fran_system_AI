@@ -7,21 +7,21 @@ import cv2
 
 # Model version
 AUTH_MODEL_VERSION = "v1_3"
-YOLO_MODEL_VERSION = "v1_3"
+YOLO_MODEL_VERSION = "v1"
 
-
-YOLO_WEIGHTS = download_file_from_hf(
-    repo_id="rikai-ai/ctr_p02_detector_v1-3",
-    filename="ctr_p02_detector_v1-3_yolov26_260422_260423.pt"
+DETECTOR_WEIGHTS = download_file_from_hf(
+    repo_id="rikai-ai/omg_p02_detector_v1",
+    filename="omg_p02_detector_v1_rfdetr_20251125_20251125.pth"
 )
+
 AUTH_WEIGHTS = download_file_from_hf(
-    repo_id="rikai-ai/ctr_p02_auth_v1-3",
-    filename="ctr_p02_auth_v1-3_convnext_260426_260504.pth"
+    repo_id="rikai-ai/ctr_p02_auth_v1-2",
+    filename="ctr_p02_auth_v1_2_maxvitsmall_260317_260325.pth"
 )
 
 # AUTH parameters
-TARGET_SIZE = 224
-AUTH_MODEL_NAME = "convnextv2_base.fcmae_ft_in22k_in1k"
+TARGET_SIZE = 512
+AUTH_MODEL_NAME = "maxvit_small_tf_512.in1k"
 AUTH_NUM_CLASSES = 2
 AUTH_CLASS_LABELS = ['fake', 'real']
 
@@ -33,7 +33,7 @@ PART = "P02"
 PACKAGE_NAME = "ctr_p02_v1_3"
 
 # YOLO parameters
-YOLO_CONF = 0.25
+YOLO_CONF = 0.65
 YOLO_IMGSZ = 640
 
 # Resize parameters
