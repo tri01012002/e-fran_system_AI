@@ -1,47 +1,29 @@
 import torch
 import timm
 import torch.nn as nn
-from .config import (AUTH_MODEL_NAME, AUTH_NUM_CLASSES, AUTH_WEIGHTS)
 
-class Convnextv2(nn.Module):
-    def __init__(self, num_classes, checkpoint=None, model_name=AUTH_MODEL_NAME, device='cpu'):
-        super().__init__()
-        self.backbone = timm.create_model(model_name, pretrained=(checkpoint is None), num_classes=0)
-        dim = self.backbone.num_features
 
-        self.type_head = nn.Linear(dim, 2)
-        self.fine_head = nn.Sequential(
-            nn.LayerNorm(dim),
-            nn.Linear(dim, 512),
-            nn.GELU(),
-            nn.Dropout(0.3),
-            nn.Linear(512, num_classes)
+class MaxvitSmall(nn.Module):
+    def __init__(self, num_classes=2, model_name='maxvit_small_tf_512.in1k',
+                 pretrained=False, checkpoint=None, device='cpu'):
+        super(MaxvitSmall, self).__init__()
+
+        self.backbone = timm.create_model(model_name, pretrained=pretrained, in_chans=3)
+
+        feature_dim = self.backbone.num_features
+
+        self.backbone.reset_classifier(num_classes=0)
+
+        self.fc = nn.Sequential(
+            nn.LayerNorm(feature_dim),
+            nn.Linear(feature_dim, num_classes)
         )
+
         if checkpoint is not None:
             state_dict = torch.load(checkpoint, map_location=device)
-
-            # chỉ lấy backbone
-            backbone_dict = {
-                k.replace("backbone.", ""): v
-                for k, v in state_dict.items()
-                if k.startswith("backbone.")
-            }
-
-        self.backbone.load_state_dict(backbone_dict, strict=False)
+            self.load_state_dict(state_dict)
 
     def forward(self, x):
-        feat = self.backbone(x)
-        return self.type_head(feat), self.fine_head(feat)
-
-
-# ================= LOSS =====================
-
-class FocalLoss(nn.Module):
-    def __init__(self, gamma=2):
-        super().__init__()
-        self.gamma = gamma
-
-    def forward(self, logits, targets):
-        ce = nn.functional.cross_entropy(logits, targets, reduction='none')
-        pt = torch.exp(-ce)
-        return ((1 - pt) ** self.gamma * ce).mean()
+        features = self.backbone(x)  # (B, in_features)
+        output = self.fc(features)
+        return output
