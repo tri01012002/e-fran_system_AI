@@ -45,7 +45,7 @@ class RolexP00Classificator(ClassificatorBase):
     
         # Turn on no-gradient mode
         with torch.no_grad():
-            self.probs = self.faceRecognizer.recognize_pil_double(image, top_k=10, N_closest = 3)
+            self.probs = self.faceRecognizer.recognize_pil_double(image, top_k=20, N_closest = 3)
             return self.probs
 
     def _add_detail_name(self, result: list):
@@ -76,38 +76,26 @@ class RolexP00Classificator(ClassificatorBase):
 
     def get_topk(self, result_model: Any, topk: int) -> ClassificationResultProb:
         topks_nor: list[dict[str, float | str]] = []
-        seen_labels: set[str] = set()
+        seen_base_names: set[str] = set()
         #REVUE_AI-567
         skip_labels = {"116523", "116503", "126200", "126300-1", "126300-2", "126300"}
 
         with torch.no_grad():
             for name, sim in result_model:
+                if len(topks_nor) >= topk:
+                    break
                 name = name.replace("_rotate", "").replace("_gray", "")
-                if "_" in name:
-                    parts = name.split("_")
-                    for part in parts:
-                        if part in skip_labels:
-                            continue
-                        if part == "brightness":  # Lọc bỏ brightness
-                            continue
-                        if part in seen_labels:
-                            continue
-                        seen_labels.add(part)
-                        topks_nor.append({"name": part, "prob": sim})
-                        if len(topks_nor) >= topk:
-                            return ClassificationResultProb(topk_probs=topks_nor, metadata=self.metadata)
-                else:
-                    if name in skip_labels:
+                candidates = name.split("_") if "_" in name else [name]
+                for candidate in candidates:
+                    if candidate in skip_labels or candidate == "brightness":
                         continue
-                    if name == "brightness":  # Lọc bỏ brightness
+                    base_name = candidate.split("-")[0]
+                    if base_name in seen_base_names:
                         continue
-                    if name in seen_labels:
-                        continue
-                    seen_labels.add(name)
-                    topks_nor.append({"name": name, "prob": sim})
+                    seen_base_names.add(base_name)
+                    topks_nor.append({"name": candidate, "prob": sim})
                     if len(topks_nor) >= topk:
-                        return ClassificationResultProb(topk_probs=topks_nor, metadata=self.metadata)
-
+                        break
 
         topks_nor = self._add_detail_name(topks_nor)
         topks_nor = topks_nor[:min(len(topks_nor),topk)]
