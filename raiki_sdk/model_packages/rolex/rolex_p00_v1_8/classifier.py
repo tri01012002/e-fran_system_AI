@@ -75,24 +75,39 @@ class RolexP00Classificator(ClassificatorBase):
         return result_new
 
     def get_topk(self, result_model: Any, topk: int) -> ClassificationResultProb:
-        topks_nor = []
-        # set_label = set()
+        topks_nor: list[dict[str, float | str]] = []
+        seen_labels: set[str] = set()
+        #REVUE_AI-567
+        skip_labels = {"116523", "116503", "126200", "126300"}
 
         with torch.no_grad():
             for name, sim in result_model:
-                name = name.replace("_rotate", "").replace("_gray","")
-                # name =  name.split("-")[0]
-                
-
-                # if name in set_label:
-                #     continue
-                # set_label.add(name)
-
+                name = name.replace("_rotate", "").replace("_gray", "")
                 if "_" in name:
-                    topks_nor.append({"name": name.split("_")[0], "prob": sim})
-                    topks_nor.append({"name": name.split("_")[1], "prob": sim})
-                else: 
+                    parts = name.split("_")
+                    for part in parts:
+                        if part in skip_labels:
+                            continue
+                        if part == "brightness":  # Lọc bỏ brightness
+                            continue
+                        if part in seen_labels:
+                            continue
+                        seen_labels.add(part)
+                        topks_nor.append({"name": part, "prob": sim})
+                        if len(topks_nor) >= topk:
+                            return ClassificationResultProb(topk_probs=topks_nor, metadata=self.metadata)
+                else:
+                    if name in skip_labels:
+                        continue
+                    if name == "brightness":  # Lọc bỏ brightness
+                        continue
+                    if name in seen_labels:
+                        continue
+                    seen_labels.add(name)
                     topks_nor.append({"name": name, "prob": sim})
+                    if len(topks_nor) >= topk:
+                        return ClassificationResultProb(topk_probs=topks_nor, metadata=self.metadata)
+
 
         topks_nor = self._add_detail_name(topks_nor)
         topks_nor = topks_nor[:min(len(topks_nor),topk)]
