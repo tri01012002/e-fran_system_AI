@@ -78,7 +78,7 @@ class RolexP00Classificator(ClassificatorBase):
         topks_nor: list[dict[str, float | str]] = []
         seen_labels: set[str] = set()
         #REVUE_AI-567
-        skip_labels = {"116523", "116503", "126200", "126300-1", "126300-2"}
+        skip_labels = {"116523", "116503", "126200", "126300-1", "126300-2", "126300"}
 
         with torch.no_grad():
             for name, sim in result_model:
