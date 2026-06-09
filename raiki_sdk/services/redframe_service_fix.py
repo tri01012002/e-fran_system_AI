@@ -24,7 +24,7 @@ from typing import Optional, Callable, List
 
 from PIL import Image
 from raiki_sdk.base import IqaResult
-from raiki_sdk.services.liqe_service import LIQEServices
+from .iqa_service import LIQEServices
 
 from part_config import PART_CONFIGS, get_config, PartConfig
 from overlap_metrics import compute_overlap
