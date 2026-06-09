@@ -29,7 +29,7 @@ Usage:
 """
 
 from typing import List, Dict, Any, Union
-from part_config import PartConfig
+from .part_config import PartConfig
 
 
 def compute_overlap(
