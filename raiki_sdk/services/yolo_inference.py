@@ -26,7 +26,7 @@ from pathlib import Path
 from typing import Optional, List, Dict
 import numpy as np
 
-from model_config import HF_MODEL_CONFIGS, get_model_config, HFModelConfig
+from .model_config import HF_MODEL_CONFIGS, get_model_config, HFModelConfig
 
 log = logging.getLogger("YOLOInference")
 
