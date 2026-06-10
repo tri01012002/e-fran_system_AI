@@ -1,6 +1,6 @@
 """Services for specialized detection tasks."""
 
-from .redframe_service import RedFrameService
+from .redframe_service_fix import RedFrameService
 from .iqa_service import LIQEServices
 from .brand_detection import BrandDetectionService, DetectionResult
 import logging
