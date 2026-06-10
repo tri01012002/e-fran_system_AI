@@ -9,7 +9,7 @@ from raiki_sdk.preprocessing import resize_pwd, padding_crop_yolo
 from ultralytics import YOLO
 from .config import (
     YOLO_WEIGHTS, YOLO_CONF, YOLO_IMGSZ,
-    TARGET_SIZE, COLOR_PADDING
+    TARGET_SIZE, COLOR_PADDING, YOLO_VALIDATE
 )
 
 MULTI_BOX_CLASS_ID = 999
@@ -140,14 +140,38 @@ class OMGP01Detector(DetectorBase):
         if len(boxes_by_class) == 1:
             class_id = list(boxes_by_class.keys())[0]
             x1, y1, x2, y2 = boxes_by_class[class_id]['box']
-            return YoloValidation(is_valid=True, position=[x1, y1, x2, y2], class_id=class_id)
+            conf = boxes_by_class[class_id]['conf']
+            if conf < YOLO_VALIDATE:
+                return YoloValidation(is_valid=False, position=None, class_id=None, confidence=None)
+
+            return YoloValidation(is_valid=True, 
+                                position=[x1, y1, x2, y2], 
+                                class_id=class_id,
+                                confidence=conf)
 
         # Multi boxes case
-        boxes_dict = {
-            class_id: {"box": box_info['box']}
-            for class_id, box_info in boxes_by_class.items()
-        }
-        return YoloValidation(is_valid=True, position=boxes_dict, class_id=MULTI_BOX_CLASS_ID)
+        sorted_boxes = sorted(boxes_by_class.items(), key=lambda x: x[1]['y1'])
+        
+        top_class_id, top_info = sorted_boxes[0]
+        bottom_class_id, bottom_info = sorted_boxes[1]
+        
+        top_box = top_info['box']
+        bottom_box = bottom_info['box']
+        
+        combined_box = [
+            min(top_box[0], bottom_box[0]),
+            min(top_box[1], bottom_box[1]),
+            max(top_box[2], bottom_box[2]),
+            max(top_box[3], bottom_box[3])
+        ]
+        avg_conf = (top_info['conf'] + bottom_info['conf']) / 2 
+        if avg_conf < YOLO_VALIDATE:
+            return YoloValidation(is_valid=False, position=None, class_id=None, confidence=None)
+            
+        return YoloValidation(is_valid=True, 
+                            position=combined_box,
+                            class_id=MULTI_BOX_CLASS_ID,
+                            confidence=avg_conf)
 
     def crop(self, image: np.ndarray, position, class_id: int = None) -> Image.Image:
         """

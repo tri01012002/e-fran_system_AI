@@ -33,6 +33,7 @@ PACKAGE_NAME = "omg_p03_v1_4"
 
 # YOLO parameters
 YOLO_CONF = 0.5
+YOLO_VALIDATE = 0.8
 YOLO_IMGSZ = 640
 
 # Resize parameters
