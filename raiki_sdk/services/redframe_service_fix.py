@@ -31,6 +31,17 @@ from .overlap_metrics import compute_overlap
 
 log = logging.getLogger("RedFrameService")
 
+
+def _is_empty(crop) -> bool:
+    """Return True if crop has no usable content regardless of type."""
+    if crop is None:
+        return True
+    if isinstance(crop, np.ndarray):
+        return crop.size == 0
+    if isinstance(crop, Image.Image):
+        return crop.width == 0 or crop.height == 0
+    return True
+
 # ══════════════════════════════════════════════════════════════
 # Scaled configs — built once at module load time.
 # All redframe coordinates are in image pixel space.
@@ -39,7 +50,7 @@ log = logging.getLogger("RedFrameService")
 #   "fit_width"  — image width fills Figma width, letterbox top/bottom
 #   "fit_height" — image height fills Figma height, letterbox left/right
 # ══════════════════════════════════════════════════════════════
-SCALE_MODE = "stretch"   # ← change to "fit_width" or "fit_height" if needed
+SCALE_MODE = "fit_height"  # fit_width/stretch returned None — fit_height matches YOLO bbox space
 _SCALED_CONFIGS: dict = {}
 
 
@@ -285,7 +296,7 @@ class RedFrameService:
         crop_fn = crop_method or self.crop_method_default
         crop    = crop_fn(image, yolo_bbox)
 
-        if crop is None or crop.size == 0:
+        if crop is None or _is_empty(crop):
             log.warning(f"[{self.part_id}] Crop result is empty.")
             return RedFrameResult(
                 result=False,
@@ -348,9 +359,47 @@ class RedFrameService:
     # IQA helpers
     # ──────────────────────────────────────────────────────────
 
-    def _run_iqa(self, crop_bgr: np.ndarray) -> IqaResult:
-        """Run LIQE IQA on a BGR crop."""
-        pil_img = Image.fromarray(cv2.cvtColor(crop_bgr, cv2.COLOR_BGR2RGB))
+    @staticmethod
+    def _to_numpy_bgr(crop) -> np.ndarray:
+        """
+        Normalize crop to BGR numpy array regardless of input type.
+
+        detector.crop() may return PIL Image or numpy array depending on
+        which detector implementation is used — this handles both cases.
+        """
+        if isinstance(crop, np.ndarray):
+            # Already numpy — handle RGBA → BGR if needed
+            if crop.ndim == 3 and crop.shape[2] == 4:
+                return cv2.cvtColor(crop, cv2.COLOR_RGBA2BGR)
+            if crop.ndim == 3 and crop.shape[2] == 3:
+                return crop   # assume BGR from OpenCV
+            if crop.ndim == 2:
+                return cv2.cvtColor(crop, cv2.COLOR_GRAY2BGR)
+            return crop
+
+        if isinstance(crop, Image.Image):
+            # PIL Image → numpy BGR
+            arr = np.array(crop.convert("RGB"))
+            return cv2.cvtColor(arr, cv2.COLOR_RGB2BGR)
+
+        raise TypeError(
+            f"Unsupported crop type: {type(crop)}. "
+            f"Expected np.ndarray or PIL.Image.Image."
+        )
+
+    def _run_iqa(self, crop) -> IqaResult:
+        """
+        Run LIQE IQA on a crop.
+        Accepts both BGR numpy array and PIL Image (detector.crop returns PIL).
+        LIQEServices.iqa_detect() accepts PIL Image or numpy array natively,
+        so we pass PIL Image directly to avoid double conversion.
+        """
+        if isinstance(crop, Image.Image):
+            return self._iqa.iqa_detect(crop)
+
+        # numpy array → convert BGR to RGB PIL
+        bgr = self._to_numpy_bgr(crop)
+        pil_img = Image.fromarray(cv2.cvtColor(bgr, cv2.COLOR_BGR2RGB))
         return self._iqa.iqa_detect(pil_img)
 
     def _run_iqa_only(self,
@@ -368,7 +417,7 @@ class RedFrameService:
             )
         crop_fn = crop_method or self.crop_method_default
         crop    = crop_fn(image, position)
-        if crop is None or crop.size == 0:
+        if crop is None or _is_empty(crop):
             return RedFrameResult(
                 result=False,
                 error_type=RedFrameResult.ERR_OUT_OF_FRAME,
