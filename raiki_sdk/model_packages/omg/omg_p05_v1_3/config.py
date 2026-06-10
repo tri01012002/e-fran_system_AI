@@ -32,7 +32,7 @@ PART = "P05"
 PACKAGE_NAME = "omg_p05_v1_2"
 
 # YOLO parameters
-YOLO_CONF = 0.65 
+YOLO_CONF = 0.8
 YOLO_VALIDATE = 0.8
 YOLO_IMGSZ = 640
 
