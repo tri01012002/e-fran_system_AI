@@ -10,8 +10,8 @@ YOLO_MODEL_VERSION = "v1-2"
 
 # # Model weights paths (relative to package root or absolute)22
 YOLO_WEIGHTS = download_file_from_hf(
-    repo_id="rikai-ai/omg_p06_detector_v1-2",
-    filename="omg_p06_detector_v1-2_yolo11s_260603_260603_v2.pt"
+    repo_id="rikai-ai/omg_p06_detector_v1",
+    filename="omg_p06_detector_v1_yolo11_20251114.pt"
 )
 
 AUTH_WEIGHTS = download_file_from_hf(
