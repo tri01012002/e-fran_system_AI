@@ -5,7 +5,7 @@ from PIL import Image
 import cv2
 import torch
 import numpy as np
-from .config import DETECTOR_WEIGHTS, YOLO_CONF, YOLO_IMGSZ, COLOR_PADDING
+from .config import DETECTOR_WEIGHTS, YOLO_CONF, YOLO_IMGSZ, COLOR_PADDING, YOLO_VALIDATE
 
 class OMGP03Detector(DetectorBase):
     """
@@ -40,7 +40,7 @@ class OMGP03Detector(DetectorBase):
 
     def validate(self, yolo_results: YoloResult) -> YoloValidation:
         if len(yolo_results.boxes) == 0:
-            return YoloValidation(is_valid=False, position=None, class_id=None)
+            return YoloValidation(is_valid=False, position=None, class_id=None, confidence=None)
 
         boxesn = [box for box in yolo_results.boxes]
         # Select the object with the highest probability.
@@ -59,7 +59,10 @@ class OMGP03Detector(DetectorBase):
             position = [x1, y1, x2, y2]
         square_position = normalize_position_to_square(position)
 
-        return YoloValidation(is_valid=valid, position=square_position, class_id=None)
+        if max_confidence < YOLO_VALIDATE:
+            return YoloValidation(is_valid=False, position=None, class_id=None, confidence=None)
+
+        return YoloValidation(is_valid=valid, position=square_position, class_id=None, confidence=max_confidence)
 
 
 

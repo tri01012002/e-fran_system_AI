@@ -37,6 +37,7 @@ PACKAGE_NAME = "omg_p02_v1_5"
 
 # YOLO parameters
 YOLO_NEEDLE_ALIGNER_CONF = 0.3
+YOLO_VALIDATE = 0.8
 YOLO_IMGSZ = 640
 
 # Resize parameters

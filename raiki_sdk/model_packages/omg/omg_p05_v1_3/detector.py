@@ -3,7 +3,7 @@ from raiki_sdk.preprocessing import padding_crop_yolo, resize_pwd
 from ultralytics import YOLO
 from .config import (
     YOLO_WEIGHTS, YOLO_CONF, YOLO_IMGSZ, 
-    TARGET_SIZE, COLOR_PADDING, ROTATION_CONFIG
+    TARGET_SIZE, COLOR_PADDING, ROTATION_CONFIG, YOLO_VALIDATE
 )
 from PIL import Image
 import cv2
@@ -113,20 +113,20 @@ class OMGP05Detector(DetectorBase):
         """
         boxes = results.boxes
         if boxes is None or len(boxes) == 0:
-            return YoloValidation(is_valid=False, position=None, class_id=None)
+            return YoloValidation(is_valid=False, position=None, class_id=None, confidence=None)
         
         boxesn = boxes.xyxyn.cpu().numpy()
         classes = boxes.cls.cpu().int().numpy()
         confs = boxes.conf.cpu().numpy()
         
         if len(classes) == 0:
-            return YoloValidation(is_valid=False, position=None, class_id=None)
+            return YoloValidation(is_valid=False, position=None, class_id=None, confidence=None)
         # Select detection with highest confidence
         image_h, image_w = map(int, boxes.orig_shape)
         boxes_by_class = self._get_best_box_per_class(boxesn, classes, confs, image_w, image_h)
 
         if len(boxes_by_class) == 0:
-            return YoloValidation(is_valid=False, position=None, class_id=None)
+            return YoloValidation(is_valid=False, position=None, class_id=None, confidence=None)
 
         # Nhiều box → trả về dict cho từng box, có thể vẫn giữ combined
         all_boxes = [info['box'] for info in boxes_by_class.values()]
@@ -138,17 +138,26 @@ class OMGP05Detector(DetectorBase):
 
         if len(boxes_by_class) == 1:
             class_id = list(boxes_by_class.keys())[0]
-            return YoloValidation(is_valid=True, position=combined_position, class_id=class_id)
+            conf = boxes_by_class[class_id]['conf']
+            if conf < YOLO_VALIDATE:
+                return YoloValidation(is_valid=False, position=None, class_id=None, confidence=None)
+
+            return YoloValidation(is_valid=True, position=combined_position, class_id=class_id, confidence=conf)
 
         # Multi-box: position = combined (cho RedFrame), class_id = MULTI_BOX_CLASS_ID
-        boxes_dict = {
-            class_id: {"box": box_info['box']}
-            for class_id, box_info in boxes_by_class.items()
-        }
+        avg_conf = sum(info['conf'] for info in boxes_by_class.values()) / len(boxes_by_class)
+        # boxes_dict = {
+        #     class_id: {"box": box_info['box']}
+        #     for class_id, box_info in boxes_by_class.items()
+        # }
+        if avg_conf < YOLO_VALIDATE:
+            return YoloValidation(is_valid=False, position=None, class_id=None, confidence=None)
+
         return YoloValidation(
             is_valid=True,
-            position=boxes_dict,       
+            position=combined_position,       
             class_id=MULTI_BOX_CLASS_ID,
+            confidence=avg_conf
             # image_crop=boxes_dict             
         )
 

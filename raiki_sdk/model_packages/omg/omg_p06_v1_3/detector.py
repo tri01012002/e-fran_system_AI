@@ -3,7 +3,7 @@ from raiki_sdk.preprocessing import padding_crop_yolo, resize_pwd
 from ultralytics import YOLO
 from .config import (
     YOLO_WEIGHTS, YOLO_CONF, YOLO_IMGSZ, 
-    TARGET_SIZE, COLOR_PADDING, ROTATION_CONFIG
+    TARGET_SIZE, COLOR_PADDING, ROTATION_CONFIG, YOLO_VALIDATE
 )
 from PIL import Image
 import cv2
@@ -75,14 +75,14 @@ class OMGP06Detector(DetectorBase):
         print (f"YOLO detection results: {results.boxes}")
         boxes = results.boxes
         if boxes is None or len(boxes) == 0:
-            return YoloValidation(is_valid=False, position=None, class_id=None)
+            return YoloValidation(is_valid=False, position=None, class_id=None, confidence=None)
         
         boxesn = boxes.xyxyn.cpu().numpy()
         classes = boxes.cls.cpu().int().numpy()
         confs = boxes.conf.cpu().numpy()
         
         if len(classes) == 0:
-            return YoloValidation(is_valid=False, position=None, class_id=None)
+            return YoloValidation(is_valid=False, position=None, class_id=None, confidence=None)
         
         best_idx = np.argmax(confs)
         best_box = boxesn[best_idx]
@@ -100,8 +100,11 @@ class OMGP06Detector(DetectorBase):
         )
         
         position = [x1, y1, x2, y2]
+
+        if confs[best_idx] < YOLO_VALIDATE:
+            return YoloValidation(is_valid=False, position=None, class_id=None, confidence=None)
         
-        return YoloValidation(is_valid=True, position=position, class_id=best_class)
+        return YoloValidation(is_valid=True, position=position, class_id=best_class, confidence=confs[best_idx])
 
     def crop(self, image, position, class_id=None) -> Image.Image:
         """

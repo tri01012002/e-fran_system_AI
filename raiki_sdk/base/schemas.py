@@ -31,6 +31,7 @@ class YoloValidation(BaseModel):
     is_valid: bool
     position: list[int] | dict | None = None 
     class_id: int | None = None
+    confidence: float | None = None
     image_crop: Optional[Image.Image | dict] = None
 
 class IqaResult(BaseModel):

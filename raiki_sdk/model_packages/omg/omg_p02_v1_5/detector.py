@@ -4,7 +4,7 @@ from PIL import Image
 import cv2
 import numpy as np
 from abc import ABC, abstractmethod
-from .config import DETECTOR_WEIGHTS, COLOR_PADDING, NEEDLE_ALIGNER_WEIGHTS, YOLO_NEEDLE_ALIGNER_CONF
+from .config import DETECTOR_WEIGHTS, COLOR_PADDING, NEEDLE_ALIGNER_WEIGHTS, YOLO_NEEDLE_ALIGNER_CONF, YOLO_VALIDATE
 from ultralytics import YOLO
 from rfdetr import RFDETRBase
 import supervision as sv
@@ -107,7 +107,7 @@ class OMGP02Detector(DetectorBase):
     def validate(self, results: Union[sv.Detections, List[sv.Detections]]) -> YoloValidation:
 
         if len(results.confidence) == 0:
-            return YoloValidation(is_valid=False, position=None, class_id=None)
+            return YoloValidation(is_valid=False, position=None, class_id=None, confidence=None)
 
         max_confidence = 0
         best_result = None
@@ -130,7 +130,10 @@ class OMGP02Detector(DetectorBase):
         x0_p, y0_p, x1_p, y1_p = x0 - 200, y0 - 200, x1 + 200, y1 + 200
         square_position_padded = [x0_p, y0_p, x1_p, y1_p]
 
-        return YoloValidation(is_valid=valid, position=square_position_padded, class_id=best_class_id)
+        if max_confidence < YOLO_VALIDATE:
+            return YoloValidation(is_valid=False, position=None, class_id=None, confidence=None)
+
+        return YoloValidation(is_valid=valid, position=square_position_padded, class_id=best_class_id, confidence=max_confidence)
 
     def crop(self, image, position) -> Image.Image:
         """
