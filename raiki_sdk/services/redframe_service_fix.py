@@ -27,9 +27,29 @@ from raiki_sdk.base import IqaResult
 from .iqa_service import LIQEServices
 
 from .part_config import PART_CONFIGS, get_config, PartConfig
-from .overlap_metrics import compute_overlap
+from overlap_metrics import compute_overlap
 
-log = logging.getLogger("RedFrameService")
+log = .logging.getLogger("RedFrameService")
+
+# ══════════════════════════════════════════════════════════════
+# Scaled configs — built once at module load time.
+# All redframe coordinates are in image pixel space.
+# Change SCALE_MODE if your web renders differently:
+#   "stretch"    — Figma coords stretched to fill image (non-uniform scale)
+#   "fit_width"  — image width fills Figma width, letterbox top/bottom
+#   "fit_height" — image height fills Figma height, letterbox left/right
+# ══════════════════════════════════════════════════════════════
+SCALE_MODE = "stretch"   # ← change to "fit_width" or "fit_height" if needed
+_SCALED_CONFIGS: dict = {}
+
+
+def _get_scaled_configs() -> dict:
+    """Return scaled configs, building them on first call."""
+    global _SCALED_CONFIGS
+    if not _SCALED_CONFIGS:
+        _SCALED_CONFIGS = build_scaled_configs(mode=SCALE_MODE)
+    return _SCALED_CONFIGS
+
 
 
 # ══════════════════════════════════════════════════════════════
@@ -228,7 +248,7 @@ class RedFrameService:
             return self._run_iqa_only(image, position, crop_method)
 
         try:
-            cfg = get_config(self.part_id)
+            cfg = _get_scaled_configs()[self.part_id]
         except KeyError:
             log.warning(f"part_id '{self.part_id}' not found in PART_CONFIGS.")
             return self._run_iqa_only(image, position, crop_method)
