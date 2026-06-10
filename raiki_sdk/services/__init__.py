@@ -1,6 +1,6 @@
 """Services for specialized detection tasks."""
 
-from .redframe_service_fix import RedFrameService
+from .redframe_service import RedFrameService
 from .iqa_service import LIQEServices
 from .brand_detection import BrandDetectionService, DetectionResult
 import logging
@@ -17,7 +17,7 @@ _brand_detection_cache: Optional[BrandDetectionService] = None
 def get_redframe_service(
     category: str, 
     part: str, 
-    # class_labels: list = None,
+    class_labels: list = None,
     advanced_mode: bool = True,
     device: str = "cuda", 
     threshold: float = 0.1
@@ -46,8 +46,8 @@ def get_redframe_service(
         >>> service = get_redframe_service("rolex", "P01", device="mps")
         >>> result = service.forward(image, frame, position, crop_func)
     """
-    # if class_labels is None:
-        # class_labels = ["good", "wide", "angle", "close"]
+    if class_labels is None:
+        class_labels = ["good", "wide", "angle", "close"]
     cache_key = f"{category.lower()}_{part.lower()}_{advanced_mode}_{device}"
     
     if cache_key not in _redframe_service_cache:
@@ -55,7 +55,7 @@ def get_redframe_service(
         _redframe_service_cache[cache_key] = RedFrameService(
             category=category,
             part=part,
-            # class_labels=class_labels,
+            class_labels=class_labels,
             advanced_mode=advanced_mode,
             device=device,
             threshold=threshold
