@@ -27,7 +27,7 @@ from raiki_sdk.base import IqaResult
 from .iqa_service import LIQEServices
 
 from .part_config import PART_CONFIGS, get_config, PartConfig
-from overlap_metrics import compute_overlap
+from .overlap_metrics import compute_overlap
 
 log = logging.getLogger("RedFrameService")
 
