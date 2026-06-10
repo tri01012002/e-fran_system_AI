@@ -33,8 +33,8 @@ PART = "P06"
 PACKAGE_NAME = "omg_p06_v1_3"
 
 # YOLO parameters
-YOLO_CONF = 0.8
-YOLO_VALIDATE = 0.8
+YOLO_CONF = 0.92
+YOLO_VALIDATE = 0.92
 YOLO_IMGSZ = 640
 
 # Resize parameters
