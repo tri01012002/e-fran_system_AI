@@ -35,18 +35,19 @@ class RolexP03Detector(DetectorBase):
     def validate(self, results: YoloResult) -> YoloValidation:
         boxesn = results.boxes.xyxyn.cpu().numpy()
         classes = results.boxes.cls.cpu().to(torch.int).numpy()
+        confs = results.boxes.conf.cpu().numpy()       
 
+        outer_conf = None                              
         for i in range(len(classes)):
-            if classes[i] == 1 and results.boxes[i].conf < 0.55:
-                return YoloValidation(is_valid=False, position=None, class_id=None)
+            if classes[i] == 1:
+                if confs[i] < 0.8:
+                    return YoloValidation(is_valid=False, position=None, class_id=None, confidence=float(confs[i]))  # ← thêm
+                outer_conf = float(confs[i])           
 
         bbox_class_inner = [boxesn[i] for i in range(len(classes)) if classes[i] == 0]
         bbox_class_outer = [boxesn[i] for i in range(len(classes)) if classes[i] == 1]
 
-        valid = False
-        position = None
         p03_boxesn = []
-
         if bbox_class_inner and bbox_class_outer:
             for bbox1 in bbox_class_inner:
                 x_min1, y_min1, x_max1, y_max1 = bbox1
@@ -61,17 +62,19 @@ class RolexP03Detector(DetectorBase):
                             min(x_max2 + p, 1), min(1, y_max2 + p)
                         ])
 
-        if len(p03_boxesn) > 0:
-            valid = True
-            image_h, image_w = results.boxes.orig_shape
-            x1n, y1n, x2n, y2n = p03_boxesn[0]
-            x1 = int(x1n * image_w)
-            y1 = int(y1n * image_h)
-            x2 = int(x2n * image_w)
-            y2 = int(y2n * image_h)
-            position = [x1, y1, x2, y2]
+        if len(p03_boxesn) == 0:
+            return YoloValidation(is_valid=False, position=None, class_id=None, confidence=outer_conf)  
 
-        return YoloValidation(is_valid=valid, position=position, class_id=None)
+        image_h, image_w = results.boxes.orig_shape
+        x1n, y1n, x2n, y2n = p03_boxesn[0]
+        position = [
+            int(x1n * image_w),
+            int(y1n * image_h),
+            int(x2n * image_w),
+            int(y2n * image_h),
+        ]
+
+        return YoloValidation(is_valid=True, position=position, class_id=None, confidence=outer_conf)  
 
     def crop(self, image, position) -> Image.Image:
         cropped_image = padding_crop_yolo(image, position)

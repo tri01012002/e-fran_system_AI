@@ -10,8 +10,8 @@ YOLO_MODEL_VERSION = "v1-4"
 
 # Model weights paths (relative to package root or absolute)
 YOLO_WEIGHTS = download_file_from_hf(
-    repo_id="rikai-ai/omg_p05_detector_v1-4",
-    filename="omg_p05_detector_v1-406032026-06032026.pt"
+    repo_id="rikai-ai/omg_p05_detector_v1-5",
+    filename="omg_p05_detector_v1-5_15062026_16062026.pt"
 )
 AUTH_WEIGHTS = download_file_from_hf(
     repo_id="rikai-ai/omg_p05_auth_v1-2",
@@ -32,8 +32,8 @@ PART = "P05"
 PACKAGE_NAME = "omg_p05_v1_2"
 
 # YOLO parameters
-YOLO_CONF = 0.8
-YOLO_VALIDATE = 0.8
+YOLO_CONF = 0.7
+YOLO_VALIDATE = 0.7
 YOLO_IMGSZ = 640
 
 # Resize parameters

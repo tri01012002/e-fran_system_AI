@@ -86,14 +86,14 @@ class CTRP04Detector(DetectorBase):
         boxes = results.boxes
         
         if boxes is None or len(boxes) == 0:
-            return YoloValidation(is_valid=False, position=None, class_id=None)
+            return YoloValidation(is_valid=False, position=None, class_id=None, confidence=None)
         
         boxesn = boxes.xyxyn.cpu().numpy()
         classes = boxes.cls.cpu().int().numpy()
         confs = boxes.conf.cpu().numpy()
         
         if len(classes) == 0:
-            return YoloValidation(is_valid=False, position=None, class_id=None)
+            return YoloValidation(is_valid=False, position=None, class_id=None, confidence=None)
         
         image_h, image_w = map(int, boxes.orig_shape)
         boxes_by_class = self._get_best_box_per_class(boxesn, classes, confs, image_w, image_h)
@@ -102,8 +102,9 @@ class CTRP04Detector(DetectorBase):
         if len(boxes_by_class) == 1:
             class_id = list(boxes_by_class.keys())[0]
             x1, y1, x2, y2 = boxes_by_class[class_id]['box']
+            conf = boxes_by_class[class_id]['conf']
             position = [x1, y1, x2, y2]
-            return YoloValidation(is_valid=True, position=position, class_id=class_id)
+            return YoloValidation(is_valid=True, position=position, class_id=class_id, confidence=conf)
         
         # Case 2: Multi boxes - create combined box
         sorted_boxes = sorted(boxes_by_class.items(), key=lambda x: x[1]['y1'])
@@ -120,8 +121,9 @@ class CTRP04Detector(DetectorBase):
             max(top_box[2], bottom_box[2]),
             max(top_box[3], bottom_box[3])
         ]
+        avg_conf = (top_info['conf'] + bottom_info['info']) / 2
         
-        return YoloValidation(is_valid=True, position=combined_box, class_id=999)
+        return YoloValidation(is_valid=True, position=combined_box, class_id=999, confidence=avg_conf)
 
     def crop(self, image, position, class_id=None) -> Image.Image:
         """

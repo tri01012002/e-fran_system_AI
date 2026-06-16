@@ -32,7 +32,7 @@ PART = "P03"
 PACKAGE_NAME = "ctr_p03_v1_1"
 
 # YOLO parameters
-YOLO_CONF = 0.65 
+YOLO_CONF = 0.8 
 YOLO_IMGSZ = 640
 
 # Resize parameters

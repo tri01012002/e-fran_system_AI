@@ -51,7 +51,7 @@ class RolexP02Detector(DetectorBase):
         """
 
         if results.boxes is None or len(results.boxes) == 0:
-            return YoloValidation(is_valid=False, position=None, class_id=None)
+            return YoloValidation(is_valid=False, position=None, class_id=None, confidence=None)
 
         best_box = None
         best_conf = -1
@@ -72,12 +72,13 @@ class RolexP02Detector(DetectorBase):
                     best_cls = cls_id
 
         if best_box is None:
-            return YoloValidation(is_valid=False, position=None, class_id=None)
+            return YoloValidation(is_valid=False, position=None, class_id=None, confidence=None)
 
         return YoloValidation(
             is_valid=True,
             position=best_box,
-            class_id=best_cls
+            class_id=best_cls,
+            confidence=best_conf
         )
 
     def crop(self, image, position) -> Image.Image:
