@@ -33,14 +33,14 @@ class CTRP02Detector(DetectorBase):
         Validate detection results and prepare crop box
         """
         if results is None or len(results.confidence) == 0:
-            return YoloValidation(is_valid=False, position=None, class_id=None)
+            return YoloValidation(is_valid=False, position=None, class_id=None, confidence=None)
 
         # lấy bbox confidence cao nhất
         best_idx = int(np.argmax(results.confidence))
         
         # Check if best confidence meets threshold
         if results.confidence[best_idx] < self.yolo_conf:
-             return YoloValidation(is_valid=False, position=None, class_id=None)
+             return YoloValidation(is_valid=False, position=None, class_id=None, confidence=None)
 
         best_box = results.xyxy[best_idx]
         class_id = int(results.class_id[best_idx])
@@ -55,7 +55,7 @@ class CTRP02Detector(DetectorBase):
         padded_pos = [x0 - padding_px, y0 - padding_px,
                        x1 + padding_px, y1 + padding_px]
 
-        return YoloValidation(is_valid=True, position=padded_pos, class_id=class_id)
+        return YoloValidation(is_valid=True, position=padded_pos, class_id=class_id, confidence=results.confidence[best_idx])
 
     def crop(self, image, position, class_id=None) -> Image.Image:
         """

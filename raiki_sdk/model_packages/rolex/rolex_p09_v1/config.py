@@ -32,7 +32,7 @@ PART = "P09"
 PACKAGE_NAME = "rolex_P09_v1_3"
 
 # YOLO parameters
-YOLO_CONF = 0.55
+YOLO_CONF = 0.5
 YOLO_IMGSZ = 640
 
 # Resize parameters

@@ -29,7 +29,7 @@ class RolexP04Detector(DetectorBase):
 
     def validate(self, results: YoloResult) -> YoloValidation:
         if len(results.boxes) == 0:
-            return YoloValidation(is_valid=False, position=None, class_id=None)
+            return YoloValidation(is_valid=False, position=None, class_id=None, confidence=None)
         
         p04_boxesn = [box for box in results.boxes]
 
@@ -57,7 +57,7 @@ class RolexP04Detector(DetectorBase):
             x2_p = x2 + horizontal_padding
             position = [x1_p, y1, x2_p, y2]
 
-        return YoloValidation(is_valid=valid, position=position, class_id=None)
+        return YoloValidation(is_valid=valid, position=position, class_id=None, confidence=max_confidence)
 
     def crop(self, image, position) -> Image.Image:
         img_padding_yolo = padding_crop_yolo(image, position)

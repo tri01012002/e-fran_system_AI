@@ -73,20 +73,20 @@ class RolexP01Detector(DetectorBase):
     def validate(self, results: YoloResult) -> YoloValidation:
         boxes = results.boxes
         if boxes is None or len(boxes) == 0:
-            return YoloValidation(is_valid=False, position=None, class_id=None)
+            return YoloValidation(is_valid=False, position=None, class_id=None, confidence=None)
 
         boxesn = boxes.xyxyn.cpu().numpy()
         classes = boxes.cls.cpu().int().numpy()
         confs = boxes.conf.cpu().numpy()
 
         if len(classes) == 0:
-            return YoloValidation(is_valid=False, position=None, class_id=None)
+            return YoloValidation(is_valid=False, position=None, class_id=None, confidence=None)
 
         image_h, image_w = map(int, boxes.orig_shape)
         boxes_by_class = self._get_best_box_per_class(boxesn, classes, confs, image_w, image_h)
 
         if len(boxes_by_class) == 0:
-            return YoloValidation(is_valid=False, position=None, class_id=None)
+            return YoloValidation(is_valid=False, position=None, class_id=None, confidence=None)
 
         # Tính combined box bao phủ tất cả các box → dùng cho RedFrame
         all_boxes = [info['box'] for info in boxes_by_class.values()]
@@ -98,17 +98,20 @@ class RolexP01Detector(DetectorBase):
 
         if len(boxes_by_class) == 1:
             class_id = list(boxes_by_class.keys())[0]
-            return YoloValidation(is_valid=True, position=combined_position, class_id=class_id)
+            conf = boxes_by_class[class_id]['conf']
+            return YoloValidation(is_valid=True, position=combined_position, class_id=class_id, confidence=conf)
 
         # Multi-box: position = combined (cho RedFrame), class_id = MULTI_BOX_CLASS_ID
-        boxes_dict = {
-            class_id: {"box": box_info['box']}
-            for class_id, box_info in boxes_by_class.items()
-        }
+        avg_conf = sum(info['conf'] for info in boxes_by_class.values()) / len(boxes_by_class)
+        # boxes_dict = {
+        #     class_id: {"box": box_info['box']}
+        #     for class_id, box_info in boxes_by_class.items()
+        # }
         return YoloValidation(
             is_valid=True,
-            position=boxes_dict,       
+            position=combined_position,       
             class_id=MULTI_BOX_CLASS_ID,
+            confidence=avg_conf
         )
 
     def crop(self, image: np.ndarray, position, class_id: int = None) -> Union[Image.Image, Dict, None]:

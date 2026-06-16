@@ -125,6 +125,8 @@ class OMGP05Detector(DetectorBase):
         image_h, image_w = map(int, boxes.orig_shape)
         boxes_by_class = self._get_best_box_per_class(boxesn, classes, confs, image_w, image_h)
 
+        boxes_by_class = {k: v for k, v in boxes_by_class.items() if k != 0}
+
         if len(boxes_by_class) == 0:
             return YoloValidation(is_valid=False, position=None, class_id=None, confidence=None)
 
@@ -139,6 +141,10 @@ class OMGP05Detector(DetectorBase):
         if len(boxes_by_class) == 1:
             class_id = list(boxes_by_class.keys())[0]
             conf = boxes_by_class[class_id]['conf']
+
+            if class_id == 0:
+                return YoloValidation(is_valid=False, position=None, class_id=None, confidence=None)
+
             if conf < YOLO_VALIDATE:
                 return YoloValidation(is_valid=False, position=None, class_id=None, confidence=None)
 
