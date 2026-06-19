@@ -32,7 +32,7 @@ PART = "LV_P04case4"
 PACKAGE_NAME = "lv_p04case4_v1_6"
 
 # YOLO parameters
-YOLO_CONF = 0.35
+YOLO_CONF = 0.65
 YOLO_IMGSZ = 640
 
 # Resize parameters
