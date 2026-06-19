@@ -5,12 +5,12 @@ from raiki_sdk.utils import download_file_from_hf
 
 # Model version
 AUTH_MODEL_VERSION = "v1_6"
-YOLO_MODEL_VERSION = "v1_2"
+YOLO_MODEL_VERSION = "v1_3"
 
 # Model weights paths (relative to package root or absolute)
 YOLO_WEIGHTS = download_file_from_hf(
-    repo_id="rikai-ai/lv_p04case4_detector_v1-2",
-    filename="lv_p04case4_detector_v1-2_yolov11_250714_250715.pt"
+    repo_id="rikai-ai/lv_p04case4_detector_v1-3",
+    filename="lv_p04case4_detector_v1-3_yolov11_19062026_19062026.pt"
 )
 
 AUTH_WEIGHTS = download_file_from_hf(
