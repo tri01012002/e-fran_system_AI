@@ -10,7 +10,7 @@ YOLO_MODEL_VERSION = "v1_3"
 # Model weights paths (relative to package root or absolute)
 YOLO_WEIGHTS = download_file_from_hf(
     repo_id="rikai-ai/lv_p04case4_detector_v1-3",
-    filename="lv_p04case4_detector_v1-3_yolov11_19062026_19062026.pt"
+    filename="lv_p04case4_detector_v1-3_yolov11_22062026_22062026_v3.pt"
 )
 
 AUTH_WEIGHTS = download_file_from_hf(
@@ -32,7 +32,7 @@ PART = "LV_P04case4"
 PACKAGE_NAME = "lv_p04case4_v1_6"
 
 # YOLO parameters
-YOLO_CONF = 0.65
+YOLO_CONF = 0.35
 YOLO_IMGSZ = 640
 
 # Resize parameters
