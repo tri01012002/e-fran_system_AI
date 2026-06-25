@@ -337,5 +337,5 @@ ROLEX_CODE_NAME_MAP = {
     "116508": "Daytona",
     "15505": "Oyster Perpetual",
     "67483": "Oyster Perpetual Date",
-    "79613" "Datejust"
+    "79613": "Datejust"
 }
