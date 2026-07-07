@@ -320,7 +320,7 @@ ROLEX_CODE_NAME_MAP = {
     "116619LB":"Submariner Date",
     "116618LB": "Submariner Date",
     "126618LN": "Submariner Date",
-    "136668LB": "Sea-Dweller",
+    "136668LB": "Deepsea",
     "126729VTNR": "GMT-Master II",
     "326935": "Sky-Dweller",
     "336938": "Sky-Dweller",
