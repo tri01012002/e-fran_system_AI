@@ -14,19 +14,19 @@ YOLO_WEIGHTS = download_file_from_hf(
 )
 
 CLASSIFIER_WEIGHTS = download_file_from_hf(
-    repo_id="rikai-ai/omg_p00_classify_v1-7",
-    filename="omg_p00_classify_v1.7_dinov3-arcface_160classes_20260722.pth"
+    repo_id="rikai-ai/omg_p00_classify_v1.8",
+    filename="omg_p00_classify_v1.8_dinov3-arcface_178classes_20260728.pth"
 )
 
 EMBEDDING_STORAGE_PKL = download_file_from_hf(
-    repo_id="rikai-ai/omg_p00_classify_v1-7",
-    filename="omg_p00_classify_v1.7_dinov3-arcface_vector-storage_20260722.pkl"
+    repo_id="rikai-ai/omg_p00_classify_v1.8",
+    filename="omg_p00_classify_v1.8_dinov3-arcface_vector-storage_20260728.pkl"
 )
 
 # Classifier model parameters
 TARGET_SIZE = 256
 CLASSIFIER_MODEL_NAME = "vit_base_patch16_dinov3.lvd1689m"
-CLASSIFIER_NUM_CLASSES = 160
+CLASSIFIER_NUM_CLASSES = 178
 CLASSIFIER_EMBEDDING_SIZE = 512
 
 
