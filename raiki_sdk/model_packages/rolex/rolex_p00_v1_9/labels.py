@@ -335,7 +335,7 @@ ROLEX_CODE_NAME_MAP = {
     "128349RBR": "Day-Date",
     "126508": "Daytona",
     "116508": "Daytona",
-    "15505": "Oyster Perpetual",
-    "67483": "Oyster Perpetual Date",
+    "15505": "Oyster Perpetual Date",
+    "67483": "Oyster Perpetual",
     "79613": "Datejust"
 }
