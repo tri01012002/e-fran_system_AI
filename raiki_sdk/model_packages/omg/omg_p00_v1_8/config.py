@@ -14,14 +14,16 @@ YOLO_WEIGHTS = download_file_from_hf(
 )
 
 CLASSIFIER_WEIGHTS = download_file_from_hf(
-    repo_id="rikai-ai/omg_p00_classify_v1.8",
+    repo_id="rikai-ai/omg-p00-classify-1.8",
     filename="omg_p00_classify_v1.8_dinov3-arcface_178classes_20260728.pth"
 )
 
 EMBEDDING_STORAGE_PKL = download_file_from_hf(
-    repo_id="rikai-ai/omg_p00_classify_v1.8",
+    repo_id="rikai-ai/omg-p00-classify-1.8",
     filename="omg_p00_classify_v1.8_dinov3-arcface_vector-storage_20260728.pkl"
 )
+
+ 
 
 # Classifier model parameters
 TARGET_SIZE = 256
