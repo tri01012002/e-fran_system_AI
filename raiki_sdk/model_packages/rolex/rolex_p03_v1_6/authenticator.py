@@ -12,7 +12,7 @@ from typing import Any, Dict, Tuple
 import torch
 from PIL import Image
 
-from config import  (
+from .config import (
     AUTH_WEIGHTS,
     AUTH_NUM_CLASSES,
     AUTH_MODEL_NAME,
@@ -21,8 +21,8 @@ from config import  (
     AUTH_CLASS_LABELS,
 )
 
-from architecture import load_rolex_model
-from preprocessor import get_transform
+from .architecture import load_rolex_model
+from .preprocessor import get_transform
 
 
 # =========================================================
