@@ -14,7 +14,7 @@ from PIL import Image
 import cv2
 import numpy as np
 
-from config import (
+from .config import (
     YOLO_WEIGHTS,
     YOLO_CONF,
     YOLO_IMGSZ,
