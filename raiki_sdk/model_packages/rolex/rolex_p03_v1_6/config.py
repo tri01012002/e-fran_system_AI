@@ -10,9 +10,10 @@ YOLO_MODEL_VERSION = "v1_3"
 
 # Model weights paths (relative to package root or absolute)
 YOLO_WEIGHTS = download_file_from_hf(
-    repo_id="rikai-ai/rolex-p03-fake-real-resnet50",
-    filename="rolex_p03_yolo_best.pt"
+    repo_id="rikai-ai/rolex_p03_detector_v1-3",
+    filename="rolex_p03_detector_v1-3_yolov11m_241129_251129.pt"
 )
+
 
 AUTH_WEIGHTS = download_file_from_hf(
     repo_id="rikai-ai/rolex-p03-fake-real-resnet50",
