@@ -8,7 +8,7 @@ from raiki_sdk.utils import BasicConv
 class Features(nn.Module):
     def __init__(self, net_layers_FeatureHead):
         super(Features, self).__init__()
-        self.net_layer_0 = nn.Sequential(net_layers_FeatureHead[0])
+        self.net_layer_0 = nn.Sequential(*net_layers_FeatureHead[0])
         self.net_layer_1 = nn.Sequential(*net_layers_FeatureHead[1])
         self.net_layer_2 = nn.Sequential(*net_layers_FeatureHead[2])
         self.net_layer_3 = nn.Sequential(*net_layers_FeatureHead[3])
