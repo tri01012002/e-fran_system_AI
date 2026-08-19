@@ -1,6 +1,5 @@
-
 """
-Configuration for Rolex P03 Model
+Configuration for Rolex P03 Model - v2 (2-class: fake / real)
 """
 from raiki_sdk.utils.hf_lib import download_file_from_hf
 # Model version
@@ -8,25 +7,24 @@ AUTH_MODEL_VERSION = "v1_6"
 YOLO_MODEL_VERSION = "v1_3"
 
 
-# Model weights paths (relative to package root or absolute)
+# Model weights paths
 YOLO_WEIGHTS = download_file_from_hf(
     repo_id="rikai-ai/rolex_p03_detector_v1-3",
     filename="rolex_p03_detector_v1-3_yolov11m_241129_251129.pt"
 )
 
-
 AUTH_WEIGHTS = download_file_from_hf(
-    repo_id="rikai-ai/rolex-p03-fake-real-resnet50",
-    filename="rolex_p03_classify_best_model.pth"
+    repo_id="rikai-ai/rolex_p03_auth_EfficientNetb2_v1.6_17082026",
+    filename="rolex_p03_auth_EfficientNetb2_v1.6_17082026_best_model.pth"
 )
 
 # AUTH parameters
 TARGET_SIZE = 224
-AUTH_MODEL_NAME = "ResNet50"
+AUTH_MODEL_NAME = "EfficientNet_B2_Weights.DEFAULT"
 AUTH_NUM_CLASSES = 2
 AUTH_CLASS_LABELS = [
-    'real',
     'fake',
+    'real',
 ]
 
 # Metadata
