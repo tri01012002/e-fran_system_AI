@@ -5,12 +5,12 @@ from raiki_sdk.utils import download_file_from_hf
 
 # Model version
 AUTH_MODEL_VERSION = "v1_6"
-YOLO_MODEL_VERSION = "v1_4"
+YOLO_MODEL_VERSION = "v1_6"
 
 # Model weights paths (relative to package root or absolute)
 YOLO_WEIGHTS = download_file_from_hf(
-    repo_id="rikai-ai/lv_p02_detector_v1-4",
-    filename="lv_p02_detector_v1-4_yolov11_260326_260327.pt"
+    repo_id="rikai-ai/lv_p02_detector_v1-6_19082026",
+    filename="rikai-ai/lv_p02_detector_v1-6_19082026"
 )
 
 AUTH_WEIGHTS = download_file_from_hf(
@@ -21,8 +21,8 @@ AUTH_WEIGHTS = download_file_from_hf(
 # AUTH parameters
 TARGET_SIZE = 512
 AUTH_MODEL_NAME = "maxvit_small_tf_512.in1k"
-AUTH_NUM_CLASSES = 2
-AUTH_CLASS_LABELS = ["fake", "real"]
+AUTH_NUM_CLASSES = 1
+# AUTH_CLASS_LABELS = ["fake", "real"]
 
 
 # Metadata
