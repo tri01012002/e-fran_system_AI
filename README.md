@@ -384,7 +384,7 @@ This project is licensed under the MIT License.
 
 ## 👥 Authors
 
-- **Danny Tram** - [GitLab](https://gitlab.com/dat.tram)
+- **Nguyen Minh Tri** - [GitLab](https://gitlab.com/dat.tram)
 
 ## 🤝 Contributing
 
